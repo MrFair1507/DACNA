@@ -1,0 +1,155 @@
+/* Header.css - Cập nhật theo theme mới */
+.main-header {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    background-color: var(--dark-bg);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    z-index: 5;
+  }
+  
+  .app-title h1 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  
+  .search-bar {
+    display: flex;
+    align-items: center;
+    max-width: 300px;
+    width: 100%;
+    position: relative;
+  }
+  
+  .search-bar input {
+    width: 100%;
+    padding: 8px 16px;
+    padding-right: 40px;
+    background-color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-light);
+    font-size: 14px;
+  }
+  
+  .search-bar input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
+  }
+  
+  .search-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+  }
+  
+  .user-profile {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .notification-icon {
+    margin-right: 16px;
+    position: relative;
+  }
+  
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  
+  /* Project Header */
+  .project-header {
+    height: var(--board-header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    background-color: var(--dark-bg-light);
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .project-title h2 {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .project-tabs {
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+  
+  .tab {
+    padding: 0 16px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .tab.active {
+    color: var(--primary-light);
+  }
+  
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: var(--primary-color);
+  }
+  
+  .project-actions {
+    display: flex;
+    align-items: center;
+  }
+  
+  .notification-btn, .members-btn {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-right: 8px;
+    color: var(--text-muted);
+    transition: background-color 0.2s;
+  }
+  
+  .notification-btn:hover, .members-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-light);
+  }
+  
+  .add-task-btn {
+    display: flex;
+    align-items: center;
+    padding: 8px 14px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .add-task-btn:hover {
+    background-color: var(--primary-light);
+  }

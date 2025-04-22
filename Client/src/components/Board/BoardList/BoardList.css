@@ -1,0 +1,153 @@
+/* BoardList.css - Cập nhật theo theme mới */
+.board-list-container {
+    padding: 20px;
+    height: 100%;
+    overflow-y: auto;
+  }
+  
+  .board-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .board-list-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  
+  .create-board-btn {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .create-board-btn:hover {
+    background-color: var(--primary-light);
+  }
+  
+  .boards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  
+  .board-card {
+    background-color: var(--secondary-color);
+    border-radius: 10px;
+    height: 180px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .board-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .board-color {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+  }
+  
+  .color-purple {
+    background-color: var(--primary-color);
+  }
+  
+  .color-green {
+    background-color: var(--success-color);
+  }
+  
+  .color-blue {
+    background-color: #60a5fa;
+  }
+  
+  .board-title {
+    margin-top: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .board-description {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    flex: 1;
+  }
+  
+  .board-meta {
+    font-size: 12px;
+  }
+  
+  .board-owner {
+    margin-bottom: 8px;
+  }
+  
+  .board-owner .label {
+    color: var(--text-muted);
+    margin-right: 4px;
+  }
+  
+  .board-stats {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-muted);
+  }
+  
+  .members-count {
+    display: flex;
+    align-items: center;
+  }
+  
+  .members-count i {
+    margin-right: 4px;
+  }
+  
+  .create-new-board {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(157, 78, 221, 0.08);
+    border: 2px dashed var(--border-color);
+    transition: all 0.2s;
+  }
+  
+  .create-new-board:hover {
+    background-color: rgba(157, 78, 221, 0.15);
+    border-color: var(--primary-color);
+  }
+  
+  .create-icon {
+    font-size: 32px;
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    background-color: rgba(157, 78, 221, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    color: var(--primary-color);
+    transition: all 0.2s;
+  }
+  
+  .create-new-board:hover .create-icon {
+    background-color: rgba(157, 78, 221, 0.25);
+  }
