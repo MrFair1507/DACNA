@@ -6,7 +6,9 @@ import { useAuth } from "./hooks/useAuth";
 // Pages
 import SignInPage from "./pages/auth/SignInPage/SignInPage";
 import DashboardPage from "./pages/dashboard/DashboardPage/DashboardPage";
-
+// Import new password recovery pages
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage/ResetPasswordPage";
 
 // Styles
 import "./App.css";
@@ -31,6 +33,10 @@ function AppRoutes() {
     <Routes>
       {/* Auth Routes */} 
       <Route path="/signin" element={<SignInPage />} />
+      
+      {/* Password Recovery Routes */}
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       {/* Protected Routes */}
       <Route
