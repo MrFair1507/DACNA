@@ -1,0 +1,81 @@
+/* KanbanBoard.css - Cập nhật theo theme mới */
+.kanban-board {
+    display: flex;
+    padding: 20px;
+    overflow-x: auto;
+    flex: 1;
+    height: calc(100vh - var(--header-height) - var(--board-header-height));
+  }
+  
+  .kanban-column {
+    flex: 0 0 var(--column-width);
+    min-width: var(--column-width);
+    margin-right: var(--column-gap);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+  }
+  
+  .column-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .column-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    flex: 1;
+  }
+  
+  .task-count {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin: 0 8px;
+  }
+  
+  .column-menu-btn {
+    color: var(--text-muted);
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .column-menu-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+  }
+  
+  .column-tasks {
+    padding: 12px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .add-card-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    margin-top: 8px;
+    border-radius: 6px;
+    color: var(--text-muted);
+    transition: background-color 0.2s;
+  }
+  
+  .add-card-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-light);
+  }

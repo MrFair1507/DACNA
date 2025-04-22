@@ -1,0 +1,264 @@
+/* MembersManagement.css */
+.members-management {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .members-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .members-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  
+  .add-members-btn {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .add-members-btn:hover {
+    background-color: var(--primary-light);
+  }
+  
+  .btn-icon {
+    margin-right: 8px;
+    font-size: 18px;
+  }
+  
+  .members-section, 
+  .invites-section,
+  .board-access-section {
+    background-color: var(--secondary-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .members-section h3,
+  .invites-section h3,
+  .board-access-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .members-list,
+  .invites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .member-item,
+  .invite-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+  }
+  
+  .member-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 12px;
+  }
+  
+  .member-details,
+  .invite-details {
+    flex: 1;
+  }
+  
+  .member-name,
+  .invite-email {
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  
+  .member-meta,
+  .invite-status {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+  }
+  
+  .status-badge {
+    background-color: rgba(243, 156, 18, 0.2);
+    color: #f39c12;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-right: 8px;
+  }
+  
+  .invite-date {
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+  
+  .invite-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-right: 12px;
+  }
+  
+  .member-role {
+    min-width: 120px;
+    margin: 0 12px;
+  }
+  
+  .role-select {
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+    font-size: 12px;
+  }
+  
+  .remove-member-btn,
+  .cancel-invite-btn {
+    padding: 6px;
+    background-color: transparent;
+    color: var(--text-muted);
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .remove-member-btn:hover,
+  .cancel-invite-btn:hover {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--danger-color);
+  }
+  
+  .cancel-invite-btn {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .board-access-section {
+    padding-bottom: 24px;
+  }
+  
+  .access-options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .access-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .option-label h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .option-label p {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  
+  .access-select {
+    width: 200px;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+  }
+  
+  .toggle-switch-wrapper {
+    display: flex;
+    align-items: center;
+  }
+  
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+    margin-right: 8px;
+  }
+  
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: .4s;
+    border-radius: 24px;
+  }
+  
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .toggle-slider {
+    background-color: var(--primary-color);
+  }
+  
+  input:focus + .toggle-slider {
+    box-shadow: 0 0 1px var(--primary-color);
+  }
+  
+  input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+  }
+  
+  .toggle-label {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
