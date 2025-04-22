@@ -66,10 +66,22 @@ CREATE TABLE User_Project (
     UNIQUE (user_id, project_id)
 );
 
+CREATE TABLE Sprints (
+    sprint_id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    start_date DATE,
+    end_date DATE,
+    created_by INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES Projects(project_id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES Users(user_id) ON DELETE RESTRICT
+);
 
 CREATE TABLE Tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
-    project_id INT NOT NULL,
+    sprint_id INT,  -- Gán với bảng Sprint
     task_title VARCHAR(200) NOT NULL,
     task_description TEXT,
     task_status ENUM('Not Started', 'In Progress', 'Completed') DEFAULT 'Not Started',
@@ -79,9 +91,10 @@ CREATE TABLE Tasks (
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (project_id) REFERENCES Projects(project_id) ON DELETE CASCADE,
-    FOREIGN KEY (created_by) REFERENCES Users(user_id)
+    FOREIGN KEY (sprint_id) REFERENCES Sprints(sprint_id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES Users(user_id) ON DELETE CASCADE
 );
+
 
 
 CREATE TABLE Task_Assignment (
@@ -145,4 +158,10 @@ CREATE TABLE Attachments (
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
     CHECK ((task_id IS NOT NULL AND comment_id IS NULL) OR (task_id IS NULL AND comment_id IS NOT NULL))
 );
+
+
+
+
+
+
 
