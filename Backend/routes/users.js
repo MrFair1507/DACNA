@@ -3,7 +3,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
-
+const userController = require('../controllers/userController');
+const authenticate = require('../middleware/authMiddleware');
+const requestLogger = require('../middleware/requestLogger');
 
 // [GET] Lấy tất cả users
 router.get('/', async (req, res) => {
@@ -53,6 +55,10 @@ router.delete('/:id', async (req, res) => {
   res.json({ message: 'Đã xóa user' });
 });
 
+router.use(authenticate);      // Xác thực trước
+router.use(requestLogger);     // Ghi log sau khi biết người dùng
 
+router.get('/me', authenticate, userController.getMyProfile);
+router.get('/all', authenticate, userController.getAllUsers);
 
 module.exports = router;

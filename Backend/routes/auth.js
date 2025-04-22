@@ -4,9 +4,15 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const otpController = require('../controllers/otpController');
+const requestLogger = require('../middleware/requestLogger');
 const authenticate = require('../middleware/authMiddleware');
 const passport = require('passport');
 const { generateToken } = require('../utils/jwt');
+
+
+router.use(authenticate);      // Xác thực trước
+router.use(requestLogger);     // Ghi log sau khi biết người dùng
+
 
 // Public
 router.post('/register', authController.register);
@@ -58,5 +64,9 @@ router.delete('/delete-account', authenticate, async (req, res) => {
 router.get('/me', authenticate, (req, res) => {
   res.json({ user: req.user });
 });
+
+
+
+
 
 module.exports = router;
