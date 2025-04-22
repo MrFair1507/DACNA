@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
-require('./middleware/passport'); // GỌI TRƯỚC KHI DÙNG
+require('./middlewares/passport'); // GỌI TRƯỚC KHI DÙNG
 
 const app = express();
 
@@ -31,6 +31,7 @@ app.use('/api/attachments', require('./routes/attachments'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/roles', require('./routes/roles'));
 app.use('/api/export-users', require('./routes/export-users'));
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

@@ -4,8 +4,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
 const userController = require('../controllers/userController');
-const authenticate = require('../middleware/authMiddleware');
-const requestLogger = require('../middleware/requestLogger');
+const authenticate = require('../middlewares/authMiddleware');
+const requestLogger = require('../middlewares/requestLogger');
 
 // [GET] Lấy tất cả users
 router.get('/', async (req, res) => {

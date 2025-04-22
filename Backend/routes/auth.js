@@ -4,13 +4,13 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const otpController = require('../controllers/otpController');
-const requestLogger = require('../middleware/requestLogger');
-const authenticate = require('../middleware/authMiddleware');
+const requestLogger = require('../middlewares/requestLogger');
+const authenticate = require('../middlewares/authMiddleware');
 const passport = require('passport');
 const { generateToken } = require('../utils/jwt');
 
 
-router.use(authenticate);      // Xác thực trước
+
 router.use(requestLogger);     // Ghi log sau khi biết người dùng
 
 

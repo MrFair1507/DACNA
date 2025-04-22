@@ -2,7 +2,7 @@ const db = require('../models/db');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { sendOTPEmail } = require('../utils/mailer'); // Import hàm gửi OTP
-
+const  {exportAllUsersToExcel}  = require('../utils/exportExcel'); // Import hàm ghi vào file Excel
 exports.sendOTP = async (req, res) => {
   const { email } = req.body;
 
@@ -84,14 +84,14 @@ exports.verifyOTP = async (req, res) => {
       await db.query("UPDATE UserOTPs SET verified = TRUE WHERE otp_id = ?", [otpRecord.otp_id]);
       await db.query("UPDATE Users SET is_verified = 1 WHERE user_id = ?", [userId]);
       
-       // Ghi vào file Excel
-      await writeUserToExcel({
-        user_id: user.user_id,
-        full_name: user.full_name,
-        email: user.email,
-        password_hash: user.password_hash,
-        verified_at: new Date().toISOString()
-      });
+      //  // Ghi vào file Excel
+      // await exportAllUsersToExcel({
+      //   user_id: users.user_id,
+      //   full_name: users.full_name,
+      //   email: users.email,
+      //   password_hash: users.password_hash,
+      //   verified_at: new Date().toISOString()
+      // });
 
       res.status(200).json({ message: 'OTP verified successfully. Your email is now confirmed.' });
     } catch (err) {

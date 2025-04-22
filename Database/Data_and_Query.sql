@@ -45,34 +45,56 @@ VALUES
 (6, 4, 6, 8000.0),
 (3, 5, 3, 9500.0);
 
-#Task Table // 
-INSERT INTO Tasks (project_id, task_title, task_description, task_status, priority, start_date, due_date, created_by)
+#Sprint Table
+INSERT INTO Sprints (project_id, name, description, start_date, end_date, created_by)
 VALUES
-	(1, 'Thiết kế giao diện trang chủ', 'Thiết kế UI', 'In Progress', 'High', '2025-04-01', '2025-04-10', 1),
-	(1, 'Tạo API sản phẩm', 'CRUD API cho sản phẩm', 'Not Started', 'Medium', '2025-04-05', '2025-04-15', 2),
-	(2, 'Phân tích nghiệp vụ', 'Thu thập yêu cầu', 'Completed', 'High', '2025-03-10', '2025-03-20', 4),
-	(3, 'Thiết kế cơ sở dữ liệu', 'Database schema CRM', 'Completed', 'Medium', '2025-02-01', '2025-02-07', 1),
-	(4, 'Tạo API booking', 'Lập trình booking spa', 'In Progress', 'High', '2025-04-06', '2025-04-20', 3),
-	(4, 'Kiểm thử login', 'Viết test case login', 'Not Started', 'Medium', '2025-04-07', '2025-04-14', 2),
-	(5, 'Tạo module bài học', 'Bài học E-learning', 'Not Started', 'Low', '2025-03-01', '2025-03-15', 5);
+  (1, 'Sprint 1 - User Management', 'Đăng ký, đăng nhập, xác thực OTP, phân quyền, cập nhật hồ sơ cá nhân.', '2025-04-01', '2025-04-15', 1),
+  (1, 'Sprint 2 - Project & Member Management', 'Tạo dự án, thêm thành viên, phân quyền, hiển thị thông tin dự án.', '2025-04-16', '2025-04-30', 1),
+  (1, 'Sprint 3 - Task Management', 'Tạo công việc, phân công, theo dõi trạng thái, ưu tiên và thời hạn.', '2025-05-01', '2025-05-20', 1),
+  (1, 'Sprint 4 - Collaboration & Reporting', 'Bình luận, thông báo, lịch làm việc và báo cáo tiến độ.', '2025-05-21', '2025-06-07', 1);
 
+
+#Task Table // 
+INSERT INTO Tasks (sprint_id, task_title, task_description, task_status,
+  priority, start_date, due_date, created_by)
+VALUES
+	-- Sprint 1: User Management
+	(1, 'Tạo chức năng đăng ký', 'Form và API đăng ký người dùng', 'Not Started', 'High', '2025-04-01', '2025-04-03', 1),
+	(1, 'Tạo chức năng đăng nhập', 'Form và API đăng nhập, JWT', 'Not Started', 'High', '2025-04-03', '2025-04-06', 1),
+	(1, 'Xác thực OTP qua email', 'Gửi mã OTP và xác minh', 'Not Started', 'Medium', '2025-04-06', '2025-04-08', 1),
+
+	-- Sprint 2: Project Management
+	(2, 'Tạo dự án mới', 'Form tạo mới, lưu vào bảng Projects', 'Not Started', 'High', '2025-04-16', '2025-04-17', 1),
+	(2, 'Thêm người dùng vào dự án', 'Tìm user theo email/username và gán vào User_Project', 'Not Started', 'Medium', '2025-04-18', '2025-04-20', 1),
+
+	-- Sprint 3: Task Management
+	(3, 'Tạo task mới', 'Form + API tạo task thuộc sprint', 'Not Started', 'High', '2025-05-01', '2025-05-03', 1),
+	(3, 'Phân công công việc', 'Chọn người và gán task', 'Not Started', 'Medium', '2025-05-03', '2025-05-06', 1),
+
+	-- Sprint 4: Collaboration
+	(4, 'Thêm bình luận cho task', 'Bình luận theo task_id', 'Not Started', 'Low', '2025-05-21', '2025-05-23', 1),
+	(4, 'Gửi thông báo khi có task mới', 'Gửi email hoặc notification', 'Not Started', 'Low', '2025-05-23', '2025-05-25', 1);
 
 #Task_Assignment Table 
-INSERT INTO Task_Assignment (task_id, user_id, assigned_by, completion_percentage, status) VALUES
--- Task 1: Thiết kế giao diện trang chủ
-	(1, 2, 1, 40, 'In Progress'),
-	-- Task 2: Tạo API sản phẩm
-	(2, 3, 2, 10, 'Assigned'),
-	-- Task 3: Phân tích nghiệp vụ
-	(3, 4, 2, 100, 'Completed'),
-	-- Task 4: Thiết kế cơ sở dữ liệu
-	(4, 1, 1, 100, 'Completed'),
-	-- Task 5: API booking
-	(5, 5, 3, 60, 'In Progress'),
-	-- Task 6: Kiểm thử login
-	(6, 6, 3, 0, 'Assigned'),
-	-- Task 7: Module bài học
-	(7, 4, 5, 0, 'Assigned');
+INSERT INTO Task_Assignment (task_id, user_id, assigned_by, completion_percentage, status) 
+VALUES
+-- Sprint 1: User Management
+(1, 2, 1, 80, 'In Progress'), -- User 2 đang làm chức năng đăng ký
+(2, 3, 1, 20, 'Assigned'),    -- User 3 mới được giao đăng nhập
+(3, 4, 1, 100, 'Completed'),  -- User 4 đã hoàn thành OTP
+
+-- Sprint 2: Project Management
+(4, 1, 1, 100, 'Completed'),  -- Người tạo tự xử lý tạo dự án
+(5, 5, 1, 60, 'In Progress'), -- User 5 đang thêm người vào dự án
+
+-- Sprint 3: Task Management
+(6, 6, 1, 0, 'Assigned'),     -- User 6 mới được giao tạo task
+(7, 4, 1, 10, 'Assigned'),    -- User 4 được giao phân công
+
+-- Sprint 4: Collaboration
+(8, 2, 1, 0, 'Assigned'),     -- User 2 được giao comment
+(9, 3, 1, 0, 'Assigned');     -- User 3 được giao gửi thông báo
+
 
 
 #Comment Table
@@ -125,9 +147,13 @@ ALTER TABLE Users MODIFY password_hash VARCHAR(255) NULL;
 ALTER TABLE Users ADD COLUMN login_type ENUM('local', 'google', 'facebook', 'github') DEFAULT 'local';
 ALTER TABLE Users ADD COLUMN facebook_id VARCHAR(255) DEFAULT NULL;
 
-
+Update Users Set role = "Manager" where user_id = 1;
 SELECT * FROM userotps WHERE email = ?;
 -- USER 
+
+-- Lấy role_id của 'Manager'
+select * from ProjectRole;
+SELECT * from Users WHERE role ="Manager";
 
  -- Lấy danh sách tất cả người dùng
 SELECT * FROM Users;
@@ -224,6 +250,10 @@ SELECT * FROM Attachments WHERE task_id = 1;
 SELECT * FROM Attachments WHERE comment_id IS NOT NULL;
 -- Lấy các file do một user upload
 SELECT * FROM Attachments WHERE user_id = 3;
+
+
+
+
 
 drop Table Task_Assignment;
 drop Table Tasks;
