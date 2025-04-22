@@ -1,0 +1,9 @@
+/* src/pages/auth/VerifyEmailPage/VerifyEmailPage.css */
+.verify-email-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f7fa;
+    padding: 20px;
+  }

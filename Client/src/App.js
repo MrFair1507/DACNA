@@ -5,6 +5,8 @@ import AuthProvider from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
 // Pages
 import SignInPage from "./pages/auth/SignInPage/SignInPage";
+import SignUpPage from "./pages/auth/SignUpPage/SignUpPage";
+import VerifyEmailPage from "./pages/auth/VerifyEmailPage/VerifyEmailPage";
 import DashboardPage from "./pages/dashboard/DashboardPage/DashboardPage";
 // Import new password recovery pages
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage/ForgotPasswordPage";
@@ -33,6 +35,8 @@ function AppRoutes() {
     <Routes>
       {/* Auth Routes */} 
       <Route path="/signin" element={<SignInPage />} />
+      <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
       
       {/* Password Recovery Routes */}
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />

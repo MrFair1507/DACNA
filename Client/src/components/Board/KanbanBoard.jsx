@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+// import { useParams } from 'react-router-dom';
 import './KanbanBoard.css';
 import KanbanColumn from './KanbanColumn';
-import TaskDetailModal from './TaskDetailModal';
-import AddTaskForm from './AddTaskForm';
+// import TaskDetailModal from './TaskDetailModal';
+// import AddTaskForm from './AddTaskForm';
 
 const KanbanBoard = ({ boardId, columns, onAddTask, onTaskClick, onTaskMoved }) => {
     // State cho drag and drop

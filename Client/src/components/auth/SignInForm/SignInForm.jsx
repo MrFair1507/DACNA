@@ -1,30 +1,23 @@
+// src/components/auth/SignInForm/SignInForm.jsx
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import "./SignInForm.css";
 
-// Dữ liệu mẫu
-const MOCK_USERS = [
-  { email: "user@example.com", password: "password123" },
-  { email: "admin@example.com", password: "admin123" },
-  { email: "test@test.com", password: "test123" },
-  { email: "nguyenvana@gmail.com", password: "123456" },
-  { email: "tranthib@yahoo.com", password: "abc@123" }
-];
-
 const SignInForm = () => {
+  const [loginMethod, setLoginMethod] = useState("email"); // "email", "phone", "oauth"
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    phoneNumber: "",
+    otp: "",
     rememberMe: false,
   });
-  const [errors, setErrors] = useState({
-    email: "",
-    password: "",
-    general: ""
-  });
+  const [errors, setErrors] = useState({});
+  const [otpSent, setOtpSent] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, loginWithPhone, verifyOTP, oauthLogin } = useAuth();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -33,7 +26,7 @@ const SignInForm = () => {
       [name]: type === "checkbox" ? checked : value,
     });
     
-    // Clear the specific field error when user starts typing again
+    // Clear errors when user types
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -42,196 +35,278 @@ const SignInForm = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleMethodChange = (method) => {
+    setLoginMethod(method);
+    setErrors({});
+    setOtpSent(false);
+  };
+
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
-    
-    // Reset errors
-    setErrors({
-      email: "",
-      password: "",
-      general: ""
-    });
+    setErrors({});
+
+    // Validate form
+    let isValid = true;
+    const newErrors = {};
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Vui lòng nhập email";
+      isValid = false;
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Vui lòng nhập mật khẩu";
+      isValid = false;
+    }
+
+    if (!isValid) {
+      setErrors(newErrors);
+      return;
+    }
 
     try {
-      // Sử dụng dữ liệu mẫu thay vì gọi API
-      const mockLogin = () => {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            const user = MOCK_USERS.find(u => u.email === formData.email);
-            
-            if (!user) {
-              resolve({ success: false, error: "Email không tồn tại trong hệ thống" });
-            } else if (user.password !== formData.password) {
-              resolve({ success: false, error: "Mật khẩu không chính xác" });
-            } else {
-              // Tạo đối tượng user với đầy đủ thông tin để trả về
-              const userInfo = {
-                id: Math.floor(Math.random() * 1000),
-                email: user.email,
-                name: user.email.split('@')[0],
-                role: user.email.includes('admin') ? 'admin' : 'user'
-              };
-              resolve({ success: true, user: userInfo });
-            }
-          }, 500); // Giả lập độ trễ 500ms
-        });
-      };
+      const result = await login({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      // Thực hiện đăng nhập mô phỏng
-      const result = await mockLogin();
-      
       if (result.success) {
-        // Quan trọng: Gọi hàm login từ AuthContext để lưu trạng thái người dùng
-        await login({ 
-          email: formData.email, 
-          password: formData.password,
-          // Cung cấp dữ liệu mẫu để AuthContext có thể sử dụng
-          mockResult: result 
-        });
-        
-        // Hiển thị thông báo đăng nhập thành công
-        alert(`Đăng nhập thành công với email: ${result.user.email}`);
-        
-        // Chuyển hướng đến dashboard
+        // Navigate to dashboard
         navigate("/dashboard");
       } else {
-        // Xử lý các loại lỗi
-        if (result.error.includes("Mật khẩu")) {
-          setErrors({
-            ...errors,
-            password: result.error,
-            email: ""
-          });
-          // Reset mật khẩu
-          setFormData({
-            ...formData,
-            password: ""
-          });
-        } else if (result.error.includes("Email")) {
-          setErrors({
-            ...errors,
-            email: result.error,
-            password: ""
+        // Display appropriate error message based on the error
+        if (result.error.includes("không tồn tại")) {
+          setErrors({ email: result.error });
+        } else if (result.error.includes("mật khẩu")) {
+          setErrors({ password: result.error });
+        } else if (result.error.includes("khóa")) {
+          setErrors({ general: result.error });
+        } else if (result.error.includes("xác minh")) {
+          setErrors({ 
+            general: "Tài khoản chưa xác minh. Vui lòng kiểm tra email để xác minh tài khoản." 
           });
         } else {
-          setErrors({
-            ...errors,
-            general: result.error
-          });
+          setErrors({ general: result.error });
         }
       }
-    } catch (err) {
-      console.error("Login error:", err);
-      setErrors({
-        ...errors,
-        general: "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại."
-      });
+    } catch (error) {
+      setErrors({ general: "Lỗi đăng nhập. Vui lòng thử lại sau." });
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    console.log(`Login with ${provider}`);
-    alert(`Tính năng đăng nhập bằng ${provider} đang được phát triển`);
+  const handlePhoneSubmit = async (e) => {
+    e.preventDefault();
+    setErrors({});
+
+    if (!otpSent) {
+      // First step: Request OTP
+      if (!formData.phoneNumber) {
+        setErrors({ phoneNumber: "Vui lòng nhập số điện thoại" });
+        return;
+      }
+
+      try {
+        const result = await loginWithPhone(formData.phoneNumber);
+        if (result.success) {
+          setOtpSent(true);
+        } else {
+          setErrors({ phoneNumber: result.error });
+        }
+      } catch (error) {
+        setErrors({ general: "Lỗi gửi OTP. Vui lòng thử lại sau." });
+      }
+    } else {
+      // Second step: Verify OTP
+      if (!formData.otp) {
+        setErrors({ otp: "Vui lòng nhập mã OTP" });
+        return;
+      }
+
+      try {
+        const result = await verifyOTP(formData.phoneNumber, formData.otp);
+        if (result.success) {
+          navigate("/dashboard");
+        } else {
+          setErrors({ otp: result.error || "Mã OTP không chính xác" });
+        }
+      } catch (error) {
+        setErrors({ general: "Lỗi xác thực OTP. Vui lòng thử lại sau." });
+      }
+    }
+  };
+
+  const handleOauthLogin = (provider) => {
+    oauthLogin(provider);
+  };
+
+  // Render different forms based on login method
+  const renderLoginForm = () => {
+    switch (loginMethod) {
+      case "email":
+        return (
+          <form onSubmit={handleEmailSubmit}>
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className={`form-control ${errors.email ? 'input-error' : ''}`}
+                placeholder="Nhập email của bạn"
+                value={formData.email}
+                onChange={handleChange}
+              />
+              {errors.email && <div className="field-error-message">{errors.email}</div>}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">Mật khẩu</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                className={`form-control ${errors.password ? 'input-error' : ''}`}
+                placeholder="Nhập mật khẩu của bạn"
+                value={formData.password}
+                onChange={handleChange}
+              />
+              {errors.password && <div className="field-error-message">{errors.password}</div>}
+            </div>
+
+            <div className="form-footer">
+              <div className="remember-me">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  name="rememberMe"
+                  checked={formData.rememberMe}
+                  onChange={handleChange}
+                />
+                <label htmlFor="rememberMe">Ghi nhớ đăng nhập</label>
+              </div>
+              <Link to="/forgot-password" className="forgot-password">
+                Quên mật khẩu?
+              </Link>
+            </div>
+
+            <button type="submit" className="btn btn-primary">
+              Đăng nhập
+            </button>
+          </form>
+        );
+
+      case "phone":
+        return (
+          <form onSubmit={handlePhoneSubmit}>
+            <div className="form-group">
+              <label htmlFor="phoneNumber" className="form-label">Số điện thoại</label>
+              <input
+                type="tel"
+                id="phoneNumber"
+                name="phoneNumber"
+                className={`form-control ${errors.phoneNumber ? 'input-error' : ''}`}
+                placeholder="Nhập số điện thoại của bạn"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                disabled={otpSent}
+              />
+              {errors.phoneNumber && <div className="field-error-message">{errors.phoneNumber}</div>}
+            </div>
+
+            {otpSent && (
+              <div className="form-group">
+                <label htmlFor="otp" className="form-label">Mã OTP</label>
+                <input
+                  type="text"
+                  id="otp"
+                  name="otp"
+                  className={`form-control ${errors.otp ? 'input-error' : ''}`}
+                  placeholder="Nhập mã OTP đã gửi đến điện thoại của bạn"
+                  value={formData.otp}
+                  onChange={handleChange}
+                />
+                {errors.otp && <div className="field-error-message">{errors.otp}</div>}
+              </div>
+            )}
+
+            <div className="form-footer">
+              <div className="remember-me">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  name="rememberMe"
+                  checked={formData.rememberMe}
+                  onChange={handleChange}
+                />
+                <label htmlFor="rememberMe">Ghi nhớ đăng nhập</label>
+              </div>
+            </div>
+
+            <button type="submit" className="btn btn-primary">
+              {otpSent ? "Xác nhận OTP" : "Gửi mã OTP"}
+            </button>
+          </form>
+        );
+
+      case "oauth":
+        return (
+          <div className="oauth-options">
+            <button
+              className="oauth-btn google-btn"
+              onClick={() => handleOauthLogin("Google")}
+            >
+              <span className="oauth-icon">G</span>
+              <span>Đăng nhập với Google</span>
+            </button>
+            <button
+              className="oauth-btn facebook-btn"
+              onClick={() => handleOauthLogin("Facebook")}
+            >
+              <span className="oauth-icon">f</span>
+              <span>Đăng nhập với Facebook</span>
+            </button>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
     <div className="sign-in-form">
       {errors.general && <div className="error-message">{errors.general}</div>}
 
-      <div className="social-login">
+      <div className="login-method-tabs">
         <button
-          className="social-btn"
-          onClick={() => handleSocialLogin("Google")}
+          className={`method-tab ${loginMethod === "email" ? "active" : ""}`}
+          onClick={() => handleMethodChange("email")}
         >
-          <span className="social-icon">G</span>
-          <span>Google</span>
+          Email
         </button>
         <button
-          className="social-btn"
-          onClick={() => handleSocialLogin("Microsoft")}
+          className={`method-tab ${loginMethod === "phone" ? "active" : ""}`}
+          onClick={() => handleMethodChange("phone")}
         >
-          <span className="social-icon">M</span>
-          <span>Microsoft</span>
+          Số điện thoại
+        </button>
+        <button
+          className={`method-tab ${loginMethod === "oauth" ? "active" : ""}`}
+          onClick={() => handleMethodChange("oauth")}
+        >
+          Mạng xã hội
         </button>
       </div>
 
-      <div className="divider">or continue with email</div>
-
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="email" className="form-label">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            className={`form-control ${errors.email ? 'input-error' : ''}`}
-            placeholder="Enter your email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-          {errors.email && <div className="field-error-message">{errors.email}</div>}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password" className="form-label">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            className={`form-control ${errors.password ? 'input-error' : ''}`}
-            placeholder="Enter your password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-          {errors.password && <div className="field-error-message">{errors.password}</div>}
-        </div>
-
-        <div className="form-footer">
-          <div className="remember-me">
-            <input
-              type="checkbox"
-              id="rememberMe"
-              name="rememberMe"
-              checked={formData.rememberMe}
-              onChange={handleChange}
-            />
-            <label htmlFor="rememberMe">Remember me</label>
-          </div>
-          <Link to="/forgot-password" className="forgot-password">
-            Forgot Password?
-          </Link>
-        </div>
-
-        <button type="submit" className="btn btn-primary">
-          Sign In
-        </button>
-      </form>
+      {renderLoginForm()}
 
       <div className="form-bottom">
         <p>
-          Don't have an account?{" "}
+          Chưa có tài khoản?{" "}
           <Link to="/signup" className="signup-link">
-            Sign Up
+            Đăng ký ngay
           </Link>
         </p>
-      </div>
-      
-      {/* Hiển thị dữ liệu mẫu để dễ dàng test */}
-      <div className="sample-data">
-        <h4>Dữ liệu mẫu để test:</h4>
-        <ul>
-          {MOCK_USERS.map((user, index) => (
-            <li key={index}>
-              Email: <strong>{user.email}</strong> | Password: <strong>{user.password}</strong>
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );

@@ -89,7 +89,7 @@
 }
 
 .form-header {
-  margin-bottom: 32px;
+  margin-bottom: 10px;
   text-align: center;
 }
 
@@ -104,6 +104,23 @@
   color: #bbbbcc;
 }
 
+.auth-message {
+  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.auth-message.success {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+}
+
+.auth-message.error {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+}
 /* Mobile */
 @media (max-width: 768px) {
   .auth-container {
