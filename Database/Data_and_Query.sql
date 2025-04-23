@@ -22,7 +22,8 @@ VALUES
 	('App Mobile Booking Spa', 'Ứng dụng đặt lịch spa và chăm sóc sắc đẹp', 'In Progress', 3),
 	('Hệ thống E-learning', 'Nền tảng học trực tuyến cho sinh viên', 'Canceled', 2),
 	('Website Blog Cá Nhân', 'Trang blog cá nhân với tính năng comment và upload ảnh', 'In Progress', 4);
-
+INSERT INTO Projects (project_name, project_description, project_status, created_by)
+VALUES ('TaskManagement', 'Trang web giúp quản lí công việc và dự án', 'In Progress', 16);
 #Project Role Table
 INSERT INTO ProjectRole (role_name, role_description)
 VALUES 
@@ -33,7 +34,8 @@ VALUES
 	('Tester', 'Kiểm thử hệ thống'),
 	('Business Analyst', 'Phân tích yêu cầu và nghiệp vụ'),
 	('Scrum Master', 'Điều phối theo mô hình Agile Scrum');
-
+INSERT INTO ProjectRole (role_name, role_description)
+	values(role_name, role_description);
 #User_Project Table
 INSERT INTO User_Project (user_id, project_id, role_id, cost)
 VALUES 
@@ -45,6 +47,8 @@ VALUES
 (6, 4, 6, 8000.0),
 (3, 5, 3, 9500.0);
 
+INSERT INTO User_Project (user_id, project_id, role_id, cost)
+VALUES (16, 7, 1, 0.0);
 #Sprint Table
 INSERT INTO Sprints (project_id, name, description, start_date, end_date, created_by)
 VALUES
@@ -133,13 +137,16 @@ VALUES
  SELECT * FROM Users;
  SELECT * FROM Projects;
  SELECT * FROM ProjectRole;
+ SELECT * FROM User_Project;
  SELECT * FROM Tasks;
  SELECT * FROM Task_Assignment;
  SELECT * FROM Comments;
  SELECT * FROM Notifications;
  SELECT * FROM Attachments;
- 
+ SELECT * FROM Sprints;
+ Select * from Temp_Users;
 -- SOME QUERIES COMMAND
+Delete from users where user_id = 9;
 
 -- AlTER TABLE
 use taskManageMent;
@@ -147,7 +154,7 @@ ALTER TABLE Users MODIFY password_hash VARCHAR(255) NULL;
 ALTER TABLE Users ADD COLUMN login_type ENUM('local', 'google', 'facebook', 'github') DEFAULT 'local';
 ALTER TABLE Users ADD COLUMN facebook_id VARCHAR(255) DEFAULT NULL;
 
-Update Users Set role = "Manager" where user_id = 1;
+delete from users where user_id = 9;
 SELECT * FROM userotps WHERE email = ?;
 -- USER 
 
@@ -252,8 +259,31 @@ SELECT * FROM Attachments WHERE comment_id IS NOT NULL;
 SELECT * FROM Attachments WHERE user_id = 3;
 
 
+SELECT u.full_name, prj.project_name, r.role_name
+FROM User_Project up
+JOIN Users u ON up.user_id = u.user_id
+JOIN Projects prj ON up.project_id = prj.project_id
+JOIN ProjectRole r ON up.role_id = r.role_id
+WHERE prj.project_id = 1;
 
 
+SELECT u.full_name, r.role_name
+FROM User_Project up
+JOIN Users u ON u.user_id = up.user_id
+JOIN ProjectRole r ON up.role_id = r.role_id
+WHERE project_id = 1;
+
+SELECT pr.role_name
+FROM User_Project up
+JOIN ProjectRole pr ON up.role_id = pr.role_id
+WHERE up.user_id = 16 AND up.project_id = 7;
+
+SELECT u.full_name, p.project_name, r.role_name
+FROM User_Project up
+JOIN Users u ON u.user_id = up.user_id
+JOIN Projects p ON p.project_id = up.project_id
+JOIN ProjectRole r ON r.role_id = up.role_id
+WHERE p.project_id = 7 AND u.email = 'KhanhDang071124@gmail.com';
 
 drop Table Task_Assignment;
 drop Table Tasks;

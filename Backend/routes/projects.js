@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
 
+
 // CRUD cho Projects
 router.get('/', async (req, res) => {
   const [rows] = await db.query('SELECT * FROM Projects');
@@ -35,5 +36,7 @@ router.delete('/:id', async (req, res) => {
   await db.query('DELETE FROM Projects WHERE project_id = ?', [req.params.id]);
   res.json({ message: 'Đã xóa dự án' });
 });
+
+
 
 module.exports = router;

@@ -160,7 +160,15 @@ CREATE TABLE Attachments (
 );
 
 
-
+CREATE TABLE Temp_Users (
+  temp_user_id INT AUTO_INCREMENT PRIMARY KEY,
+  full_name VARCHAR(100),
+  email VARCHAR(100) UNIQUE,
+  password_hash VARCHAR(255),
+  otp_code VARCHAR(10),
+  expires_at DATETIME,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 
 

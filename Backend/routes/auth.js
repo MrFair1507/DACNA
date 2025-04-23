@@ -11,7 +11,7 @@ const { generateToken } = require('../utils/jwt');
 
 
 
-router.use(requestLogger);     // Ghi log sau khi biết người dùng
+   // Ghi log sau khi biết người dùng
 
 
 // Public
@@ -19,14 +19,15 @@ router.post('/register', authController.register);
 router.post('/login', authController.login);
 
 // OTP (Email Verification)
-router.post('/send-otp', otpController.sendOTP);     // Gửi lại OTP qua email
+// router.post('/send-otp', otpController.sendOTP);     // Gửi lại OTP qua email
 router.post('/verify-otp', otpController.verifyOTP); // Xác minh OTP
-
+router.post('/resend-otp', otpController.resendOTP);
 // passport Google OAuth
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
+  requestLogger,
   (req, res) => {
     const token = generateToken(req.user);
     res.redirect(`http://localhost:5173/oauth-success?token=${token}`);
@@ -38,6 +39,7 @@ router.get('/facebook', passport.authenticate('facebook', { scope: ['public_prof
 
 router.get('/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
+  requestLogger,
   (req, res) => {
     const token = generateToken(req.user);
     res.redirect(`http://localhost:5173/oauth-success?token=${token}`);
@@ -47,7 +49,7 @@ router.get('/facebook/callback',
 
 
 // delete account by this url 
-router.delete('/delete-account', authenticate, async (req, res) => {
+router.delete('/delete-account', authenticate, requestLogger, async (req, res) => {
   const userId = req.user.user_id;
 
   try {
@@ -61,7 +63,7 @@ router.delete('/delete-account', authenticate, async (req, res) => {
 });
 
 // Protected
-router.get('/me', authenticate, (req, res) => {
+router.get('/me', authenticate, requestLogger, (req, res) => {
   res.json({ user: req.user });
 });
 
