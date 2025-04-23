@@ -11,8 +11,8 @@ require('dotenv').config();
 app.use(express.json());
 
 app.use(cors({
-  // origin: 'http://localhost:5173', // địa chỉ frontend của bạn
-  // credentials: true,               // cho phép gửi cookie, token
+  origin: 'http://localhost:5173', // địa chỉ frontend của bạn
+  credentials: true,               // cho phép gửi cookie, token
 }));
 
 app.use(session({ secret: 'oauth_secret', resave: false, saveUninitialized: true }));

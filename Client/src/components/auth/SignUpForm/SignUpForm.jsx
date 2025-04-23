@@ -6,19 +6,18 @@ import { useAuth } from "../../../hooks/useAuth";
 import "./SignUpForm.css";
 
 const SignUpForm = () => {
-  const [registrationMethod, setRegistrationMethod] = useState("email"); // "email", "phone", "oauth"
+  const [registrationMethod, setRegistrationMethod] = useState("email"); // "email", "oauth"
   const [formData, setFormData] = useState({
+    fullName: "", // Thêm trường fullName
     email: "",
     password: "",
     confirmPassword: "",
-    phoneNumber: "",
-    nickname: "",
     otp: "",
   });
-  const [step, setStep] = useState(1); // 1: Initial input, 2: Verification, 3: Account setup
+  const [step, setStep] = useState(1); // 1: Initial input, 2: Verification
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const { register, verifyEmail, verifyOTP, oauthLogin } = useAuth();
+  const { register, verifyEmail, oauthLogin } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,6 +44,10 @@ const SignUpForm = () => {
   const validateEmailForm = () => {
     const newErrors = {};
     
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Vui lòng nhập họ và tên";
+    }
+    
     if (!formData.email) {
       newErrors.email = "Vui lòng nhập email";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -65,19 +68,6 @@ const SignUpForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const validatePhoneForm = () => {
-    const newErrors = {};
-    
-    if (!formData.phoneNumber) {
-      newErrors.phoneNumber = "Vui lòng nhập số điện thoại";
-    } else if (!/^\d{10,11}$/.test(formData.phoneNumber)) {
-      newErrors.phoneNumber = "Số điện thoại không hợp lệ";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const validateVerificationForm = () => {
     const newErrors = {};
     
@@ -85,17 +75,6 @@ const SignUpForm = () => {
       newErrors.otp = "Vui lòng nhập mã xác minh";
     } else if (!/^\d{6}$/.test(formData.otp)) {
       newErrors.otp = "Mã xác minh phải có 6 số";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateNicknameForm = () => {
-    const newErrors = {};
-    
-    if (!formData.nickname) {
-      newErrors.nickname = "Vui lòng nhập nickname";
     }
     
     setErrors(newErrors);
@@ -112,6 +91,7 @@ const SignUpForm = () => {
       try {
         // Check if email is already in use
         const result = await register({
+          full_name: formData.fullName, // Gửi fullName lên server
           email: formData.email,
           password: formData.password,
           method: "email"
@@ -146,68 +126,6 @@ const SignUpForm = () => {
     }
   };
 
-  const handlePhoneRegistrationSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (step === 1) {
-      // Validate phone registration form
-      if (!validatePhoneForm()) return;
-      
-      try {
-        // Register with phone number
-        const result = await register({
-          phoneNumber: formData.phoneNumber,
-          method: "phone"
-        });
-        
-        if (result.success) {
-          setStep(2); // Move to verification step
-        } else {
-          setErrors({ phoneNumber: result.error || "Số điện thoại đã được sử dụng" });
-        }
-      } catch (error) {
-        setErrors({ general: "Lỗi đăng ký. Vui lòng thử lại sau." });
-      }
-    } else if (step === 2) {
-      // Validate OTP
-      if (!validateVerificationForm()) return;
-      
-      try {
-        const result = await verifyOTP(formData.phoneNumber, formData.otp);
-        
-        if (result.success) {
-          setStep(3); // Move to nickname setup
-        } else {
-          setErrors({ otp: result.error || "Mã OTP không chính xác" });
-        }
-      } catch (error) {
-        setErrors({ general: "Lỗi xác minh OTP. Vui lòng thử lại sau." });
-      }
-    } else if (step === 3) {
-      // Validate nickname
-      if (!validateNicknameForm()) return;
-      
-      try {
-        // Complete registration with nickname
-        const result = await register({
-          phoneNumber: formData.phoneNumber,
-          nickname: formData.nickname,
-          method: "phone",
-          step: "final"
-        });
-        
-        if (result.success) {
-          // Redirect to main screen
-          navigate("/dashboard");
-        } else {
-          setErrors({ general: result.error });
-        }
-      } catch (error) {
-        setErrors({ general: "Lỗi hoàn tất đăng ký. Vui lòng thử lại sau." });
-      }
-    }
-  };
-
   const handleOauthRegistration = (provider) => {
     oauthLogin(provider);
   };
@@ -220,6 +138,20 @@ const SignUpForm = () => {
           // Email registration form
           return (
             <form onSubmit={handleEmailRegistrationSubmit}>
+              <div className="form-group">
+                <label htmlFor="fullName" className="form-label">Họ và tên</label>
+                <input
+                  type="text"
+                  id="fullName"
+                  name="fullName"
+                  className={`form-control ${errors.fullName ? 'input-error' : ''}`}
+                  placeholder="Nhập họ và tên của bạn"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                />
+                {errors.fullName && <div className="field-error-message">{errors.fullName}</div>}
+              </div>
+
               <div className="form-group">
                 <label htmlFor="email" className="form-label">Email</label>
                 <input
@@ -299,83 +231,6 @@ const SignUpForm = () => {
         }
         break;
 
-      case "phone":
-        if (step === 1) {
-          // Phone registration form
-          return (
-            <form onSubmit={handlePhoneRegistrationSubmit}>
-              <div className="form-group">
-                <label htmlFor="phoneNumber" className="form-label">Số điện thoại</label>
-                <input
-                  type="tel"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  className={`form-control ${errors.phoneNumber ? 'input-error' : ''}`}
-                  placeholder="Nhập số điện thoại của bạn"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                />
-                {errors.phoneNumber && <div className="field-error-message">{errors.phoneNumber}</div>}
-              </div>
-
-              <button type="submit" className="btn btn-primary">
-                Gửi mã OTP
-              </button>
-            </form>
-          );
-        } else if (step === 2) {
-          // OTP verification form
-          return (
-            <form onSubmit={handlePhoneRegistrationSubmit}>
-              <div className="form-info">
-                <p>Mã OTP đã được gửi đến số điện thoại {formData.phoneNumber}</p>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="otp" className="form-label">Mã OTP</label>
-                <input
-                  type="text"
-                  id="otp"
-                  name="otp"
-                  className={`form-control ${errors.otp ? 'input-error' : ''}`}
-                  placeholder="Nhập mã OTP gửi đến điện thoại của bạn"
-                  value={formData.otp}
-                  onChange={handleChange}
-                />
-                {errors.otp && <div className="field-error-message">{errors.otp}</div>}
-              </div>
-
-              <button type="submit" className="btn btn-primary">
-                Xác nhận
-              </button>
-            </form>
-          );
-        } else if (step === 3) {
-          // Nickname setup form
-          return (
-            <form onSubmit={handlePhoneRegistrationSubmit}>
-              <div className="form-group">
-                <label htmlFor="nickname" className="form-label">Nickname</label>
-                <input
-                  type="text"
-                  id="nickname"
-                  name="nickname"
-                  className={`form-control ${errors.nickname ? 'input-error' : ''}`}
-                  placeholder="Nhập nickname của bạn"
-                  value={formData.nickname}
-                  onChange={handleChange}
-                />
-                {errors.nickname && <div className="field-error-message">{errors.nickname}</div>}
-              </div>
-
-              <button type="submit" className="btn btn-primary">
-                Hoàn tất
-              </button>
-            </form>
-          );
-        }
-        break;
-
       case "oauth":
         return (
           <div className="oauth-options">
@@ -401,8 +256,6 @@ const SignUpForm = () => {
     }
   };
 
-  // Thêm vào phần render cuối cùng
-
   return (
     <div className="sign-up-form">
       {errors.general && <div className="error-message">{errors.general}</div>}
@@ -413,12 +266,6 @@ const SignUpForm = () => {
           onClick={() => handleMethodChange("email")}
         >
           Email
-        </button>
-        <button
-          className={`method-tab ${registrationMethod === "phone" ? "active" : ""}`}
-          onClick={() => handleMethodChange("phone")}
-        >
-          Số điện thoại
         </button>
         <button
           className={`method-tab ${registrationMethod === "oauth" ? "active" : ""}`}
@@ -435,25 +282,15 @@ const SignUpForm = () => {
               {step > 1 ? "✓" : 1}
               <span className="step-line"></span>
             </div>
-            <span className="step-label">
-              {registrationMethod === "email" ? "Thông tin" : "Số điện thoại"}
-            </span>
+            <span className="step-label">Thông tin</span>
           </div>
           <div className={`step ${step >= 2 ? "active" : ""}`}>
-            <div className={`step-circle ${step > 2 ? "completed" : step === 2 ? "active" : ""}`}>
-              {step > 2 ? "✓" : 2}
+            <div className={`step-circle ${step === 2 ? "active" : ""}`}>
+              2
               <span className="step-line"></span>
             </div>
             <span className="step-label">Xác minh</span>
           </div>
-          {registrationMethod === "phone" && (
-            <div className={`step ${step >= 3 ? "active" : ""}`}>
-              <div className={`step-circle ${step === 3 ? "active" : ""}`}>
-                3
-              </div>
-              <span className="step-label">Nickname</span>
-            </div>
-          )}
         </div>
       )}
 

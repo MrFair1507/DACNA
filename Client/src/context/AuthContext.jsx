@@ -133,44 +133,51 @@ const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+
+
+
+
   const login = async (credentials) => {
     try {
-      if (credentials.mockResult?.success) {
-        const userData = credentials.mockResult.user;
+      const response = await api.post('/auth/login', {
+        email: credentials.email,
+        password: credentials.password
+      });
+
+      if (response.data?.token) {
+        const userData = {
+          id: response.data.user.id || response.data.user.user_id,
+          email: response.data.user.email,
+          fullName: response.data.user.full_name,
+          role: response.data.user.role,
+          token: response.data.token
+        };
+        
         setUser(userData);
         localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("token", response.data.token);
+        
         return { success: true, user: userData };
       }
-
-      try {
-        const response = await api.post('/auth/login', {
-          email: credentials.email,
-          password: credentials.password
-        });
-
-        if (response.data?.token) {
-          const userData = {
-            id: response.data.user.id,
-            email: response.data.user.email,
-            fullName: response.data.user.full_name,
-            role: response.data.user.role,
-            token: response.data.token
-          };
-          setUser(userData);
-          localStorage.setItem("user", JSON.stringify(userData));
-          localStorage.setItem("token", response.data.token);
-          return { success: true, user: userData };
-        }
-
-        return { success: false, error: "Đăng nhập thất bại." };
-      } catch (error) {
-        console.warn("Fallback mock login...");
-        return simulateLoginApi(credentials);
-      }
+      
+      return { success: false, error: "Đăng nhập thất bại." };
     } catch (error) {
-      return { success: false, error: error.message || "Lỗi đăng nhập" };
+      console.error("Login error:", error);
+      
+      // Xử lý mã lỗi từ server
+      if (error.response) {
+        const message = error.response.data?.message || "Đăng nhập thất bại.";
+        return { success: false, error: message };
+      }
+      
+      return { success: false, error: "Lỗi kết nối với server." };
     }
   };
+
+  // Tương tự cập nhật các hàm khác như register, verifyOTP...
+  
+  
+
 
   const register = async (userData) => {
     try {

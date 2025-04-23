@@ -3,7 +3,7 @@
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 0 10px; /* Thêm padding ngang */
 }
 
 .error-message {
@@ -27,6 +27,7 @@
   display: flex;
   margin-bottom: 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
 }
 
 .method-tab {
@@ -67,7 +68,7 @@
 
 .form-control {
   width: 100%;
-  box-sizing: border-box; 
+  box-sizing: border-box;
   padding: 12px;
   border: 1px solid #2e2e3f;
   border-radius: 6px;
@@ -75,6 +76,7 @@
   transition: all 0.2s;
   color: #f1f1f1;
   background-color: #252535;
+  margin-bottom: 5px; /* Thêm khoảng cách dưới */
 }
 
 .form-control:focus {
@@ -140,15 +142,15 @@
 }
 
 .google-btn {
-  background-color: #DB4437;
+  background-color: #db4437;
 }
 
 .google-btn:hover {
-  background-color: #C53929;
+  background-color: #c53929;
 }
 
 .facebook-btn {
-  background-color: #4267B2;
+  background-color: #4267b2;
 }
 
 .facebook-btn:hover {
@@ -192,15 +194,18 @@
 /* Step indicator */
 .step-indicator {
   display: flex;
-  justify-content: center;
-  margin-bottom: 14px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  width: 100%;
+  padding: 0 15px;
 }
 
 .step {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 80px;
+  position: relative;
+  flex: 1;
 }
 
 .step-circle {
@@ -215,6 +220,7 @@
   margin-bottom: 8px;
   font-weight: 500;
   position: relative;
+  z-index: 2;
 }
 
 .step-circle.active {
@@ -227,15 +233,6 @@
   color: white;
 }
 
-.step-line {
-  position: absolute;
-  height: 2px;
-  background-color: #2e2e3f;
-  width: 80px;
-  right: -40px;
-  top: 15px;
-  z-index: -1;
-}
 
 .step:last-child .step-line {
   display: none;
@@ -250,3 +247,5 @@
 .step.active .step-label {
   color: #e0e0e0;
 }
+
+
