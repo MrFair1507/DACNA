@@ -1,6 +1,6 @@
+// Cập nhật file: src/components/UI/CreateBoardForm/CreateBoardForm.jsx
 import React, { useState } from 'react';
 import './CreateBoardForm.css';
-
 
 const CreateBoardForm = ({ onClose, onBoardCreated }) => {
   const [boardData, setBoardData] = useState({
@@ -10,12 +10,21 @@ const CreateBoardForm = ({ onClose, onBoardCreated }) => {
     templateType: 'default'
   });
   
+  // State để theo dõi quá trình submit
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setBoardData(prev => ({
       ...prev,
       [name]: value
     }));
+
+    // Xóa thông báo lỗi khi người dùng thay đổi input
+    if (error) {
+      setError('');
+    }
   };
   
   const handleSelectColor = (color) => {
@@ -27,13 +36,28 @@ const CreateBoardForm = ({ onClose, onBoardCreated }) => {
   
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    
+    // Validate input
+    if (!boardData.title.trim()) {
+      setError('Vui lòng nhập tiêu đề bảng');
+      setIsSubmitting(false);
+      return;
+    }
     
     // Log để debug
     console.log('Submitting board data:', boardData);
     
-    // Gọi hàm callback với dữ liệu bảng mới
-    if (onBoardCreated) {
-      onBoardCreated(boardData);
+    try {
+      // Gọi callback với dữ liệu bảng mới
+      if (onBoardCreated) {
+        onBoardCreated(boardData);
+      }
+    } catch (err) {
+      console.error('Error creating board:', err);
+      setError('Đã xảy ra lỗi khi tạo bảng. Vui lòng thử lại sau.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -44,6 +68,12 @@ const CreateBoardForm = ({ onClose, onBoardCreated }) => {
           <h3>Tạo bảng mới</h3>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
+        
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
         
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
@@ -125,9 +155,9 @@ const CreateBoardForm = ({ onClose, onBoardCreated }) => {
             <button 
               type="submit" 
               className="submit-btn"
-              disabled={!boardData.title.trim()}
+              disabled={isSubmitting || !boardData.title.trim()}
             >
-              Tạo bảng
+              {isSubmitting ? 'Đang tạo...' : 'Tạo bảng'}
             </button>
           </div>
         </form>
@@ -135,6 +165,5 @@ const CreateBoardForm = ({ onClose, onBoardCreated }) => {
     </div>
   );
 };
-
 
 export default CreateBoardForm;

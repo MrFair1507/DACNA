@@ -1,20 +1,21 @@
+// Cập nhật file DashboardPage.jsx
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../../hooks/useAuth"; // Import hook to get user info
+import { useAuth } from "../../../hooks/useAuth";
 import "./DashboardPage.css";
 
 // Layout Components
-
 import Sidebar from "../../../components/Layout/Sidebar/Sidebar";
 import Header from "../../../components/Layout/Header/Header";
 
 // Board Components
-
 import KanbanBoard from "../../../components/Board/KanbanBoard";
 import CreateBoardForm from "../../../components/UI/CreateBoardForm/CreateBoardForm";
 import BoardList from "../../../components/Board/BoardList/BoardList";
 import AddMembersForm from "../../../components/UI/AddMembersForm/AddMembersForm";
 import AddTaskForm from "../../../components/Board/AddTaskForm";
 import TaskDetailModal from "../../../components/Board/TaskDetailModal";
+import SprintsList from "../../../components/Sprints/SprintsList";
+import CreateSprintForm from "../../../components/Sprints/CreateSprintForm";
 
 const DashboardPage = () => {
   const { user } = useAuth();
@@ -340,13 +341,50 @@ const DashboardPage = () => {
     board3: JSON.parse(JSON.stringify(defaultTemplates.default)),
   });
 
+  // State cho sprints
+  const [sprints, setSprints] = useState([
+    {
+      id: "sprint1",
+      name: "Sprint 1 - Initial Setup",
+      status: "completed",
+      startDate: "01/03/2025",
+      endDate: "15/03/2025",
+      totalTasks: 8,
+      completedTasks: 8,
+      progress: 100
+    },
+    {
+      id: "sprint2",
+      name: "Sprint 2 - Core Features",
+      status: "completed",
+      startDate: "16/03/2025",
+      endDate: "31/03/2025",
+      totalTasks: 10,
+      completedTasks: 10,
+      progress: 100
+    },
+    {
+      id: "sprint3",
+      name: "Sprint 3 - User Authentication",
+      status: "active",
+      startDate: "01/04/2025",
+      endDate: "15/04/2025",
+      totalTasks: 12,
+      completedTasks: 8,
+      progress: 67
+    }
+  ]);
+
   // Trạng thái cho các popup
   const [showCreateBoardForm, setShowCreateBoardForm] = useState(false);
   const [showAddMembersForm, setShowAddMembersForm] = useState(false);
   const [showAddTaskForm, setShowAddTaskForm] = useState(false);
   const [showTaskDetailModal, setShowTaskDetailModal] = useState(false);
+  const [showCreateSprintForm, setShowCreateSprintForm] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
+  // eslint-disable-next-line
+  const [selectedSprint, setSelectedSprint] = useState(null);
 
   // Debug để kiểm tra state
   useEffect(() => {
@@ -356,6 +394,10 @@ const DashboardPage = () => {
   useEffect(() => {
     console.log("Board tasks hiện tại:", boardTasks);
   }, [boardTasks]);
+
+  useEffect(() => {
+    console.log("Sprints hiện tại:", sprints);
+  }, [sprints]);
 
   // Xử lý khi chọn một bảng
   const handleBoardSelect = (boardId) => {
@@ -464,11 +506,43 @@ const DashboardPage = () => {
     // Đóng form
     setShowCreateBoardForm(false);
 
-    // THAY ĐỔI: Không chuyển đến board mới, mà vẫn ở dashboard
-    // Bỏ đoạn code sau:
-    // setTimeout(() => {
-    //   handleBoardSelect(newBoardId);
-    // }, 100);
+    // Chuyển đến board mới sau khi tạo
+    setTimeout(() => {
+      handleBoardSelect(newBoardId);
+    }, 100);
+  };
+
+  // Xử lý tạo sprint mới
+  const handleCreateSprint = () => {
+    setShowCreateSprintForm(true);
+  };
+
+  // Xử lý khi sprint được tạo thành công
+  const handleSprintCreated = (sprintData) => {
+    const newSprintId = `sprint${Date.now()}`;
+    
+    // Tạo sprint mới
+    const newSprint = {
+      id: newSprintId,
+      name: sprintData.name,
+      description: sprintData.description,
+      status: "planned",
+      startDate: sprintData.startDate,
+      endDate: sprintData.endDate,
+      totalTasks: 0,
+      completedTasks: 0,
+      progress: 0
+    };
+
+    // Thêm sprint vào danh sách
+    setSprints(prevSprints => [...prevSprints, newSprint]);
+    
+    // Đóng form tạo sprint
+    setShowCreateSprintForm(false);
+
+    // Lưu sprint vào backend
+    // TODO: Implement API call to save sprint
+    console.log("Sprint mới đã được tạo:", newSprint);
   };
 
   // Xử lý thêm thành viên
@@ -638,6 +712,13 @@ const DashboardPage = () => {
     });
   };
 
+  // Xử lý khi click vào một sprint
+  const handleSprintClick = (sprint) => {
+    setSelectedSprint(sprint);
+    // Thực hiện các hành động để xem chi tiết sprint
+    console.log("Đã chọn sprint:", sprint);
+  };
+
   // Hiển thị nội dung chính dựa vào activeView
   const renderContent = () => {
     switch (activeView) {
@@ -661,15 +742,11 @@ const DashboardPage = () => {
         );
       case "sprints":
         return (
-          <div className="placeholder-view">
-            <div className="placeholder-icon">🔄</div>
-            <h3>Tính năng Sprints đang phát triển</h3>
-            <p>
-              Chức năng này đang được xây dựng và sẽ sớm được ra mắt. Bạn sẽ có
-              thể quản lý các sprint, xem burndown chart và nhiều tính năng
-              khác.
-            </p>
-          </div>
+          <SprintsList
+            sprints={sprints}
+            onCreateSprint={handleCreateSprint}
+            onSprintClick={handleSprintClick}
+          />
         );
       case "backlog":
         return (
@@ -712,7 +789,6 @@ const DashboardPage = () => {
       <Sidebar
         activeTab={activeTab}
         activeBoardId={activeBoardId}
-        boards={boards}
         onBoardSelect={handleBoardSelect}
         onTabSelect={handleTabSelect}
         onCreateBoard={handleCreateBoard}
@@ -767,6 +843,13 @@ const DashboardPage = () => {
           boardMembers={boardMembers[activeBoardId] || []}
           onClose={() => setShowTaskDetailModal(false)}
           onTaskUpdate={handleTaskUpdated}
+        />
+      )}
+
+      {showCreateSprintForm && (
+        <CreateSprintForm
+          onClose={() => setShowCreateSprintForm(false)}
+          onSubmit={handleSprintCreated}
         />
       )}
     </div>
