@@ -58,7 +58,7 @@ router.delete('/:id', async (req, res) => {
 router.use(authenticate);      // Xác thực trước
 router.use(requestLogger);     // Ghi log sau khi biết người dùng
 
-router.get('/me', authenticate, userController.getMyProfile);
-router.get('/all', authenticate, userController.getAllUsers);
+router.get('/me', authenticate, requestLogger, userController.getMyProfile);
+router.get('/all', authenticate, requestLogger, userController.getAllUsers);
 
 module.exports = router;
