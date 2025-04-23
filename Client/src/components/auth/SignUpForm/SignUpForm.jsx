@@ -94,7 +94,7 @@ const SignUpForm = () => {
           full_name: formData.fullName, // Gửi fullName lên server
           email: formData.email,
           password: formData.password,
-          method: "email"
+          // method: "email"
         });
         
         if (result.success) {
