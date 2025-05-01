@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
-
+const searchController = require('../controllers/searchController');
 // CRUD cho Tasks
 router.get('/', async (req, res) => {
   const [rows] = await db.query('SELECT * FROM Tasks');
@@ -35,5 +35,8 @@ router.delete('/:id', async (req, res) => {
   await db.query('DELETE FROM Tasks WHERE task_id = ?', [req.params.id]);
   res.json({ message: 'Đã xóa công việc' });
 });
+
+
+router.get('/search', searchController.searchTasks);
 
 module.exports = router;
