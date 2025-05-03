@@ -1,0 +1,102 @@
+/* SprintView.css */
+.sprint-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .sprint-view-content {
+    flex: 1;
+    overflow: auto;
+  }
+  
+  .back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    margin-right: 12px;
+    transition: background-color 0.2s;
+  }
+  
+  .back-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .sprint-status {
+    margin-left: 12px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .status-completed {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: var(--success-color);
+  }
+  
+  .status-active {
+    background-color: rgba(142, 68, 173, 0.2);
+    color: var(--primary-light);
+  }
+  
+  .status-planned {
+    background-color: rgba(149, 165, 166, 0.2);
+    color: var(--text-muted);
+  }
+  
+  .placeholder-view {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 30px;
+    text-align: center;
+  }
+  
+  .placeholder-icon {
+    font-size: 48px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  
+  .placeholder-view h3 {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+  
+  .placeholder-view p {
+    color: var(--text-muted);
+    max-width: 500px;
+    margin: 0 auto;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  /* Nút thêm task */
+  .add-task-btn {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .add-task-btn:hover {
+    background-color: var(--primary-light);
+  }
+  
+  .btn-icon {
+    margin-right: 8px;
+    font-size: 18px;
+  }

@@ -153,3 +153,9 @@
   .add-task-btn:hover {
     background-color: var(--primary-light);
   }
+
+  .sprint-title-separator {
+    color: var(--text-muted);
+    font-weight: normal;
+    margin-left: 8px;
+  }

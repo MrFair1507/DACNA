@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
+const taskController = require('../controllers/taskController');
+const authenticate = require('../middlewares/authMiddleware');
+const requestLogger = require('../middlewares/requestLogger');
 
 // CRUD cho Tasks
 router.get('/', async (req, res) => {
@@ -31,9 +34,20 @@ router.put('/:id', async (req, res) => {
   res.json({ message: 'Cập nhật công việc thành công' });
 });
 
-router.delete('/:id', async (req, res) => {
-  await db.query('DELETE FROM Tasks WHERE task_id = ?', [req.params.id]);
-  res.json({ message: 'Đã xóa công việc' });
-});
+// router.delete('/:id', async (req, res) => {
+//   await db.query('DELETE FROM Tasks WHERE task_id = ?', [req.params.id]);
+//   res.json({ message: 'Đã xóa công việc' });
+// });
+
+
+router.use(authenticate);
+router.use(requestLogger);
+
+// Tạo task mới
+router.post('/create', taskController.createTask);
+
+// Xóa task
+router.delete('/:id', taskController.deleteTask);
+
 
 module.exports = router;

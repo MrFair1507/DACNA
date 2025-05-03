@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const dashboardController = require('../controllers/dashBoardController');
+const sprintController = require('../controllers/sprintController');
 const { updateProject } = require('../controllers/dashBoardController');
 const authenticate = require('../middlewares/authMiddleware');
 const requestLogger = require('../middlewares/requestLogger');
@@ -10,7 +11,7 @@ const { projectManagerOnly } = require('../middlewares/projectPermission');
 
 router.use(authenticate);
 // 🧩 Tạo sprint mới cho dự án (người tạo sẽ được gán Manager nếu chưa có)
-router.post('/create-sprint', authenticate, requestLogger, dashboardController.createSprint);
+router.post('/create-sprint', authenticate, requestLogger, sprintController.createSprint);
 
 // 👥 Thêm người dùng vào dự án bằng email hoặc tên
 router.post('/add-member', authenticate, requestLogger, projectManagerOnly, dashboardController.addUserToProject);

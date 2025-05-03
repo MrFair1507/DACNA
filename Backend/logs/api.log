@@ -65,3 +65,5 @@
 [2025-04-23 18:23:16] INFO: Unknown (Unknown) - [POST] /api/auth/login
 [2025-04-23 18:25:13] INFO: Unknown (Unknown) - [POST] /api/auth/register
 [2025-04-23 18:25:15] INFO: Unknown (Unknown) - [POST] /api/auth/register
+[2025-04-24 11:26:12] INFO: huynhcongminh04@gmail.com (18) - [POST] /api/dashboard/create-sprint
+[2025-04-24 11:26:23] INFO: huynhcongminh04@gmail.com (18) - [POST] /api/dashboard/create-sprint

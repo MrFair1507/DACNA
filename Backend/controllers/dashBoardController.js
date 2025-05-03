@@ -1,40 +1,6 @@
 const db = require('../models/db');
 
-exports.createSprint = async (req, res) => {
-  const { project_id, name, description, start_date, end_date } = req.body;
-  const user_id = req.user.user_id;
 
-  try {
-    const [result] = await db.query(
-      `INSERT INTO Sprints (project_id, name, description, start_date, end_date, created_by)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [project_id, name, description, start_date, end_date, user_id]
-    );
-
-    const [check] = await db.query(
-      `SELECT * FROM User_Project WHERE user_id = ? AND project_id = ?`,
-      [user_id, project_id]
-    );
-
-    if (check.length === 0) {
-      const [roleRow] = await db.query(
-        `SELECT role_id FROM ProjectRole WHERE role_name = 'Manager'`
-      );
-      const managerRoleId = roleRow[0]?.role_id;
-
-      await db.query(
-        `INSERT INTO User_Project (user_id, project_id, role_id, status)
-         VALUES (?, ?, ?, 'Active')`,
-        [user_id, project_id, managerRoleId]
-      );
-    }
-
-    res.status(201).json({ message: 'Sprint created successfully', sprint_id: result.insertId });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to create sprint' });
-  }
-};
 
 exports.addUserToProject = async (req, res) => {
   const { project_id, email_or_name, role_name } = req.body;

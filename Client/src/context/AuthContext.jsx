@@ -258,22 +258,37 @@ const AuthProvider = ({ children }) => {
         email: userData.email,
         password: userData.password,
       });
-
+  
+      // Success response from server
       return {
         success: true,
         message: response.data.message,
         userId: response.data.user_id,
       };
     } catch (error) {
-      const isEmailTaken = error?.response?.data?.message?.includes("Email");
-      const isOtpPending = error?.response?.data?.message?.includes("OTP");
-
-      if (isEmailTaken)
-        return { success: false, error: "Email đã được đăng ký" };
-      if (isOtpPending)
-        return { success: true, message: "OTP đã gửi, vui lòng xác minh." };
-
-      return { success: false, error: "Lỗi đăng ký" };
+      console.log("Registration error:", error.response?.data);
+      
+      // Check specific error messages
+      if (error.response?.data?.message) {
+        const message = error.response.data.message;
+        
+        if (message.includes("Email already registered")) {
+          return { success: false, error: "Email đã được đăng ký" };
+        }
+        
+        if (message.includes("OTP already sent")) {
+          return { 
+            success: true, 
+            message: "OTP đã được gửi, vui lòng kiểm tra email và xác minh."
+          };
+        }
+      }
+  
+      // Generic error
+      return { 
+        success: false, 
+        error: error.response?.data?.error || "Lỗi đăng ký, vui lòng thử lại sau."
+      };
     }
   };
 
