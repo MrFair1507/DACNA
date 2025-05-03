@@ -170,6 +170,6 @@ CREATE TABLE Temp_Users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
+drop table projectRole;
 
 

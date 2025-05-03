@@ -26,6 +26,7 @@
 [2025-04-22 22:05:50] INFO: Unknown (Unknown) - [POST] /api/auth/verify-otp
 [2025-04-22 22:06:15] INFO: Unknown (Unknown) - [POST] /api/auth/verify-otp
 [2025-04-22 22:06:39] INFO: Unknown (Unknown) - [POST] /api/auth/login
+<<<<<<< HEAD
 [2025-04-22 22:52:19] INFO: Unknown (Unknown) - [GET] /api/auth
 [2025-04-22 22:53:24] INFO: Unknown (Unknown) - [POST] /api/auth/login
 [2025-04-23 07:27:53] INFO: Unknown (Unknown) - [GET] /api/auth
@@ -67,3 +68,29 @@
 [2025-04-23 18:25:15] INFO: Unknown (Unknown) - [POST] /api/auth/register
 [2025-04-24 11:26:12] INFO: huynhcongminh04@gmail.com (18) - [POST] /api/dashboard/create-sprint
 [2025-04-24 11:26:23] INFO: huynhcongminh04@gmail.com (18) - [POST] /api/dashboard/create-sprint
+=======
+[2025-04-23 16:41:34] INFO: Unknown (Unknown) - [POST] /api/auth/register
+[2025-04-23 16:42:27] INFO: Unknown (Unknown) - [POST] /api/auth/verify-otp
+[2025-04-23 16:44:43] INFO: Unknown (Unknown) - [POST] /api/auth/register
+[2025-04-23 16:46:02] INFO: Unknown (Unknown) - [POST] /api/auth/send-otp
+[2025-04-23 16:55:56] INFO: Unknown (Unknown) - [POST] /api/auth/register
+[2025-04-23 17:02:56] INFO: Unknown (Unknown) - [POST] /api/auth/verify-otp
+[2025-04-23 17:03:25] INFO: Unknown (Unknown) - [POST] /api/auth/verify-otp
+[2025-04-23 17:04:35] INFO: Unknown (Unknown) - [POST] /api/auth/register
+[2025-04-23 17:05:07] INFO: Unknown (Unknown) - [POST] /api/auth/resend-otp
+[2025-04-23 17:05:20] INFO: Unknown (Unknown) - [POST] /api/auth/resend-otp
+[2025-04-23 17:06:37] INFO: Unknown (Unknown) - [POST] /api/auth/verify-otp
+[2025-04-23 17:20:51] INFO: Unknown (Unknown) - [POST] /api/auth/login
+[2025-04-23 17:30:30] INFO: Unknown (Unknown) - [POST] /api/dashboard/add-member
+[2025-04-23 17:35:40] INFO: Unknown (Unknown) - [POST] /api/auth/login
+[2025-04-23 17:36:04] INFO: Unknown (Unknown) - [POST] /api/dashboard/add-member
+[2025-04-23 17:36:59] INFO: Unknown (Unknown) - [POST] /api/auth/me
+[2025-04-23 17:37:01] INFO: Unknown (Unknown) - [GET] /api/auth/me
+[2025-04-23 17:39:15] INFO: Unknown (Unknown) - [POST] /api/dashboard/add-member
+[2025-04-23 17:59:48] INFO: Unknown (Unknown) - [POST] /api/auth/login
+[2025-04-23 18:00:09] INFO: Unknown (Unknown) - [POST] /api/dashboard/add-member
+[2025-04-23 18:02:35] INFO: Unknown (Unknown) - [GET] /api/auth/all
+[2025-04-23 18:09:24] INFO: KhanhDang071124@gmail.com (16) - [GET] /api/auth/me
+[2025-04-23 18:10:34] INFO: KhanhDang071124@gmail.com (16) - [POST] /api/dashboard/create-sprint
+[2025-04-24 11:28:38] INFO: KhanhDang071124@gmail.com (16) - [POST] /api/dashboard/create-sprint
+>>>>>>> 5ab1387635309a788dff5a779e969de19a88f305

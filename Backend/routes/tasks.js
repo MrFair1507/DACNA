@@ -1,10 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
+<<<<<<< HEAD
 const taskController = require('../controllers/taskController');
 const authenticate = require('../middlewares/authMiddleware');
 const requestLogger = require('../middlewares/requestLogger');
 
+=======
+const searchController = require('../controllers/searchController');
+>>>>>>> 5ab1387635309a788dff5a779e969de19a88f305
 // CRUD cho Tasks
 router.get('/', async (req, res) => {
   const [rows] = await db.query('SELECT * FROM Tasks');
@@ -40,6 +44,7 @@ router.put('/:id', async (req, res) => {
 // });
 
 
+<<<<<<< HEAD
 router.use(authenticate);
 router.use(requestLogger);
 
@@ -51,3 +56,8 @@ router.delete('/:id', taskController.deleteTask);
 
 
 module.exports = router;
+=======
+router.get('/search', searchController.searchTasks);
+
+module.exports = router;
+>>>>>>> 5ab1387635309a788dff5a779e969de19a88f305

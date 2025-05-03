@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
-
+const searchController = require('../controllers/searchController');
 
 // CRUD cho Projects
 router.get('/', async (req, res) => {
@@ -37,6 +37,7 @@ router.delete('/:id', async (req, res) => {
   res.json({ message: 'Đã xóa dự án' });
 });
 
+router.get('/search', searchController.searchProjects);
 
 
 module.exports = router;
