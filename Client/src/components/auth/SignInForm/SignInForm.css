@@ -24,9 +24,10 @@
 
 /* Login method tabs */
 .login-method-tabs {
-  display: flex;
+  /* display: flex;
   margin-bottom: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); */
+  display: none;
 }
 
 .method-tab {
@@ -71,7 +72,13 @@
   transition: all 0.2s;
   border: none;
 }
-
+.oauth-options,
+.oauth-btn,
+.google-btn,
+.facebook-btn,
+.oauth-icon {
+  display: none; /* Ẩn hoặc xóa phần này */
+}
 .google-btn {
   background-color: #DB4437;
 }

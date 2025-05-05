@@ -172,4 +172,3 @@ CREATE TABLE Temp_Users (
 
 drop table projectRole;
 
-

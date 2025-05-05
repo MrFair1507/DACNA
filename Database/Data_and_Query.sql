@@ -287,3 +287,20 @@ WHERE p.project_id = 7 AND u.email = 'KhanhDang071124@gmail.com';
 
 drop Table Task_Assignment;
 drop Table Tasks;
+
+-- drop table
+USE taskManageMent;
+
+-- Drop tables with foreign key dependencies first
+DROP TABLE IF EXISTS Attachments;
+DROP TABLE IF EXISTS Notifications;
+DROP TABLE IF EXISTS Comments;
+DROP TABLE IF EXISTS Task_Assignment;
+DROP TABLE IF EXISTS Tasks;
+DROP TABLE IF EXISTS Sprints;
+DROP TABLE IF EXISTS User_Project;
+DROP TABLE IF EXISTS ProjectRole;
+DROP TABLE IF EXISTS Projects;
+DROP TABLE IF EXISTS UserOTPs;
+DROP TABLE IF EXISTS Temp_Users;
+DROP TABLE IF EXISTS Users;
