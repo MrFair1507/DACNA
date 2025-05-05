@@ -32,21 +32,41 @@ const AuthProvider = ({ children }) => {
       
       console.log("Login response:", response.data);
       
-      if (response.data && response.data.token) {
+      // if (response.data && response.data.token) {
+      //   const userData = {
+      //     id: response.data.user.id || response.data.user.user_id,
+      //     email: response.data.user.email,
+      //     fullName: response.data.user.full_name,
+      //     role: response.data.user.role,
+      //     token: response.data.token,
+      //   };
+        
+      //   // Set token cho tất cả request sau này
+      //   api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        
+      //   setUser(userData);
+      //   localStorage.setItem("user", JSON.stringify(userData));
+      //   localStorage.setItem("token", response.data.token);
+        
+      //   return { success: true, user: userData };
+      // }
+      if (response.data && (response.data.token || response.data.message === "Login successful" || response.data.user)) {
         const userData = {
-          id: response.data.user.id || response.data.user.user_id,
-          email: response.data.user.email,
-          fullName: response.data.user.full_name,
-          role: response.data.user.role,
-          token: response.data.token,
+          id: response.data.user?.id || response.data.user?.user_id,
+          email: response.data.user?.email,
+          fullName: response.data.user?.full_name,
+          role: response.data.user?.role,
+          token: response.data.token || "" // Token có thể không có
         };
         
-        // Set token cho tất cả request sau này
-        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        // Chỉ set token header nếu có token
+        if (response.data.token) {
+          api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+          localStorage.setItem("token", response.data.token);
+        }
         
         setUser(userData);
         localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("token", response.data.token);
         
         return { success: true, user: userData };
       }

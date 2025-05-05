@@ -33,6 +33,8 @@ const SignInForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Đang gửi yêu cầu đăng nhập với:", formData);
+  
     setErrors({});
 
     // Validate form
@@ -63,6 +65,7 @@ const SignInForm = () => {
         email: formData.email,
         password: formData.password,
       });
+      console.log("Kết quả đăng nhập:", result);
 
       if (result.success) {
         // Navigate to dashboard
@@ -84,6 +87,7 @@ const SignInForm = () => {
         }
       }
     } catch (error) {
+      console.error("Lỗi đăng nhập:", error);
       setErrors({ general: "Lỗi đăng nhập. Vui lòng thử lại sau." });
     } finally {
       setIsSubmitting(false);
