@@ -1,4 +1,4 @@
-/* BoardList.css - Cập nhật theo theme mới */
+/* BoardList.css - Cập nhật theo theme mới
 .board-list-container {
     padding: 20px;
     height: 100%;
@@ -150,4 +150,80 @@
   
   .create-new-board:hover .create-icon {
     background-color: rgba(157, 78, 221, 0.25);
-  }
+  } */
+   /* ProjectList.css - Cập nhật theo theme mới */
+.project-list-container {
+  padding: 20px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.project-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.project-list-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.create-project-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.create-project-btn:hover {
+  background-color: var(--primary-light);
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.create-new-project {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(157, 78, 221, 0.08);
+  border: 2px dashed var(--border-color);
+  border-radius: 10px;
+  height: 180px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.create-new-project:hover {
+  background-color: rgba(157, 78, 221, 0.15);
+  border-color: var(--primary-color);
+}
+
+.create-icon {
+  font-size: 32px;
+  height: 60px;
+  width: 60px;
+  border-radius: 50%;
+  background-color: rgba(157, 78, 221, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: var(--primary-color);
+  transition: all 0.2s;
+}
+
+.create-new-project:hover .create-icon {
+  background-color: rgba(157, 78, 221, 0.25);
+}
