@@ -124,6 +124,7 @@ exports.login = async (req, res) => {
     // Gửi phản hồi thành công
     res.status(200).json({
       message: 'Login successful',
+      token, // ✅ ADD THIS
       user: {
         id: user.user_id,
         full_name: user.full_name,
@@ -131,6 +132,7 @@ exports.login = async (req, res) => {
         role: user.role
       }
     });
+    
 
   } catch (err) {
     console.error('❌ Login error:', err.message);
@@ -180,7 +182,36 @@ exports.login = async (req, res) => {
 //   }
 // };
 
+
 exports.logout = (req, res) => {
   res.clearCookie('token');
   res.json({ message: 'Logged out successfully' });
+};
+
+
+exports.getProfile = async (req, res) => {
+  const userId = req.user.user_id;
+
+  try {
+    const [rows] = await db.query("SELECT * FROM Users WHERE user_id = ?", [userId]);
+
+    if (!rows || rows.length === 0)
+      return res.status(404).json({ error: "User not found" });
+
+    const user = rows[0];
+
+    res.json({
+      full_name: user.full_name,
+      email: user.email,
+      role: user.role,
+      phone_number: user.phone_number || null,
+      status: user.status || null,
+      is_verified: user.is_verified,
+      created_at: user.created_at,
+      last_login: user.last_login,
+    });
+  } catch (err) {
+    console.error("❌ Error in /auth/me:", err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };

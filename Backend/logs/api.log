@@ -94,3 +94,12 @@
 [2025-04-23 18:10:34] INFO: KhanhDang071124@gmail.com (16) - [POST] /api/dashboard/create-sprint
 [2025-04-24 11:28:38] INFO: KhanhDang071124@gmail.com (16) - [POST] /api/dashboard/create-sprint
 >>>>>>> 5ab1387635309a788dff5a779e969de19a88f305
+[2025-05-07 09:42:54] INFO: huynhcongminh04@gmail.com (10) - [GET] /api/auth/me
+[2025-05-08 11:48:13] INFO: huynhcongminh04@gmail.com (10) - [GET] /api/auth/me
+[2025-05-08 14:54:28] INFO: huynhcongminh04@gmail.com (10) - [GET] /api/auth/me
+[2025-05-08 14:54:28] INFO: huynhcongminh04@gmail.com (10) - [GET] /api/auth/me
+[2025-05-08 14:57:33] INFO: huynhcongminh04@gmail.com (10) - [GET] /api/auth/me
+[2025-05-08 14:57:33] INFO: huynhcongminh04@gmail.com (10) - [GET] /api/auth/me
+[2025-05-08 15:01:38] INFO: huynhcongminh04@gmail.com (10) - [GET] /api/auth/me
+[2025-05-08 15:01:38] INFO: huynhcongminh04@gmail.com (10) - [GET] /api/auth/me
+[2025-05-08 16:42:13] INFO: huynhcongminh04@gmail.com (10) - [POST] /api/tasks

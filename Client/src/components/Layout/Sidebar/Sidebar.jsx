@@ -1,13 +1,7 @@
 import React from 'react';
 import './Sidebar.css';
 
-const Sidebar = ({ activeTab, activeProjectId, onProjectSelect, onTabSelect }) => {
-  const projects = [
-    { id: 'project1', name: 'Dự án chính', color: 'purple' },
-    { id: 'project2', name: 'Marketing', color: 'green' },
-    { id: 'project3', name: 'Design System', color: 'blue' }
-  ];
-
+const Sidebar = ({ projects = [], activeTab, activeProjectId, onProjectSelect, onTabSelect }) => {
   return (
     <div className="sidebar">
       <div className="workspace-info">
@@ -54,8 +48,8 @@ const Sidebar = ({ activeTab, activeProjectId, onProjectSelect, onTabSelect }) =
               className={activeProjectId === project.id ? 'active' : ''}
               onClick={() => onProjectSelect(project.id)}
             >
-              <div className={`board-color color-${project.color}`}></div>
-              <span>{project.name}</span>
+              <div className={`board-color color-${project.color || "blue"}`}></div>
+              <span>{project.title}</span>
             </li>
           ))}
         </ul>
@@ -70,36 +64,28 @@ const Sidebar = ({ activeTab, activeProjectId, onProjectSelect, onTabSelect }) =
                 className={activeTab === 'board' ? 'active' : ''}
                 onClick={() => onTabSelect(activeProjectId, 'board')}
               >
-                <span className="menu-icon">
-                  <i className="icon-board"></i>
-                </span>
+                <span className="menu-icon"><i className="icon-board"></i></span>
                 <span>Board</span>
               </li>
               <li 
                 className={activeTab === 'sprints' ? 'active' : ''}
                 onClick={() => onTabSelect(activeProjectId, 'sprints')}
               >
-                <span className="menu-icon">
-                  <i className="icon-sprint"></i>
-                </span>
+                <span className="menu-icon"><i className="icon-sprint"></i></span>
                 <span>Sprints</span>
               </li>
               <li 
                 className={activeTab === 'backlog' ? 'active' : ''}
                 onClick={() => onTabSelect(activeProjectId, 'backlog')}
               >
-                <span className="menu-icon">
-                  <i className="icon-backlog"></i>
-                </span>
+                <span className="menu-icon"><i className="icon-backlog"></i></span>
                 <span>Backlog</span>
               </li>
               <li 
                 className={activeTab === 'reports' ? 'active' : ''}
                 onClick={() => onTabSelect(activeProjectId, 'reports')}
               >
-                <span className="menu-icon">
-                  <i className="icon-reports"></i>
-                </span>
+                <span className="menu-icon"><i className="icon-reports"></i></span>
                 <span>Báo cáo</span>
               </li>
             </ul>
@@ -109,15 +95,11 @@ const Sidebar = ({ activeTab, activeProjectId, onProjectSelect, onTabSelect }) =
             <h4>THÀNH VIÊN</h4>
             <ul className="sidebar-menu">
               <li>
-                <span className="menu-icon">
-                  <i className="icon-members"></i>
-                </span>
+                <span className="menu-icon"><i className="icon-members"></i></span>
                 <span>Quản lý thành viên</span>
               </li>
               <li>
-                <span className="menu-icon">
-                  <i className="icon-invite"></i>
-                </span>
+                <span className="menu-icon"><i className="icon-invite"></i></span>
                 <span>Mời thành viên</span>
               </li>
             </ul>

@@ -33,11 +33,14 @@ app.use('/api/comments', require('./routes/comments'));
 app.use('/api/attachments', require('./routes/attachments'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/roles', require('./routes/roles'));
+app.use('/api/sprints', require('./routes/sprints'));
 app.use('/api/export-users', require('./routes/export-users'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 
 // cron
 cron.schedule('*/10 * * * *', require("./jobs/cleanupTempUsers")); // Mỗi 5 phút
+
+
 
 const PORT = 3000;
 app.listen(PORT, () => {

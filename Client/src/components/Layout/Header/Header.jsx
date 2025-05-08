@@ -1,17 +1,11 @@
 import React from "react";
 import { useAuth } from "../../../hooks/useAuth";
+import { Link, useNavigate } from "react-router-dom";
 import "./Header.css";
 
-const Header = ({
-  user,
-  activeTab,
-  activeProjectId,
-  activeSprint,
-  onTabSelect,
-  onAddMembers,
-}) => {
-  // eslint-disable-next-line
-  const { logout } = useAuth();
+const Header = ({ activeTab, activeProjectId, activeSprint, onTabSelect }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const getProjectName = () => {
     const projects = {
@@ -21,10 +15,18 @@ const Header = ({
     };
     return projects[activeProjectId] || "Tất cả dự án";
   };
+  // eslint-disable-next-line
+  const handleLogout = () => {
+    logout();
+    navigate("/signin");
+  };
 
-  // const handleAddMembersClick = () => {
-  //   if (onAddMembers) onAddMembers();
-  // };
+  const getInitials = (name) => {
+    if (!name) return "U";
+    const words = name.trim().split(" ");
+    if (words.length === 1) return words[0][0];
+    return words[0][0] + words[1][0];
+  };
 
   return (
     <>
@@ -42,17 +44,24 @@ const Header = ({
 
         <div className="header-right">
           <div className="notification-btn">
-            <i className="icon-notification">thông báo</i>
+            <i className="icon-notification">🔔</i>
           </div>
-          <div className="user-profile" onClick={logout}>
-            <div className="user-avatar">NT</div>
+
+          <div className="user-menu">
+            <Link to="/profile" className="user-profile">
+              <div className="user-avatar">
+                {getInitials(user?.fullName || user?.email)}
+              </div>
+            </Link>
+            {/* <button className="logout-btn" onClick={handleLogout}>
+              Đăng xuất
+            </button> */}
           </div>
         </div>
       </header>
 
-      {/* Hiển thị tabs luôn luôn trên dashboard */}
       <div className="project-header">
-        <div className="project-title">
+        <div className="project-title-header">
           <h2>
             {getProjectName()}
             {activeSprint && (
@@ -83,21 +92,6 @@ const Header = ({
           >
             Reports
           </div>
-        </div>
-
-        <div className="project-actions">
-          {/* <button className="notification-btn">
-            <i className="icon-notification"></i>
-            <span>Thông báo</span>
-          </button> */}
-          {/* <button className="members-btn" onClick={handleAddMembersClick}>
-            <i className="icon-members"></i>
-            <span>Thành viên</span>
-          </button> */}
-          {/* <button className="add-task-btn">
-            <span className="btn-icon">+</span>
-            <span>Thêm công việc</span>
-          </button> */}
         </div>
       </div>
     </>

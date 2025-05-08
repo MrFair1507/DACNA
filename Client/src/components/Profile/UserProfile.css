@@ -1,0 +1,70 @@
+.profile-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  background: var(--dark-bg-light);
+  padding: 2rem;
+  border-radius: 12px;
+  color: var(--text-light);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.profile-info {
+  margin-bottom: 1.5rem;
+}
+
+.profile-info label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.profile-info span,
+.profile-info input {
+  margin-top: 6px;
+  display: block;
+  font-size: 15px;
+}
+
+.profile-info input {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--secondary-color);
+  color: var(--text-light);
+  width: 100%;
+}
+
+.profile-info input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.profile-actions button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.profile-actions .save-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.profile-actions .cancel-btn {
+  background-color: var(--border-color);
+  color: var(--text-light);
+}
+
+.profile-actions button:hover {
+  opacity: 0.9;
+}

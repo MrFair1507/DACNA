@@ -8,13 +8,14 @@ import Header from "../../../components/Layout/Header/Header";
 import KanbanBoard from "../../../components/Project/KanbanBoard";
 import ProjectList from "../../../components/Project/ProjectList/ProjectList";
 import CreateProjectForm from "../../../components/UI/CreateProjectForm/CreateProjectForm";
-// import AddMembersForm from "../../../components/UI/AddMembersForm/AddMembersForm";
-// import AddTaskForm from "../../../components/Project/AddTaskForm";
-// import TaskDetailModal from "../../../components/Project/TaskDetailModal";
+
 import AddTaskForm from "../../../components/Project/AddTaskForm";
 import TaskDetailModal from "../../../components/Project/TaskDetailModal";
 import SprintsList from "../../../components/Sprints/SprintsList";
 import CreateSprintForm from "../../../components/Sprints/CreateSprintForm";
+
+// import axios from "axios";
+import api from "../../../services/api";
 
 const DashboardPage = () => {
   const { user } = useAuth();
@@ -27,38 +28,36 @@ const DashboardPage = () => {
   const [activeSprint, setActiveSprint] = useState(null);
 
   // Dữ liệu project và tasks
-  const [projects, setProjects] = useState([
-    {
-      id: "project1",
-      title: "Dự án chính",
-      color: "purple",
-      description: "Phát triển ứng dụng quản lý công việc",
-      owner: "Team Dev",
-      members: 8,
-      template: "default",
-      lastModified: "21/04/2025",
-    },
-    {
-      id: "project2",
-      title: "Marketing",
-      color: "green",
-      description: "Chiến dịch quảng cáo Q2 2025",
-      owner: "Marketing Team",
-      members: 5,
-      template: "default",
-      lastModified: "19/04/2025",
-    },
-    {
-      id: "project3",
-      title: "Design System",
-      color: "blue",
-      description: "UI/UX components và guidelines",
-      owner: "Design Team",
-      members: 3,
-      template: "default",
-      lastModified: "18/04/2025",
-    },
-  ]);
+  const [projects, setProjects] = useState([]);
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await api.get("/projects", {
+          withCredentials: true, // nếu có sử dụng cookie
+        });
+
+        // Chuyển đổi dữ liệu từ backend sang định dạng phù hợp
+        const formatted = response.data.map((p) => ({
+          id: `project${p.project_id}`,
+          title: p.project_name,
+          description: p.project_description,
+          color: "blue", // gán tạm nếu chưa có
+          owner: `User ${p.created_by}`, // sau này thay bằng tên thật
+          members: 1,
+          template: "default",
+          lastModified: new Date(
+            p.updated_at || p.created_at
+          ).toLocaleDateString("vi-VN"),
+        }));
+
+        setProjects(formatted);
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách dự án:", error);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const [projectMembers, setProjectMembers] = useState({
     project1: [
@@ -162,11 +161,7 @@ const DashboardPage = () => {
   });
 
   // Dữ liệu sprints
-  const [sprints, setSprints] = useState({
-    project1: [],
-    project2: [],
-    project3: [],
-  });
+  const [sprints, setSprints] = useState({});
 
   // Trạng thái cho các popup/modal
   const [showCreateProjectForm, setShowCreateProjectForm] = useState(false);
@@ -176,6 +171,8 @@ const DashboardPage = () => {
   const [showCreateSprintForm, setShowCreateSprintForm] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
+  // eslint-disable-next-line
+  const [justCreatedProjectId, setJustCreatedProjectId] = useState(null);
 
   useEffect(() => {
     console.log("Projects hiện tại:", projects);
@@ -188,43 +185,78 @@ const DashboardPage = () => {
   useEffect(() => {
     console.log("Sprints hiện tại:", sprints);
   }, [sprints]);
-
+  useEffect(() => {
+    if (justCreatedProjectId) {
+      console.log(
+        "⏩ Auto chuyển tab Sprints cho project mới:",
+        justCreatedProjectId
+      );
+      handleTabSelect(justCreatedProjectId, "sprints");
+      setJustCreatedProjectId(null);
+    }
+    // eslint-disable-next-line
+  }, [justCreatedProjectId]);
   // Chọn project
-  const handleProjectSelect = (projectId) => {
+  const handleProjectSelect = async (projectId) => {
     if (projectId) {
+      await handleTabSelect(projectId, "sprints");
       setActiveProjectId(projectId);
       setActiveView("sprints");
       setActiveTab("sprints");
       setActiveSprint(null);
-      console.log("Đã chọn project:", projectId);
     } else {
       setActiveView("projectList");
       setActiveProjectId(null);
       setActiveSprint(null);
-      console.log("Quay lại danh sách project");
     }
   };
 
-  // Chọn tab
-  const handleTabSelect = (projectId, tab) => {
+  const handleTabSelect = async (projectId, tab) => {
     setActiveProjectId(projectId);
     setActiveTab(tab);
 
-    if (tab === "projects") {
-      setActiveView("projectList");
-      setActiveProjectId(null); // nếu cần quay về danh sách tổng
-    } else if (tab === "sprints") {
+    if (tab === "sprints") {
       setActiveView("sprints");
       setActiveSprint(null);
-    } else if (tab === "backlog") {
-      setActiveView("backlog");
-      setActiveSprint(null);
-    } else if (tab === "reports") {
-      setActiveView("reports");
-      setActiveSprint(null);
-    }
 
-    console.log(`Đã chuyển sang tab ${tab} của project ${projectId}`);
+      const realProjectId = Number(projectId.replace("project", ""));
+      try {
+        const response = await api.get(`/sprints?project_id=${realProjectId}`);
+        console.log("🧩 Dữ liệu trả về từ API:", response.data);
+
+        const sprintsFromApi = Array.isArray(response.data)
+          ? response.data
+          : response.data.sprints;
+
+        const mapped = sprintsFromApi.map((s) => ({
+          id: s.sprint_id,
+          name: s.name,
+          description: s.description,
+          startDate: s.start_date,
+          endDate: s.end_date,
+          status: s.status || "planned",
+          totalTasks: s.totalTasks || 0,
+          completedTasks: s.completedTasks || 0,
+          progress: s.progress || 0,
+        }));
+
+        const newKey = `project${realProjectId}`;
+        setSprints((prev) => {
+          const updated = {
+            ...prev,
+            [newKey]: mapped,
+          };
+          console.log("✅ Đã cập nhật sprints:", updated);
+          console.log("👉 Kiểm tra key:", newKey, "=", updated[newKey]);
+          return updated;
+        });
+      } catch (error) {
+        console.error(
+          "❌ Lỗi khi gọi API:",
+          error.response?.data || error.message
+        );
+      }
+    }
   };
 
   // Tạo cột theo template
@@ -241,25 +273,10 @@ const DashboardPage = () => {
     setShowCreateProjectForm(true);
   };
 
-  // Tạo project thành công
-  // const handleProjectCreated = (projectData) => {
-  //   const newProjectId = `project${Date.now()}`;
-  //   const templateType = projectData.templateType;
-
-  //   const newProject = {
-  //     id: newProjectId,
-  //     title: projectData.title,
-  //     color: projectData.color,
-  //     description: projectData.description,
-  //     owner: `${user?.firstName || "Người"} ${user?.lastName || "dùng"}`,
-  //     members: 1,
-  //     template: templateType,
-  //     lastModified: currentDate,
-  //   };
   const handleProjectCreated = (projectData) => {
-    const newProjectId = `project${Date.now()}`;
+    const newProjectId = `project${projectData.project_id}`;
     const templateType = projectData.templateType;
-  
+
     const newProject = {
       id: newProjectId,
       title: projectData.title,
@@ -270,16 +287,16 @@ const DashboardPage = () => {
       template: templateType,
       lastModified: currentDate,
     };
-  
+
     setProjects((prev) => [...prev, newProject]);
-  
+
     setProjectTasks((prev) => ({
       ...prev,
       [newProjectId]: createColumnsFromTemplate(templateType),
     }));
-  
+
     setSprints((prev) => ({ ...prev, [newProjectId]: [] }));
-  
+
     setProjectMembers((prev) => ({
       ...prev,
       [newProjectId]: [
@@ -299,88 +316,67 @@ const DashboardPage = () => {
         })),
       ],
     }));
-  
-    setShowCreateProjectForm(false);
-    setTimeout(() => {
-      handleProjectSelect(newProjectId);
-    }, 100);
-  };
-  
 
-    
+    setShowCreateProjectForm(false);
+    setJustCreatedProjectId(newProjectId); // 🔁 Auto-trigger chuyển tab
+
+    // Optional: gọi liền (tránh phải đợi useEffect)
+    handleTabSelect(newProjectId, "sprints");
+  };
+
   // Mở form tạo sprint
   const handleCreateSprint = () => {
     setShowCreateSprintForm(true);
   };
 
-  // Sprint được tạo thành công
-  const handleSprintCreated = (sprintData) => {
+  const handleSprintCreated = async (sprintData) => {
     if (!activeProjectId) return;
-
-    const newSprintId = `sprint${Date.now()}`;
-    const newSprint = {
-      id: newSprintId,
+    const realProjectId = Number(activeProjectId.replace("project", ""));
+    const formatDate = (dateString) => {
+      const [day, month, year] = dateString.split("/");
+      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    };
+    const fullSprintData = {
+      project_id: realProjectId,
       name: sprintData.name,
       description: sprintData.description,
-      status: "planned",
-      startDate: sprintData.startDate,
-      endDate: sprintData.endDate,
-      totalTasks: 0,
-      completedTasks: 0,
-      progress: 0,
+      start_date: formatDate(sprintData.startDate),
+      end_date: formatDate(sprintData.endDate),
+      color: sprintData.color,
     };
 
-    setSprints((prev) => ({
-      ...prev,
-      [activeProjectId]: [...(prev[activeProjectId] || []), newSprint],
-    }));
+    try {
+      await api.post("/sprints", fullSprintData, { withCredentials: true });
 
-    setShowCreateSprintForm(false);
-    console.log("Sprint mới đã được tạo:", newSprint);
+      const fetchResponse = await api.get(
+        `/sprints?project_id=${realProjectId}`
+      );
+
+      const mappedSprints = fetchResponse.data.sprints.map((s) => ({
+        id: s.sprint_id,
+        name: s.name,
+        description: s.description,
+        startDate: s.start_date,
+        endDate: s.end_date,
+        status: s.status || "planned",
+        totalTasks: s.totalTasks || 0,
+        completedTasks: s.completedTasks || 0,
+        progress: s.progress || 0,
+      }));
+
+      setSprints((prev) => ({
+        ...prev,
+        [`project${realProjectId}`]: mappedSprints,
+      }));
+
+      setShowCreateSprintForm(false);
+    } catch (error) {
+      console.error(
+        "❌ Lỗi khi tạo hoặc load sprint:",
+        error.response?.data || error.message
+      );
+    }
   };
-  // 🔹 Phần 6
-  // Mở form thêm thành viên
-  // const handleAddMembers = () => {
-  //   setShowAddMembersForm(true);
-  // };
-
-  // Thêm thành viên thành công
-  // const handleMembersAdded = (newMembers, method) => {
-  //   if (!activeProjectId) return;
-
-  //   setProjectMembers((prevMembers) => {
-  //     const currentMembers = prevMembers[activeProjectId] || [];
-  //     const existingIds = currentMembers.map((m) => m.id);
-  //     let updated = [...currentMembers];
-
-  //     if (method === "email") {
-  //       console.log(
-  //         "Mời qua email:",
-  //         newMembers.map((m) => m.email).join(", ")
-  //       );
-  //     } else if (method === "users") {
-  //       const toAdd = newMembers
-  //         .filter((u) => !existingIds.includes(u.id))
-  //         .map((u) => ({
-  //           id: u.id,
-  //           name: u.name,
-  //           avatar: u.avatar,
-  //           role: "Member",
-  //           lastActive: currentDate,
-  //         }));
-  //       if (toAdd.length > 0) updated = [...updated, ...toAdd];
-  //     } else if (method === "team") {
-  //       console.log("Đã thêm cả team:", newMembers.teamName);
-  //     }
-
-  //     return {
-  //       ...prevMembers,
-  //       [activeProjectId]: updated,
-  //     };
-  //   });
-
-  //   setShowAddMembersForm(false);
-  // };
 
   // Mở form tạo task
   const handleAddTask = (columnId) => {
@@ -483,6 +479,13 @@ const DashboardPage = () => {
   };
   // Hiển thị nội dung chính dựa vào activeView
   const renderContent = () => {
+    console.log("🔎 renderContent - activeProjectId:", activeProjectId);
+    console.log("🔎 renderContent - sprints keys:", Object.keys(sprints));
+    console.log(
+      "🔎 renderContent - sprints[activeProjectId]:",
+      sprints[activeProjectId]
+    );
+
     switch (activeView) {
       case "projectList":
         return (
@@ -509,8 +512,10 @@ const DashboardPage = () => {
             sprints={sprints[activeProjectId] || []}
             onCreateSprint={handleCreateSprint}
             onSprintClick={handleSprintClick}
+            activeProjectId={activeProjectId}
           />
         );
+
       case "backlog":
         return (
           <div className="placeholder-view">
@@ -565,11 +570,11 @@ const DashboardPage = () => {
   return (
     <div className="dashboard-container">
       <Sidebar
+        projects={projects} // ✅ truyền props mới
         activeTab={activeTab}
         activeProjectId={activeProjectId}
         onProjectSelect={handleProjectSelect}
         onTabSelect={handleTabSelect}
-        onCreateProject={handleCreateProject}
       />
 
       <div className="main-content">
@@ -595,18 +600,9 @@ const DashboardPage = () => {
           onClose={() => setShowCreateProjectForm(false)}
           onProjectCreated={handleProjectCreated}
           availableUsers={availableUsers}
+          currentUserId={user?.user_id} // bạn có thể đặt tên khác nếu cần
         />
       )}
-
-      {/* {showAddMembersForm && (
-        <AddMembersForm
-          projectId={activeProjectId}
-          currentMembers={projectMembers[activeProjectId] || []}
-          availableUsers={availableUsers}
-          onClose={() => setShowAddMembersForm(false)}
-          onAddMembers={handleMembersAdded}
-        />
-      )} */}
 
       {showAddTaskForm && (
         <AddTaskForm

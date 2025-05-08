@@ -10,7 +10,7 @@ const passport = require('passport');
 const { generateToken } = require('../utils/jwt');
 
 
-
+router.get("/me", authenticate, authController.getProfile);
    // Ghi log sau khi biết người dùng
 
 

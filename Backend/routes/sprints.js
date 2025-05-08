@@ -1,31 +1,73 @@
 // routes/Sprints.js
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authenticate = require('../middleware/authMiddleware');
-const searchController = require('../controllers/searchController');
-const db = require('../models/db');
+const authenticate = require("../middlewares/authMiddleware");
+const searchController = require("../controllers/searchController");
+const db = require("../models/db");
 
+router.get("/", async (req, res) => {
+  const { project_id } = req.query;
+
+  try {
+    const [rows] = await db.query(`SELECT * FROM Sprints WHERE project_id=?`, [
+      project_id,
+    ]);
+    res.json({ sprints: rows });
+  } catch (err) {
+    console.error("❌ Error fetching sprints:", err.message);
+    res.status(500).json({ error: "Failed to fetch sprints" });
+  }
+});
 // ✅ Create Sprint
-router.post('/', authenticate, async (req, res) => {
+// router.post('/', async (req, res) => {
+//   const { project_id, name, description, start_date, end_date } = req.body;
+//   const created_by = req.user.user_id;
+
+//   try {
+//     const [result] = await db.query(
+//       `INSERT INTO Sprints (project_id, name, description, start_date, end_date, created_by)
+//        VALUES (?, ?, ?, ?, ?, ?)`,
+//       [project_id, name, description, start_date, end_date, created_by]
+//     );
+//     res.status(201).json({ message: 'Sprint created successfully', sprint_id: result.insertId });
+//   } catch (err) {
+//     console.error('❌ Error creating sprint:', err.message);
+//     res.status(500).json({ error: 'Failed to create sprint' });
+//   }
+// });
+// ✅ Create Sprint
+router.post("/", authenticate, async (req, res) => {
   const { project_id, name, description, start_date, end_date } = req.body;
   const created_by = req.user.user_id;
-
+  console.log("Creating sprint with:", {
+    project_id,
+    name,
+    description,
+    start_date,
+    end_date,
+    created_by,
+  });
   try {
     const [result] = await db.query(
       `INSERT INTO Sprints (project_id, name, description, start_date, end_date, created_by) 
        VALUES (?, ?, ?, ?, ?, ?)`,
       [project_id, name, description, start_date, end_date, created_by]
     );
-    res.status(201).json({ message: 'Sprint created successfully', sprint_id: result.insertId });
+    res
+      .status(201)
+      .json({
+        message: "Sprint created successfully",
+        sprint_id: result.insertId,
+      });
   } catch (err) {
-    console.error('❌ Error creating sprint:', err.message);
-    res.status(500).json({ error: 'Failed to create sprint' });
+    console.error("❌ Error creating sprint:", err.message);
+    res.status(500).json({ error: "Failed to create sprint" });
   }
 });
 
 // ✅ Update Sprint
-router.put('/:sprint_id', authenticate, async (req, res) => {
+router.put("/:sprint_id", authenticate, async (req, res) => {
   const { sprint_id } = req.params;
   const { name, description, start_date, end_date } = req.body;
 
@@ -34,28 +76,28 @@ router.put('/:sprint_id', authenticate, async (req, res) => {
       `UPDATE Sprints SET name=?, description=?, start_date=?, end_date=? WHERE sprint_id=?`,
       [name, description, start_date, end_date, sprint_id]
     );
-    res.json({ message: 'Sprint updated successfully' });
+    res.json({ message: "Sprint updated successfully" });
   } catch (err) {
-    console.error('❌ Error updating sprint:', err.message);
-    res.status(500).json({ error: 'Failed to update sprint' });
+    console.error("❌ Error updating sprint:", err.message);
+    res.status(500).json({ error: "Failed to update sprint" });
   }
 });
 
 // ✅ Delete Sprint
-router.delete('/:sprint_id', authenticate, async (req, res) => {
+router.delete("/:sprint_id", authenticate, async (req, res) => {
   const { sprint_id } = req.params;
 
   try {
     await db.query(`DELETE FROM Sprints WHERE sprint_id=?`, [sprint_id]);
-    res.json({ message: 'Sprint deleted successfully' });
+    res.json({ message: "Sprint deleted successfully" });
   } catch (err) {
-    console.error('❌ Error deleting sprint:', err.message);
-    res.status(500).json({ error: 'Failed to delete sprint' });
+    console.error("❌ Error deleting sprint:", err.message);
+    res.status(500).json({ error: "Failed to delete sprint" });
   }
 });
 
 // ✅ Search Sprints
-router.get('/search', authenticate, async (req, res) => {
+router.get("/search", authenticate, async (req, res) => {
   const { keyword, project_id } = req.query;
 
   try {
@@ -63,31 +105,18 @@ router.get('/search', authenticate, async (req, res) => {
     let params = [`%${keyword}%`];
 
     if (project_id) {
-      query += ' AND project_id = ?';
+      query += " AND project_id = ?";
       params.push(project_id);
     }
 
     const [rows] = await db.query(query, params);
     res.json({ sprints: rows });
   } catch (err) {
-    console.error('❌ Error searching sprints:', err.message);
-    res.status(500).json({ error: 'Failed to search sprints' });
+    console.error("❌ Error searching sprints:", err.message);
+    res.status(500).json({ error: "Failed to search sprints" });
   }
 });
 
-// ✅ Get Sprints by Project ID
-router.get('/project/:project_id', authenticate, async (req, res) => {
-  const { project_id } = req.params;
-
-  try {
-    const [rows] = await db.query(`SELECT * FROM Sprints WHERE project_id = ?`, [project_id]);
-    res.json({ sprints: rows });
-  } catch (err) {
-    console.error('❌ Error fetching sprints:', err.message);
-    res.status(500).json({ error: 'Failed to fetch sprints' });
-  }
-});
-
-router.get('/search', authenticate, searchController.searchSprints);
+router.get("/search", authenticate, searchController.searchSprints);
 
 module.exports = router;
