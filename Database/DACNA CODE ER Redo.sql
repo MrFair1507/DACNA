@@ -79,9 +79,20 @@ CREATE TABLE Sprints (
     FOREIGN KEY (created_by) REFERENCES Users(user_id) ON DELETE RESTRICT
 );
 
+CREATE TABLE Sprint_Backlog (
+    sprint_backlog_id INT AUTO_INCREMENT PRIMARY KEY,
+    sprint_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_by INT NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sprint_id) REFERENCES Sprints(sprint_id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES Users(user_id)
+);
+
 CREATE TABLE Tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
-    sprint_id INT,  -- Gán với bảng Sprint
+    sprint_backlog_id INT NOT NULL,
     task_title VARCHAR(200) NOT NULL,
     task_description TEXT,
     task_status ENUM('Not Started', 'In Progress', 'Completed') DEFAULT 'Not Started',
@@ -91,8 +102,8 @@ CREATE TABLE Tasks (
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (sprint_id) REFERENCES Sprints(sprint_id) ON DELETE SET NULL,
-    FOREIGN KEY (created_by) REFERENCES Users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (sprint_backlog_id) REFERENCES Sprint_Backlog(sprint_backlog_id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES Users(user_id)
 );
 
 
@@ -170,5 +181,9 @@ CREATE TABLE Temp_Users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-drop table projectRole;
 
+
+
+drop database taskmanagement;
+
+CREATE TABLE Users (     user_id INT AUTO_INCREMENT PRIMARY KEY,     full_name VARCHAR(100) NOT NULL,     email VARCHAR(100) NOT NULL UNIQUE,     password_hash VARCHAR(255) NOT NULL,     role ENUM('Admin', 'Manager', 'Member') NOT NULL DEFAULT 'Member',     avatar_url VARCHAR(255),     phone_number VARCHAR(20),     status ENUM('Active', 'Inactive', 'Blocked') DEFAULT 'Active',     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,     last_login TIMESTAMP NULL,     is_verified TINYINT(1) DEFAULT 0 )

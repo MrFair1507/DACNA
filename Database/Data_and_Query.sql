@@ -22,8 +22,7 @@ VALUES
 	('App Mobile Booking Spa', 'Ứng dụng đặt lịch spa và chăm sóc sắc đẹp', 'In Progress', 3),
 	('Hệ thống E-learning', 'Nền tảng học trực tuyến cho sinh viên', 'Canceled', 2),
 	('Website Blog Cá Nhân', 'Trang blog cá nhân với tính năng comment và upload ảnh', 'In Progress', 4);
-INSERT INTO Projects (project_name, project_description, project_status, created_by)
-VALUES ('TaskManagement', 'Trang web giúp quản lí công việc và dự án', 'In Progress', 16);
+
 #Project Role Table
 INSERT INTO ProjectRole (role_name, role_description)
 VALUES 
@@ -34,8 +33,7 @@ VALUES
 	('Tester', 'Kiểm thử hệ thống'),
 	('Business Analyst', 'Phân tích yêu cầu và nghiệp vụ'),
 	('Scrum Master', 'Điều phối theo mô hình Agile Scrum');
-INSERT INTO ProjectRole (role_name, role_description)
-	values(role_name, role_description);
+
 #User_Project Table
 INSERT INTO User_Project (user_id, project_id, role_id, cost)
 VALUES 
@@ -47,8 +45,6 @@ VALUES
 (6, 4, 6, 8000.0),
 (3, 5, 3, 9500.0);
 
-INSERT INTO User_Project (user_id, project_id, role_id, cost)
-VALUES (16, 7, 1, 0.0);
 #Sprint Table
 INSERT INTO Sprints (project_id, name, description, start_date, end_date, created_by)
 VALUES
@@ -58,26 +54,39 @@ VALUES
   (1, 'Sprint 4 - Collaboration & Reporting', 'Bình luận, thông báo, lịch làm việc và báo cáo tiến độ.', '2025-05-21', '2025-06-07', 1);
 
 
-#Task Table // 
-INSERT INTO Tasks (sprint_id, task_title, task_description, task_status,
-  priority, start_date, due_date, created_by)
+#Sprint-Backlog Table 
+INSERT INTO Sprint_Backlog (sprint_id, title, description, created_by)
 VALUES
-	-- Sprint 1: User Management
-	(1, 'Tạo chức năng đăng ký', 'Form và API đăng ký người dùng', 'Not Started', 'High', '2025-04-01', '2025-04-03', 1),
-	(1, 'Tạo chức năng đăng nhập', 'Form và API đăng nhập, JWT', 'Not Started', 'High', '2025-04-03', '2025-04-06', 1),
-	(1, 'Xác thực OTP qua email', 'Gửi mã OTP và xác minh', 'Not Started', 'Medium', '2025-04-06', '2025-04-08', 1),
+(1, 'Quản lý người dùng', 'Cho phép đăng ký, đăng nhập, xác thực người dùng', 1),
+(1, 'Phân quyền người dùng', 'Gán quyền admin, member, manager cho người dùng', 1),
+(2, 'Tạo dự án', 'Form tạo mới dự án, kiểm tra validate', 1),
+(2, 'Quản lý thành viên dự án', 'Tìm kiếm, thêm, xoá người dùng trong 1 project', 1),
+(3, 'Tạo công việc', 'Thêm công việc chính và phân công người thực hiện', 1),
+(4, 'Thông báo task mới', 'Gửi email hoặc push thông báo khi tạo task', 1);
 
-	-- Sprint 2: Project Management
-	(2, 'Tạo dự án mới', 'Form tạo mới, lưu vào bảng Projects', 'Not Started', 'High', '2025-04-16', '2025-04-17', 1),
-	(2, 'Thêm người dùng vào dự án', 'Tìm user theo email/username và gán vào User_Project', 'Not Started', 'Medium', '2025-04-18', '2025-04-20', 1),
 
-	-- Sprint 3: Task Management
-	(3, 'Tạo task mới', 'Form + API tạo task thuộc sprint', 'Not Started', 'High', '2025-05-01', '2025-05-03', 1),
-	(3, 'Phân công công việc', 'Chọn người và gán task', 'Not Started', 'Medium', '2025-05-03', '2025-05-06', 1),
+#Task Table // 
+INSERT INTO Tasks (sprint_backlog_id, task_title, task_description, task_status, priority, created_by)
+VALUES
+(1, 'Tạo form đăng ký', 'Form frontend + validate thông tin', 'Not Started', 'Medium', 1),
+(1, 'API đăng ký', 'Gửi thông tin đăng ký lên server', 'Not Started', 'Medium', 1),
+(1, 'Xác thực OTP', 'Gửi và xác minh OTP qua email', 'Not Started', 'Medium', 1),
 
-	-- Sprint 4: Collaboration
-	(4, 'Thêm bình luận cho task', 'Bình luận theo task_id', 'Not Started', 'Low', '2025-05-21', '2025-05-23', 1),
-	(4, 'Gửi thông báo khi có task mới', 'Gửi email hoặc notification', 'Not Started', 'Low', '2025-05-23', '2025-05-25', 1);
+(2, 'Thêm trường role', 'Cập nhật schema user để thêm role', 'Not Started', 'Medium', 1),
+(2, 'Tạo enum phân quyền', 'Admin, Manager, Member', 'Not Started', 'Medium', 1),
+(2, 'Middleware kiểm tra quyền', 'Chặn route nếu không đủ quyền', 'Not Started', 'Medium', 1),
+
+(3, 'Form tạo dự án', 'Giao diện nhập tên, mô tả, người tạo', 'Not Started', 'Medium', 1),
+(3, 'API tạo project', 'Lưu thông tin dự án vào DB', 'Not Started', 'Medium', 1),
+
+(4, 'Tìm user theo email', 'Autocomplete user theo email', 'Not Started', 'Medium', 1),
+(4, 'Gán user vào bảng User_Project', 'Kết nối user, project, role', 'Not Started', 'Medium', 1),
+
+(5, 'Tạo form task', 'Điền tiêu đề, mô tả, deadline', 'Not Started', 'Medium', 1),
+(5, 'Gán người thực hiện', 'Chọn người và assign', 'Not Started', 'Medium', 1),
+
+(6, 'Tạo API thông báo', 'Thông báo khi tạo task mới', 'Not Started', 'Medium', 1),
+(6, 'Gửi email tự động', 'Sử dụng nodemailer để gửi email', 'Not Started', 'Medium', 1);
 
 #Task_Assignment Table 
 INSERT INTO Task_Assignment (task_id, user_id, assigned_by, completion_percentage, status) 
@@ -132,6 +141,8 @@ VALUES
 	(3, 4, 'requirements_analysis.pdf', '/uploads/requirements_analysis.pdf', 'application/pdf', 800),
 	(1, 1, 'style_guide.jpg', '/uploads/style_guide.jpg', 'image/jpeg', 500);
 
+
+
  use taskmanagement;
  
  SELECT * FROM Users;
@@ -145,6 +156,7 @@ VALUES
  SELECT * FROM Attachments;
  SELECT * FROM Sprints;
  Select * from Temp_Users;
+ SELECT * FROM Sprint_Backlog;
 -- SOME QUERIES COMMAND
 Delete from users where user_id = 9;
 
