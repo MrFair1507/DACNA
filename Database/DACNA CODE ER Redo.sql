@@ -14,7 +14,10 @@ CREATE TABLE Users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     last_login TIMESTAMP NULL,
-    is_verified TINYINT(1) DEFAULT 0
+    is_verified TINYINT(1) DEFAULT 0,
+    login_type ENUM('local', 'google', 'facebook') DEFAULT 'local',
+	google_id VARCHAR(255),
+    facebook_id VARCHAR(255)
 );
 
 CREATE TABLE UserOTPs (
@@ -81,14 +84,17 @@ CREATE TABLE Sprints (
 
 CREATE TABLE Sprint_Backlog (
     sprint_backlog_id INT AUTO_INCREMENT PRIMARY KEY,
-    sprint_id INT NOT NULL,
+    project_id INT NOT NULL,
+    sprint_id INT DEFAULT NULL,  -- NULL khi chưa gán vào sprint
     title VARCHAR(255) NOT NULL,
-    description TEXT,
+    status ENUM('Pending', 'Assigned', 'Done', 'Deferred') DEFAULT 'Pending',
     created_by INT NOT NULL,
-    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sprint_id) REFERENCES Sprints(sprint_id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES Projects(project_id) ON DELETE CASCADE,
+    FOREIGN KEY (sprint_id) REFERENCES Sprints(sprint_id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES Users(user_id)
 );
+
 
 CREATE TABLE Tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -105,6 +111,7 @@ CREATE TABLE Tasks (
     FOREIGN KEY (sprint_backlog_id) REFERENCES Sprint_Backlog(sprint_backlog_id) ON DELETE CASCADE,
     FOREIGN KEY (created_by) REFERENCES Users(user_id)
 );
+
 
 
 
@@ -186,4 +193,3 @@ CREATE TABLE Temp_Users (
 
 drop database taskmanagement;
 
-CREATE TABLE Users (     user_id INT AUTO_INCREMENT PRIMARY KEY,     full_name VARCHAR(100) NOT NULL,     email VARCHAR(100) NOT NULL UNIQUE,     password_hash VARCHAR(255) NOT NULL,     role ENUM('Admin', 'Manager', 'Member') NOT NULL DEFAULT 'Member',     avatar_url VARCHAR(255),     phone_number VARCHAR(20),     status ENUM('Active', 'Inactive', 'Blocked') DEFAULT 'Active',     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,     last_login TIMESTAMP NULL,     is_verified TINYINT(1) DEFAULT 0 )

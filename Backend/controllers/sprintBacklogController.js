@@ -1,48 +1,72 @@
-const db = require('../models/db');
+const db = require('../models/db'); // mysql2 connection
 
-exports.getBacklogBySprint = async (req, res) => {
+// GET: backlog chưa gán sprint (Product Backlog)
+exports.getProductBacklog = async (req, res) => {
   try {
-    const backlog = await db.Sprint_Backlog.findAll({
-      where: { sprint_id: req.params.sprintId },
-      include: [{ model: db.User, as: 'creator', attributes: ['full_name'] }]
-    });
-    res.json(backlog);
+    const [rows] = await db.execute(
+      `SELECT * FROM Sprint_Backlog WHERE project_id = ? AND sprint_id IS NULL`,
+      [req.params.projectId]
+    );
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Lỗi khi lấy backlog' });
   }
 };
 
-exports.createSprintBacklog = async (req, res) => {
-  const { title, description } = req.body;
+// POST: tạo backlog mới
+exports.createBacklog = async (req, res) => {
+  const { title } = req.body;
   try {
-    const entry = await db.Sprint_Backlog.create({
-      sprint_id: req.params.sprintId,
-      title,
-      description,
-      created_by: req.user.user_id
-    });
-    res.status(201).json(entry);
+    await db.execute(
+      `INSERT INTO Sprint_Backlog (project_id, title, status, created_by)
+       VALUES (?, ?, 'Pending', ?)`,
+      [req.params.projectId, title, req.user.user_id]
+    );
+    res.status(201).json({ message: 'Sprint Backlog đã được tạo' });
   } catch (err) {
-    res.status(500).json({ error: 'Không thể tạo sprint backlog' });
+    res.status(500).json({ error: 'Tạo backlog thất bại' });
   }
 };
 
-exports.updateSprintBacklog = async (req, res) => {
+// PUT: gán backlog vào sprint
+exports.assignToSprint = async (req, res) => {
+  const { backlogId } = req.params;
+  const { sprint_id } = req.body;
   try {
-    const updated = await db.Sprint_Backlog.update(req.body, {
-      where: { sprint_backlog_id: req.params.id }
-    });
-    res.json({ message: 'Cập nhật thành công', updated });
+    await db.execute(
+      `UPDATE Sprint_Backlog SET sprint_id = ?, status = 'Assigned' WHERE sprint_backlog_id = ?`,
+      [sprint_id, backlogId]
+    );
+    res.json({ message: 'Đã gán backlog vào sprint' });
   } catch (err) {
-    res.status(500).json({ error: 'Cập nhật thất bại' });
+    res.status(500).json({ error: 'Gán sprint thất bại' });
   }
 };
 
-exports.deleteSprintBacklog = async (req, res) => {
+// PUT: cập nhật trạng thái backlog (Done, Deferred)
+exports.updateStatus = async (req, res) => {
+  const { backlogId } = req.params;
+  const { status } = req.body;
   try {
-    await db.Sprint_Backlog.destroy({ where: { sprint_backlog_id: req.params.id } });
-    res.json({ message: 'Đã xoá sprint backlog' });
+    await db.execute(
+      `UPDATE Sprint_Backlog SET status = ? WHERE sprint_backlog_id = ?`,
+      [status, backlogId]
+    );
+    res.json({ message: 'Cập nhật trạng thái thành công' });
   } catch (err) {
-    res.status(500).json({ error: 'Xoá thất bại' });
+    res.status(500).json({ error: 'Cập nhật trạng thái thất bại' });
+  }
+};
+
+// GET: backlog theo sprint
+exports.getBacklogBySprint = async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      `SELECT * FROM Sprint_Backlog WHERE sprint_id = ?`,
+      [req.params.sprintId]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Lỗi khi lấy backlog của sprint' });
   }
 };

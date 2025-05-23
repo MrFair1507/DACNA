@@ -245,3 +245,120 @@
 
 ---
 
+---
+
+# ✅ Sprint_Backlog and Task Breakdown APIs
+
+## ✅ 5. Sprint Backlog APIs
+
+### 5.1 Get Product Backlog by Project
+- **Method:** GET  
+- **URL:** `/api/projects/:project_id/backlog`  
+- **Headers:**  
+  - Authorization: `Bearer your_jwt_token`
+
+---
+
+### 5.2 Create Sprint Backlog
+- **Method:** POST  
+- **URL:** `/api/projects/:project_id/backlog`  
+- **Headers:**  
+  - Authorization: `Bearer your_jwt_token`  
+- **Body:**
+```json
+{
+  "title": "Quản lý người dùng"
+}
+```
+
+---
+
+### 5.3 Assign Sprint Backlog to Sprint
+- **Method:** PUT  
+- **URL:** `/api/backlog/:backlog_id/assign`  
+- **Headers:**  
+  - Authorization: `Bearer your_jwt_token`  
+- **Body:**
+```json
+{
+  "sprint_id": 2
+}
+```
+
+---
+
+### 5.4 Update Sprint Backlog Status
+- **Method:** PUT  
+- **URL:** `/api/backlog/:backlog_id/status`  
+- **Headers:**  
+  - Authorization: `Bearer your_jwt_token`  
+- **Body:**
+```json
+{
+  "status": "Done"
+}
+```
+
+---
+
+### 5.5 Get Backlog by Sprint
+- **Method:** GET  
+- **URL:** `/api/sprints/:sprint_id/backlog`  
+- **Headers:**  
+  - Authorization: `Bearer your_jwt_token`
+
+---
+
+---
+
+## ✅ 6. Task Breakdown APIs (Updated)
+
+### 6.1 Get Tasks by Sprint Backlog
+- **Method:** GET  
+- **URL:** `/api/backlog/:backlog_id/tasks`  
+- **Headers:**  
+  - Authorization: `Bearer your_jwt_token`
+
+---
+
+### 6.2 Create Task Breakdown
+- **Method:** POST  
+- **URL:** `/api/backlog/:backlog_id/tasks`  
+- **Headers:**  
+  - Authorization: `Bearer your_jwt_token`  
+- **Body:**
+```json
+{
+  "task_title": "Tạo API xác thực",
+  "task_description": "Tạo token, kiểm tra JWT",
+  "priority": "High",
+  "start_date": "2024-07-01",
+  "due_date": "2024-07-05"
+}
+```
+
+---
+
+### 6.3 Update Task
+- **Method:** PUT  
+- **URL:** `/api/tasks/:task_id`  
+- **Headers:**  
+  - Authorization: `Bearer your_jwt_token`  
+- **Body:**
+```json
+{
+  "task_title": "Tạo API xác thực (updated)",
+  "task_description": "JWT + bảo mật nâng cao",
+  "task_status": "In Progress",
+  "start_date": "2024-07-02",
+  "due_date": "2024-07-06"
+}
+```
+
+---
+
+### 6.4 Delete Task
+- **Method:** DELETE  
+- **URL:** `/api/tasks/:task_id`  
+- **Headers:**  
+  - Authorization: `Bearer your_jwt_token`

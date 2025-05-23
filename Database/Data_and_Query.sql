@@ -54,39 +54,41 @@ VALUES
   (1, 'Sprint 4 - Collaboration & Reporting', 'Bình luận, thông báo, lịch làm việc và báo cáo tiến độ.', '2025-05-21', '2025-06-07', 1);
 
 
-#Sprint-Backlog Table 
-INSERT INTO Sprint_Backlog (sprint_id, title, description, created_by)
+INSERT INTO Sprint_Backlog (project_id, sprint_id, title, status, created_by)
 VALUES
-(1, 'Quản lý người dùng', 'Cho phép đăng ký, đăng nhập, xác thực người dùng', 1),
-(1, 'Phân quyền người dùng', 'Gán quyền admin, member, manager cho người dùng', 1),
-(2, 'Tạo dự án', 'Form tạo mới dự án, kiểm tra validate', 1),
-(2, 'Quản lý thành viên dự án', 'Tìm kiếm, thêm, xoá người dùng trong 1 project', 1),
-(3, 'Tạo công việc', 'Thêm công việc chính và phân công người thực hiện', 1),
-(4, 'Thông báo task mới', 'Gửi email hoặc push thông báo khi tạo task', 1);
+	-- Product Backlog (chưa gán sprint → NULL)
+	(1, NULL, 'Chức năng tìm kiếm sản phẩm', 'Pending', 1),
+	(1, NULL, 'Quản lý danh mục sản phẩm', 'Pending', 1),
+	(1, NULL, 'Báo cáo đơn hàng', 'Pending', 1),
+
+	-- Đã gán vào sprint
+	(1, 1, 'Quản lý người dùng', 'Assigned', 1),
+	(1, 2, 'Tạo dự án', 'Assigned', 1),
+	(1, 3, 'Tạo công việc', 'Assigned', 1);
 
 
 #Task Table // 
 INSERT INTO Tasks (sprint_backlog_id, task_title, task_description, task_status, priority, created_by)
 VALUES
-(1, 'Tạo form đăng ký', 'Form frontend + validate thông tin', 'Not Started', 'Medium', 1),
-(1, 'API đăng ký', 'Gửi thông tin đăng ký lên server', 'Not Started', 'Medium', 1),
-(1, 'Xác thực OTP', 'Gửi và xác minh OTP qua email', 'Not Started', 'Medium', 1),
+	(1, 'Tạo form đăng ký', 'Form frontend + validate thông tin', 'Not Started', 'Medium', 1),
+	(1, 'API đăng ký', 'Gửi thông tin đăng ký lên server', 'Not Started', 'Medium', 1),
+	(1, 'Xác thực OTP', 'Gửi và xác minh OTP qua email', 'Not Started', 'Medium', 1),
 
-(2, 'Thêm trường role', 'Cập nhật schema user để thêm role', 'Not Started', 'Medium', 1),
-(2, 'Tạo enum phân quyền', 'Admin, Manager, Member', 'Not Started', 'Medium', 1),
-(2, 'Middleware kiểm tra quyền', 'Chặn route nếu không đủ quyền', 'Not Started', 'Medium', 1),
+	(2, 'Thêm trường role', 'Cập nhật schema user để thêm role', 'Not Started', 'Medium', 1),
+	(2, 'Tạo enum phân quyền', 'Admin, Manager, Member', 'Not Started', 'Medium', 1),
+	(2, 'Middleware kiểm tra quyền', 'Chặn route nếu không đủ quyền', 'Not Started', 'Medium', 1),
 
-(3, 'Form tạo dự án', 'Giao diện nhập tên, mô tả, người tạo', 'Not Started', 'Medium', 1),
-(3, 'API tạo project', 'Lưu thông tin dự án vào DB', 'Not Started', 'Medium', 1),
+	(3, 'Form tạo dự án', 'Giao diện nhập tên, mô tả, người tạo', 'Not Started', 'Medium', 1),
+	(3, 'API tạo project', 'Lưu thông tin dự án vào DB', 'Not Started', 'Medium', 1),
 
-(4, 'Tìm user theo email', 'Autocomplete user theo email', 'Not Started', 'Medium', 1),
-(4, 'Gán user vào bảng User_Project', 'Kết nối user, project, role', 'Not Started', 'Medium', 1),
+	(4, 'Tìm user theo email', 'Autocomplete user theo email', 'Not Started', 'Medium', 1),
+	(4, 'Gán user vào bảng User_Project', 'Kết nối user, project, role', 'Not Started', 'Medium', 1),
 
-(5, 'Tạo form task', 'Điền tiêu đề, mô tả, deadline', 'Not Started', 'Medium', 1),
-(5, 'Gán người thực hiện', 'Chọn người và assign', 'Not Started', 'Medium', 1),
+	(5, 'Tạo form task', 'Điền tiêu đề, mô tả, deadline', 'Not Started', 'Medium', 1),
+	(5, 'Gán người thực hiện', 'Chọn người và assign', 'Not Started', 'Medium', 1),
 
-(6, 'Tạo API thông báo', 'Thông báo khi tạo task mới', 'Not Started', 'Medium', 1),
-(6, 'Gửi email tự động', 'Sử dụng nodemailer để gửi email', 'Not Started', 'Medium', 1);
+	(6, 'Tạo API thông báo', 'Thông báo khi tạo task mới', 'Not Started', 'Medium', 1),
+	(6, 'Gửi email tự động', 'Sử dụng nodemailer để gửi email', 'Not Started', 'Medium', 1);
 
 #Task_Assignment Table 
 INSERT INTO Task_Assignment (task_id, user_id, assigned_by, completion_percentage, status) 
