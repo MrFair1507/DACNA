@@ -1,0 +1,85 @@
+/* 📁 src/components/Layout/Header/SprintsHeader.css */
+
+:root {
+  --header-height: 60px;
+  --board-header-height: 50px;
+  --primary-color: #9d4edd;
+  --primary-light: #c084fc;
+  --dark-bg: #1e1e2f;
+  --dark-bg-light: #252539;
+  --border-color: #2c2c3e;
+  --text-light: #f1f1f1;
+  --text-muted: #aaa;
+  --secondary-color: #2a2a40;
+}
+
+.sprint-header {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background-color: var(--dark-bg-light);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 10;
+  position: sticky;
+  top: 0;
+}
+
+.sprint-header .app-title h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.sprint-header .header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.sprint-header .notification-btn {
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.sprint-header .notification-btn:hover {
+  color: var(--text-light);
+}
+
+.sprint-header .user-profile {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.sprint-header .user-avatar {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 14px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sprint-project-header {
+  background-color: var(--dark-bg);
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: var(--header-height);
+  z-index: 9;
+}
+
+.sprint-project-title h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-light);
+  margin: 0;
+}

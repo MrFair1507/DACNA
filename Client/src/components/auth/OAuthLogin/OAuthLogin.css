@@ -1,0 +1,8 @@
+.oauth-options,
+.oauth-btn,
+.google-btn,
+.facebook-btn,
+.oauth-icon {
+  display: none;
+  /* hoặc remove dòng display: none */
+}

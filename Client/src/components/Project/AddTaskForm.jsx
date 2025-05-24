@@ -631,10 +631,16 @@ const AddTaskForm = ({
       <div className="modal-container">
         <div className="modal-header">
           <h3>Thêm thẻ mới</h3>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <button className="close-btn" onClick={onClose}>
+            ×
+          </button>
         </div>
 
-        {error && <div className="error-message" style={{ margin: "0 20px" }}>{error}</div>}
+        {error && (
+          <div className="error-message" style={{ margin: "0 20px" }}>
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
@@ -669,7 +675,9 @@ const AddTaskForm = ({
                         className="assignee-option"
                         onClick={() => handleAssigneeSelect(member)}
                       >
-                        <div className="option-avatar"><span>{member.avatar}</span></div>
+                        <div className="option-avatar">
+                          <span>{member.avatar}</span>
+                        </div>
                         <div className="option-name">{member.name}</div>
                       </div>
                     ))}
@@ -711,11 +719,19 @@ const AddTaskForm = ({
                 {["High", "Medium", "Low"].map((level) => (
                   <div
                     key={level}
-                    className={`priority-option ${taskData.priority === level ? "selected" : ""}`}
+                    className={`priority-option ${
+                      taskData.priority === level ? "selected" : ""
+                    }`}
                     onClick={() => handlePriorityChange(level)}
                   >
-                    <span className={`priority-badge priority-${level.toLowerCase()}`}>
-                      {level === "High" ? "Cao" : level === "Medium" ? "Trung bình" : "Thấp"}
+                    <span
+                      className={`priority-badge priority-${level.toLowerCase()}`}
+                    >
+                      {level === "High"
+                        ? "Cao"
+                        : level === "Medium"
+                        ? "Trung bình"
+                        : "Thấp"}
                     </span>
                   </div>
                 ))}
@@ -723,24 +739,32 @@ const AddTaskForm = ({
             </div>
 
             <div className="form-group">
-              <label className="form-label">Mô tả</label>
-              <textarea
+              <label className="form-label">
+                Vị trí bắt đầu trong bảng Kanban
+              </label>
+              <select
                 className="form-control"
-                rows="3"
-                placeholder="Nhập mô tả chi tiết cho thẻ"
-                name="task_description"
-                value={taskData.task_description}
+                name="task_status"
+                value={taskData.task_status}
                 onChange={handleChange}
-              ></textarea>
+              >
+                <option value="Not Started">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Hoàn thành</option>
+              </select>
             </div>
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="cancel-btn" onClick={onClose}>Hủy</button>
+            <button type="button" className="cancel-btn" onClick={onClose}>
+              Hủy
+            </button>
             <button
               type="submit"
               className="submit-btn"
-              disabled={isLoading || !taskData.task_title.trim() || !taskData.due_date}
+              disabled={
+                isLoading || !taskData.task_title.trim() || !taskData.due_date
+              }
             >
               {isLoading ? "Đang xử lý..." : "Thêm thẻ"}
             </button>

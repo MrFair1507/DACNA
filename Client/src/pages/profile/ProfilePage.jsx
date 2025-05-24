@@ -1,9 +1,10 @@
 import React from "react";
 import Sidebar from "../../components/Layout/Sidebar/Sidebar";
-import Header from "../../components/Layout/Header/Header";
+// import Header from "../../components/Layout/Header/Header";
 import UserProfile from "../../components/Profile/UserProfile";
 import { useAuth } from "../../hooks/useAuth";
 import "./ProfilePage.css";
+import MainHeader from "../../components/Layout/Header/MainHeader/MainHeader";
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -20,8 +21,8 @@ const ProfilePage = () => {
       />
 
       <div className="main-content">
-        <Header user={user} activeView="profile" />
-
+        <MainHeader />
+        {/* <Header user={user} activeView="profile" /> */}
         <div className="content-area">
           <UserProfile />
         </div>

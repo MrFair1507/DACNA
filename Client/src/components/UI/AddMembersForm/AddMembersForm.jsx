@@ -1,219 +1,122 @@
-import React, { useState } from 'react';
-import './AddMembersForm.css';
+import React, { useState } from "react";
+import "./AddMembersForm.css";
+import api from "../../../services/api";
 
-const AddMembersForm = ({ onClose, onAddMembers }) => {
-  const [addMethod, setAddMethod] = useState('email'); // 'email', 'users', 'team'
-  const [emails, setEmails] = useState('');
-  const [searchUser, setSearchUser] = useState('');
-  const [selectedTeam, setSelectedTeam] = useState('');
-  const [selectedUsers, setSelectedUsers] = useState([]);
-  
-  // Mock data cho users và teams
-  const availableUsers = [
-    { id: 'u1', name: 'Minh Huynh', email: 'minh@example.com', avatar: 'M' },
-    { id: 'u2', name: 'Dang Ho', email: 'dang@example.com', avatar: 'D' },
-    { id: 'u3', name: 'Tri Vu', email: 'tri@example.com', avatar: 'T' },
-    { id: 'u4', name: 'Khoa Nguyen', email: 'khoa@example.com', avatar: 'K' },
-    { id: 'u5', name: 'Dat Chau', email: 'dat@example.com', avatar: 'D' },
-  ];
-  
-  const availableTeams = [
-    { id: 't1', name: 'Team Dev', members: 6 },
-    { id: 't2', name: 'Team Design', members: 4 },
-    { id: 't3', name: 'Team Marketing', members: 3 },
-  ];
-  
-  // Lọc users dựa trên từ khóa tìm kiếm
-  const filteredUsers = availableUsers.filter(user => 
-    user.name.toLowerCase().includes(searchUser.toLowerCase()) || 
-    user.email.toLowerCase().includes(searchUser.toLowerCase())
-  );
-  
-  const handleAddMethod = (method) => {
-    setAddMethod(method);
-    setSelectedUsers([]);
+const AddMembersForm = ({ projectId, onClose, onAddMembers }) => {
+  const [emails, setEmails] = useState([""]);
+  const [message, setMessage] = useState("");
+  const [role, setRole] = useState("Member");
+  const [loading, setLoading] = useState(false);
+
+  const handleChangeEmail = (index, value) => {
+    const updated = [...emails];
+    updated[index] = value;
+    setEmails(updated);
   };
-  
-  const handleSelectUser = (user) => {
-    if (selectedUsers.find(u => u.id === user.id)) {
-      setSelectedUsers(selectedUsers.filter(u => u.id !== user.id));
-    } else {
-      setSelectedUsers([...selectedUsers, user]);
-    }
+
+  const handleAddEmail = () => {
+    setEmails([...emails, ""]);
   };
-  
-  const handleSubmit = (e) => {
+
+  const handleRemoveEmail = (index) => {
+    const updated = emails.filter((_, i) => i !== index);
+    setEmails(updated);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    let usersToAdd = [];
-    
-    if (addMethod === 'email') {
-      // Xử lý thêm qua email
-      const emailList = emails.split(/[,;\n]/)
-        .map(email => email.trim())
-        .filter(email => email && email.includes('@')); // Thêm kiểm tra email hợp lệ
-      
-      // Loại bỏ email trùng lặp
-      const uniqueEmails = [...new Set(emailList)];
-      usersToAdd = uniqueEmails.map(email => ({ email }));
-    } else if (addMethod === 'users') {
-      // Chỉ thêm người dùng đã chọn (không cần lọc trùng lặp vì selectedUsers đã là mảng duy nhất)
-      usersToAdd = selectedUsers;
-    } else if (addMethod === 'team') {
-      // Thêm toàn bộ team
-      const team = availableTeams.find(t => t.id === selectedTeam);
-      if (team) {
-        usersToAdd = { teamId: team.id, teamName: team.name };
-      }
-    }
-    
-    // Chỉ gọi callback khi có người dùng để thêm
-    if (usersToAdd.length > 0 || (addMethod === 'team' && usersToAdd.teamId)) {
-      if (onAddMembers) {
-        onAddMembers(usersToAdd, addMethod);
-      }
+
+    const validEmails = emails.filter((email) => email.trim() !== "");
+    if (validEmails.length === 0 || !projectId) return;
+
+    try {
+      setLoading(true);
+      const res = await api.post(
+        "/invitations/send",
+        {
+          projectId,
+          emails: validEmails,
+          role,
+          message,
+        },
+        { withCredentials: true }
+      );
+
+      onAddMembers?.(res.data.invitations, "email");
       onClose();
-    } else {
-      // Thông báo khi không có người dùng nào được chọn
-      alert('Vui lòng chọn hoặc nhập thông tin thành viên để thêm');
+    } catch (err) {
+      console.error("❌ Gửi lời mời thất bại:", err.response?.data || err.message);
+      alert("Lỗi khi gửi lời mời. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
     }
   };
-  
+
   return (
     <div className="modal-overlay">
-      <div className="modal-container add-members-modal">
+      <div className="modal-container">
         <div className="modal-header">
-          <h3>Thêm thành viên vào bảng</h3>
-          <button className="close-btn" onClick={onClose}>×</button>
-        </div>
-        
-        <div className="modal-body">
-          <div className="add-method-tabs">
-            <button 
-              className={`method-tab ${addMethod === 'email' ? 'active' : ''}`}
-              onClick={() => handleAddMethod('email')}
-            >
-              Qua Email
-            </button>
-            <button 
-              className={`method-tab ${addMethod === 'users' ? 'active' : ''}`}
-              onClick={() => handleAddMethod('users')}
-            >
-              Từ danh sách
-            </button>
-            <button 
-              className={`method-tab ${addMethod === 'team' ? 'active' : ''}`}
-              onClick={() => handleAddMethod('team')}
-            >
-              Thêm cả team
-            </button>
-          </div>
-          
-          {addMethod === 'email' && (
-            <div className="email-input-section">
-              <div className="form-group">
-                <label className="form-label">Nhập email thành viên</label>
-                <textarea 
-                  className="form-control" 
-                  rows="4" 
-                  placeholder="Nhập một hoặc nhiều email, phân cách bằng dấu phẩy hoặc xuống dòng"
-                  value={emails}
-                  onChange={(e) => setEmails(e.target.value)}
-                ></textarea>
-                <div className="form-tip">
-                  Hệ thống sẽ tự động gửi email mời nếu người dùng chưa có tài khoản
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {addMethod === 'users' && (
-            <div className="users-list-section">
-              <div className="search-users">
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  placeholder="Tìm kiếm người dùng..." 
-                  value={searchUser}
-                  onChange={(e) => setSearchUser(e.target.value)}
-                />
-              </div>
-              
-              <div className="users-list">
-                {filteredUsers.map(user => (
-                  <div 
-                    key={user.id}
-                    className={`user-item ${selectedUsers.find(u => u.id === user.id) ? 'selected' : ''}`}
-                    onClick={() => handleSelectUser(user)}
-                  >
-                    <div className="user-avatar">{user.avatar}</div>
-                    <div className="user-details">
-                      <div className="user-name">{user.name}</div>
-                      <div className="user-email">{user.email}</div>
-                    </div>
-                    <div className="user-select-indicator">
-                      {selectedUsers.find(u => u.id === user.id) && (
-                        <div className="check-icon">✓</div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                
-                {filteredUsers.length === 0 && (
-                  <div className="no-users-found">
-                    Không tìm thấy người dùng phù hợp
-                  </div>
-                )}
-              </div>
-              
-              <div className="selected-count">
-                Đã chọn: {selectedUsers.length} người dùng
-              </div>
-            </div>
-          )}
-          
-          {addMethod === 'team' && (
-            <div className="teams-section">
-              <div className="form-group">
-                <label className="form-label">Chọn team</label>
-                <select 
-                  className="form-control"
-                  value={selectedTeam}
-                  onChange={(e) => setSelectedTeam(e.target.value)}
-                >
-                  <option value="">-- Chọn team --</option>
-                  {availableTeams.map(team => (
-                    <option key={team.id} value={team.id}>
-                      {team.name} ({team.members} thành viên)
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              {selectedTeam && (
-                <div className="team-info">
-                  <div className="team-members-info">
-                    Tất cả {availableTeams.find(t => t.id === selectedTeam)?.members || 0} thành viên 
-                    của team sẽ được thêm vào bảng và nhận thông báo qua email.
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-        
-        <div className="modal-footer">
-          <button className="cancel-btn" onClick={onClose}>Hủy</button>
-          <button 
-            className="submit-btn" 
-            onClick={handleSubmit}
-            disabled={(addMethod === 'email' && !emails.trim()) || 
-                    (addMethod === 'users' && selectedUsers.length === 0) ||
-                    (addMethod === 'team' && !selectedTeam)}
-          >
-            Thêm thành viên
+          <h3>Mời thành viên qua email</h3>
+          <button className="close-btn" onClick={onClose}>
+            ×
           </button>
         </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="modal-body">
+            {emails.map((email, index) => (
+              <div key={index} className="email-row">
+                <input
+                  type="email"
+                  placeholder="example@gmail.com"
+                  value={email}
+                  onChange={(e) => handleChangeEmail(index, e.target.value)}
+                  required
+                />
+                {emails.length > 1 && (
+                  <button
+                    type="button"
+                    className="remove-btn"
+                    onClick={() => handleRemoveEmail(index)}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              className="add-email-btn"
+              onClick={handleAddEmail}
+            >
+              + Thêm email
+            </button>
+
+            <label>Ghi chú (tùy chọn)</label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Bạn được mời tham gia dự án..."
+              rows={3}
+            />
+
+            <label>Vai trò</label>
+            <select value={role} onChange={(e) => setRole(e.target.value)}>
+              <option value="Member">Thành viên</option>
+              <option value="Admin">Quản trị viên</option>
+              <option value="Observer">Người quan sát</option>
+            </select>
+          </div>
+
+          <div className="modal-footer">
+            <button type="button" onClick={onClose} className="cancel-btn">
+              Hủy
+            </button>
+            <button type="submit" className="submit-btn" disabled={loading}>
+              {loading ? "Đang gửi..." : "Gửi lời mời"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

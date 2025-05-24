@@ -126,6 +126,7 @@
   flex-direction: column;
   gap: 16px;
   margin-bottom: 14px;
+   margin-top: 16px;
 }
 
 .oauth-btn {

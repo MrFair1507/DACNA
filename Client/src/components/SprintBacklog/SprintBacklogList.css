@@ -1,0 +1,48 @@
+.backlog-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 1rem;
+  color: var(--text-light);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.backlog-item {
+  background: var(--secondary-color);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.backlog-item:hover {
+  background-color: #2a2a40;
+}
+
+.backlog-item.selected {
+  background-color: #2f2f4f;
+}
+
+.tick {
+  font-size: 16px;
+  margin-right: 8px;
+  color: #3ddc84;
+}
+
+.backlog-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.backlog-text strong {
+  color: #fff;
+  font-size: 15px;
+}
+
+.backlog-text .description {
+  font-size: 13px;
+  color: #aaa;
+}

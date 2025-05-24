@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import "./SignInForm.css";
+import OAuthLogin from "../OAuthLogin/OAuthLogin";
 
 const SignInForm = () => {
   const [formData, setFormData] = useState({
@@ -151,6 +152,7 @@ const SignInForm = () => {
           {isSubmitting ? "Đang xử lý..." : "Đăng nhập"}
         </button>
       </form>
+    <OAuthLogin />
 
       <div className="form-bottom">
         <p>

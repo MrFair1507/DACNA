@@ -203,17 +203,19 @@ const AuthProvider = ({ children }) => {
   };
 
   const value = {
-    user,
-    loading,
-    login,
-    register,
-    logout,
-    isAuthenticated,
-    forgotPassword,
-    resetPassword,
-    verifyOTP,
-    resendOTP,
-  };
+  user,
+  setUser, // 👈 thêm dòng này
+  loading,
+  login,
+  register,
+  logout,
+  isAuthenticated,
+  forgotPassword,
+  resetPassword,
+  verifyOTP,
+  resendOTP,
+};
+
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

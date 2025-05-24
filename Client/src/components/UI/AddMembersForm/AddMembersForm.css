@@ -1,268 +1,166 @@
-/* AddMembersForm.css */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-container {
+  background-color: #1e1e2f;
+  border-radius: 10px;
+  width: 480px;
+  max-width: 90%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #2c2c3e;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #f1f1f1;
+  font-size: 18px;
+}
+
+.close-btn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.email-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.email-row input {
+  flex: 1;
+  padding: 10px;
+  background-color: #252539;
+  border: 1px solid #3c3c50;
+  border-radius: 6px;
+  color: #f1f1f1;
+  font-size: 14px;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: #ff5c5c;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.add-email-btn {
+  background: none;
+  color: #c084fc;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+}
+
+.add-email-btn:hover {
+  text-decoration: underline;
+}
+
+textarea {
+  width: 100%;
+  background-color: #252539;
+  color: #f1f1f1;
+  border: 1px solid #3c3c50;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 14px;
+  resize: none;
+}
+
+select {
+  width: 100%;
+  padding: 10px;
+  background-color: #252539;
+  border: 1px solid #3c3c50;
+  border-radius: 6px;
+  color: #f1f1f1;
+  font-size: 14px;
+}
+
+label {
+  color: #ccc;
+  font-size: 14px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid #2c2c3e;
+  gap: 10px;
+}
+
+.cancel-btn,
+.submit-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+
+.cancel-btn {
+  background-color: #3a3a3a;
+  color: #fff;
+}
+
+.cancel-btn:hover {
+  background-color: #4a4a4a;
+}
+
+.submit-btn {
+  background-color: #9d4edd;
+  color: white;
+}
+
+.submit-btn:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #c084fc;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
   }
-  
-  .add-members-modal {
-    background-color: var(--dark-bg);
-    border-radius: 8px;
-    width: 550px;
-    max-width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-    display: flex;
-    flex-direction: column;
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
-  
-  .modal-header {
-    padding: 16px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .modal-header h3 {
-    font-size: 18px;
-    font-weight: 600;
-  }
-  
-  .close-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: var(--text-muted);
-    transition: background-color 0.2s;
-  }
-  
-  .close-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--text-light);
-  }
-  
-  .modal-body {
-    padding: 16px;
-    flex: 1;
-  }
-  
-  .add-method-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 20px;
-  }
-  
-  .method-tab {
-    padding: 12px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-muted);
-    background-color: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .method-tab:hover {
-    color: var(--text-light);
-  }
-  
-  .method-tab.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-  }
-  
-  .form-group {
-    margin-bottom: 16px;
-  }
-  
-  .form-label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 500;
-    font-size: 14px;
-  }
-  
-  .form-control {
-    width: 100%;
-    padding: 10px;
-    background-color: var(--secondary-color);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-light);
-    font-size: 14px;
-  }
-  
-  .form-control:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(142, 68, 173, 0.2);
-  }
-  
-  textarea.form-control {
-    resize: vertical;
-    min-height: 80px;
-  }
-  
-  .form-tip {
-    margin-top: 6px;
-    font-size: 12px;
-    color: var(--text-muted);
-    font-style: italic;
-  }
-  
-  .search-users {
-    margin-bottom: 12px;
-  }
-  
-  .users-list {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: var(--secondary-color);
-    margin-bottom: 12px;
-  }
-  
-  .user-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border-color);
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  
-  .user-item:last-child {
-    border-bottom: none;
-  }
-  
-  .user-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .user-item.selected {
-    background-color: rgba(142, 68, 173, 0.1);
-  }
-  
-  .user-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    margin-right: 12px;
-  }
-  
-  .user-details {
-    flex: 1;
-  }
-  
-  .user-name {
-    font-weight: 500;
-    margin-bottom: 2px;
-  }
-  
-  .user-email {
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-  
-  .user-select-indicator {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .check-icon {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-  }
-  
-  .no-users-found {
-    padding: 16px;
-    text-align: center;
-    color: var(--text-muted);
-    font-style: italic;
-  }
-  
-  .selected-count {
-    font-size: 12px;
-    color: var(--text-muted);
-    text-align: right;
-  }
-  
-  .team-info {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    padding: 12px;
-    margin-top: 16px;
-  }
-  
-  .team-members-info {
-    font-size: 14px;
-    line-height: 1.5;
-  }
-  
-  .modal-footer {
-    padding: 16px;
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-  }
-  
-  .cancel-btn {
-    padding: 8px 16px;
-    border-radius: 4px;
-    background-color: transparent;
-    color: var(--text-light);
-    border: 1px solid var(--border-color);
-    transition: background-color 0.2s;
-  }
-  
-  .cancel-btn:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .submit-btn {
-    padding: 8px 16px;
-    border-radius: 4px;
-    background-color: var(--primary-color);
-    color: white;
-    font-weight: 500;
-    transition: background-color 0.2s;
-  }
-  
-  .submit-btn:hover {
-    background-color: var(--primary-light);
-  }
-  
-  .submit-btn:disabled {
-    background-color: rgba(142, 68, 173, 0.4);
-    cursor: not-allowed;
-  }
+}
