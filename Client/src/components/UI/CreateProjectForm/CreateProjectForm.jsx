@@ -1,17 +1,19 @@
+// Client/src/components/UI/CreateProjectForm/CreateProjectForm.jsx
 import React, { useState } from "react";
 import AddMembersForm from "../AddMembersForm/AddMembersForm";
 import "./CreateProjectForm.css";
-import axios from "axios";
+import api from "../../../services/api";
 
-const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentUserId }) => {
+const CreateProjectForm = ({ onClose, onProjectCreated, currentUserId }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     color: "blue",
     templateType: "default",
   });
-  const [selectedMembers, setSelectedMembers] = useState([]);
+  
   const [showAddMembersPopup, setShowAddMembersPopup] = useState(false);
+  const [selectedMembers, setSelectedMembers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -20,16 +22,31 @@ const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentU
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleOpenAddMembers = () => setShowAddMembersPopup(true);
-
+  // Xử lý khi chọn thành viên (trước khi tạo dự án)
   const handleMembersSelected = (newMembers, method) => {
-    if (method === "users") {
-      const newUnique = newMembers.filter(
-        (u) => !selectedMembers.find((m) => m.email === u.email)
+    console.log("Thành viên được chọn:", newMembers);
+    
+    // Lưu danh sách thành viên được chọn để thêm sau khi tạo dự án
+    const validMembers = newMembers.filter(m => m.status !== "error");
+    setSelectedMembers(prev => {
+      // Tránh duplicate members
+      const existing = prev.map(m => m.email || m.user_id);
+      const newUnique = validMembers.filter(m => 
+        !existing.includes(m.email || m.user_id)
       );
-      setSelectedMembers((prev) => [...prev, ...newUnique]);
-    }
+      return [...prev, ...newUnique];
+    });
+    
     setShowAddMembersPopup(false);
+  };
+
+  // Xóa thành viên khỏi danh sách đã chọn
+  const removeMember = (memberToRemove) => {
+    setSelectedMembers(prev => 
+      prev.filter(m => 
+        (m.email || m.user_id) !== (memberToRemove.email || memberToRemove.user_id)
+      )
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -38,35 +55,61 @@ const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentU
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:3000/api/projects", {
-        project_name: formData.title,
-        project_description: formData.description,
-        project_status: "In Progress",
-        created_by: currentUserId,
-      }, { withCredentials: true });
+      // Bước 1: Tạo dự án
+      const response = await api.post(
+        "/projects",
+        {
+          project_name: formData.title,
+          project_description: formData.description,
+          project_status: "Planning",
+          created_by: currentUserId,
+        },
+        { withCredentials: true }
+      );
 
       const newProjectId = response.data.project_id;
 
+      // Bước 2: Thêm thành viên đã chọn vào dự án (nếu có)
+      const addedMembers = [];
       if (selectedMembers.length > 0) {
-        const emails = selectedMembers.map((u) => u.email);
-        await axios.post("http://localhost:3000/api/invitations/send", {
-          projectId: newProjectId,
-          emails,
-          role: 2,
-          message: "Bạn được mời tham gia dự án.",
-        }, { withCredentials: true });
+        for (const member of selectedMembers) {
+          try {
+            await api.post(
+              "/dashboard/add-member",
+              {
+                project_id: newProjectId,
+                email_or_name: member.email || member.full_name,
+                role_name: member.role || "Backend Developer"
+              },
+              { withCredentials: true }
+            );
+            addedMembers.push({ ...member, status: "added" });
+          } catch (memberErr) {
+            console.error(`Error adding member ${member.email}:`, memberErr);
+            addedMembers.push({ ...member, status: "error" });
+          }
+        }
       }
 
-      onProjectCreated({
+      // Bước 3: Thông báo cho parent component
+      const projectData = {
         ...formData,
+        project_id: newProjectId,
         id: `project${newProjectId}`,
-        members: selectedMembers,
-      });
+        members: addedMembers,
+      };
 
-      setLoading(false);
+      onProjectCreated(projectData);
+      onClose();
+
     } catch (err) {
-      console.error("Lỗi chi tiết:", err.response?.data || err.message);
-      setError("Đã xảy ra lỗi khi tạo dự án hoặc gửi lời mời.");
+      console.error("Lỗi khi tạo dự án:", err.response?.data || err.message);
+      setError(
+        err.response?.data?.message || 
+        err.response?.data?.error || 
+        "Đã xảy ra lỗi khi tạo dự án"
+      );
+    } finally {
       setLoading(false);
     }
   };
@@ -85,6 +128,7 @@ const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentU
               value={formData.title}
               onChange={handleChange}
               required
+              placeholder="Nhập tên dự án"
             />
           </div>
 
@@ -94,14 +138,16 @@ const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentU
               name="description"
               value={formData.description}
               onChange={handleChange}
-            ></textarea>
+              placeholder="Mô tả về dự án (tùy chọn)"
+              rows="3"
+            />
           </div>
 
           <div className="form-group">
-            <label>Màu</label>
+            <label>Màu sắc</label>
             <select name="color" value={formData.color} onChange={handleChange}>
-              <option value="blue">Xanh</option>
-              <option value="green">Lục</option>
+              <option value="blue">Xanh dương</option>
+              <option value="green">Xanh lá</option>
               <option value="purple">Tím</option>
               <option value="red">Đỏ</option>
             </select>
@@ -121,40 +167,188 @@ const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentU
             </select>
           </div>
 
+          {/* Phần thành viên - có thể thêm ngay từ đầu */}
           <div className="form-group">
-            <label>Thành viên</label>
-            <button type="button" className="add-members-btn" onClick={handleOpenAddMembers}>
+            <label>Thành viên dự án</label>
+            <button 
+              type="button" 
+              className="add-members-btn" 
+              onClick={() => setShowAddMembersPopup(true)}
+            >
               + Thêm thành viên
             </button>
-            <div className="selected-members-preview">
-              {selectedMembers.map((user) => (
-                <div key={user.email} className="member-chip">
-                  {user.avatar || user.name[0]} – {user.name}
-                </div>
-              ))}
-            </div>
+            
+            {/* Hiển thị danh sách thành viên đã chọn */}
+            {selectedMembers.length > 0 && (
+              <div className="selected-members-preview">
+                <p className="members-count">
+                  Đã chọn {selectedMembers.length} thành viên:
+                </p>
+                {selectedMembers.map((member, index) => (
+                  <div key={index} className="member-chip">
+                    <span>
+                      {member.email || member.full_name} 
+                      {member.role && ` - ${member.role}`}
+                    </span>
+                    <button 
+                      type="button"
+                      className="remove-member-chip"
+                      onClick={() => removeMember(member)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <p className="form-tip">
+              Bạn có thể chọn thành viên ngay hoặc thêm sau khi tạo dự án
+            </p>
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
 
           <div className="form-actions">
-            <button type="submit" disabled={loading}>
-              {loading ? "Đang tạo..." : "Tạo dự án"}
-            </button>
             <button type="button" onClick={onClose}>
               Hủy
+            </button>
+            <button type="submit" disabled={loading}>
+              {loading ? "Đang tạo..." : "Tạo dự án"}
             </button>
           </div>
         </form>
 
+        {/* Modal chọn thành viên */}
         {showAddMembersPopup && (
-          <AddMembersForm
-            currentMembers={selectedMembers}
-            availableUsers={availableUsers}
-            onClose={() => setShowAddMembersPopup(false)}
-            onAddMembers={handleMembersSelected}
-          />
+          <div className="members-selection-modal">
+            <div className="members-modal-overlay">
+              <div className="members-modal-content">
+                <div className="members-modal-header">
+                  <h3>Chọn thành viên cho dự án</h3>
+                  <button 
+                    className="close-members-modal"
+                    onClick={() => setShowAddMembersPopup(false)}
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <MemberSelector 
+                  onMembersSelected={handleMembersSelected}
+                  selectedMembers={selectedMembers}
+                />
+              </div>
+            </div>
+          </div>
         )}
+      </div>
+    </div>
+  );
+};
+
+// Component con để chọn thành viên
+const MemberSelector = ({ onMembersSelected, selectedMembers }) => {
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await api.get("/users", { withCredentials: true });
+      setAvailableUsers(response.data || []);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleUserSelection = (user) => {
+    setSelectedUsers(prev => {
+      const isSelected = prev.find(u => u.user_id === user.user_id);
+      if (isSelected) {
+        return prev.filter(u => u.user_id !== user.user_id);
+      } else {
+        return [...prev, { ...user, role: "Backend Developer" }];
+      }
+    });
+  };
+
+  const handleConfirm = () => {
+    onMembersSelected(selectedUsers.map(u => ({ ...u, status: "selected" })), "users");
+  };
+
+  const filteredUsers = availableUsers.filter(user =>
+    user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Lọc ra những user đã được chọn trước đó
+  const alreadySelectedIds = selectedMembers.map(m => m.user_id || m.email);
+  const availableForSelection = filteredUsers.filter(user =>
+    !alreadySelectedIds.includes(user.user_id) && !alreadySelectedIds.includes(user.email)
+  );
+
+  if (loading) {
+    return <div className="loading">Đang tải danh sách người dùng...</div>;
+  }
+
+  return (
+    <div className="member-selector">
+      <div className="search-section">
+        <input
+          type="text"
+          placeholder="Tìm kiếm theo tên hoặc email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+      </div>
+
+      <div className="users-grid">
+        {availableForSelection.length === 0 ? (
+          <p className="no-users">Không có người dùng nào để chọn</p>
+        ) : (
+          availableForSelection.map(user => (
+            <div
+              key={user.user_id}
+              className={`user-card ${selectedUsers.find(u => u.user_id === user.user_id) ? 'selected' : ''}`}
+              onClick={() => toggleUserSelection(user)}
+            >
+              <div className="user-avatar">
+                {user.full_name ? user.full_name[0].toUpperCase() : 'U'}
+              </div>
+              <div className="user-info">
+                <div className="user-name">{user.full_name || 'Không có tên'}</div>
+                <div className="user-email">{user.email}</div>
+              </div>
+              {selectedUsers.find(u => u.user_id === user.user_id) && (
+                <div className="selected-check">✓</div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="member-selector-footer">
+        <p>Đã chọn: {selectedUsers.length} người</p>
+        <button 
+          className="confirm-selection-btn"
+          onClick={handleConfirm}
+          disabled={selectedUsers.length === 0}
+        >
+          Xác nhận chọn
+        </button>
       </div>
     </div>
   );

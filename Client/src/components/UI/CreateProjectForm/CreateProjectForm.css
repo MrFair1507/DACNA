@@ -1,3 +1,5 @@
+/* Client/src/components/UI/CreateProjectForm/CreateProjectForm.css */
+
 /* Popup overlay */
 .create-project-form-overlay {
   position: fixed;
@@ -80,7 +82,7 @@
   border: none;
   transition: background-color 0.2s;
   cursor: pointer;
-  margin-top: 8px;
+  margin-bottom: 12px;
 }
 
 .add-members-btn:hover {
@@ -90,17 +92,67 @@
 /* Selected member preview */
 .selected-members-preview {
   margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  padding: 12px;
+  background-color: rgba(157, 78, 221, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(157, 78, 221, 0.2);
+}
+
+.members-count {
+  font-size: 12px;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+  font-weight: 500;
 }
 
 .member-chip {
+  display: inline-flex;
+  align-items: center;
   background-color: #5c5c85;
   color: white;
   padding: 6px 10px;
   border-radius: 20px;
   font-size: 13px;
+  margin: 4px 8px 4px 0;
+}
+
+.remove-member-chip {
+  background: none;
+  border: none;
+  color: white;
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.remove-member-chip:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.form-tip {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* Error message */
+.error-message {
+  color: #f87171;
+  background-color: rgba(248, 113, 113, 0.1);
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  border-left: 4px solid #f87171;
 }
 
 /* Footer buttons */
@@ -121,8 +173,14 @@
   transition: background-color 0.2s;
 }
 
-.form-actions button[type="submit"]:hover {
+.form-actions button[type="submit"]:hover:not(:disabled) {
   background-color: var(--primary-light);
+}
+
+.form-actions button[type="submit"]:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .form-actions button[type="button"] {
@@ -136,4 +194,219 @@
 
 .form-actions button[type="button"]:hover {
   background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Member Selector Modal */
+.members-selection-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1001;
+}
+
+.members-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.members-modal-content {
+  background-color: var(--dark-bg);
+  border-radius: 12px;
+  width: 600px;
+  max-width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.members-modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.members-modal-header h3 {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 18px;
+}
+
+.close-members-modal {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 24px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.close-members-modal:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+}
+
+/* Member Selector */
+.member-selector {
+  padding: 20px;
+}
+
+.search-section {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--secondary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.user-card {
+  background-color: var(--secondary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.user-card:hover {
+  background-color: rgba(157, 78, 221, 0.1);
+  border-color: var(--primary-color);
+}
+
+.user-card.selected {
+  background-color: rgba(157, 78, 221, 0.2);
+  border-color: var(--primary-color);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-weight: 500;
+  color: var(--text-light);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selected-check {
+  color: var(--primary-color);
+  font-weight: bold;
+  font-size: 16px;
+  margin-left: 8px;
+}
+
+.no-users {
+  grid-column: 1/-1;
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px;
+  font-style: italic;
+}
+
+.loading {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px;
+}
+
+.member-selector-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.member-selector-footer p {
+  margin: 0;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.confirm-selection-btn {
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.confirm-selection-btn:hover:not(:disabled) {
+  background-color: var(--primary-light);
+}
+
+.confirm-selection-btn:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
