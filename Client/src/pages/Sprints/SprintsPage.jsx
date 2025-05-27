@@ -15,9 +15,11 @@ const SprintsPage = ({
   user = null,
 }) => {
   const [showCreateSprintForm, setShowCreateSprintForm] = useState(false);
+
   const [sprints, setSprints] = useState(initialSprints || []);
 
   const currentProject = projects.find((p) => p.id === activeProjectId);
+  const realProjectId = activeProjectId?.replace("project", "");
 
   const formatDate = (dateStr) => {
     const [day, month, year] = dateStr.split("/");
@@ -90,7 +92,7 @@ const SprintsPage = ({
       />
 
       <div className="main-content">
-      <MainHeader/>
+        <MainHeader />
         <SprintsHeader
           project={currentProject}
           activeTab="sprints"
@@ -111,6 +113,11 @@ const SprintsPage = ({
             onCreateSprint={() => setShowCreateSprintForm(true)}
             onSprintClick={onSprintClick}
             activeProjectId={activeProjectId}
+            projectId={realProjectId} // truyền thêm xuống
+            projectMembers={user ? [user] : []} // hoặc danh sách thành viên thật nếu có
+            onTaskCreated={(task) => {
+              console.log("✅ Task đã tạo:", task);
+            }}
           />
         </div>
       </div>

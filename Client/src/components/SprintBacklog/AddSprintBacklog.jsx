@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import "./AddSprintBacklog.css";
 
-const AddSprintBacklog = ({ sprintId, onClose, onSubmit }) => {
+const AddSprintBacklog = ({ projectId, onClose, onSubmit }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
   const handleSubmit = () => {
     if (!title) return;
-    onSubmit({ sprintId, title, description });
+    if (!projectId || projectId === "null") {
+      alert("⚠️ Vui lòng chọn một dự án trước khi tạo backlog.");
+      return;
+    }
+
+    onSubmit({ projectId, title, description });
   };
 
   return (
@@ -15,7 +20,9 @@ const AddSprintBacklog = ({ sprintId, onClose, onSubmit }) => {
       <div className="modal-container">
         <div className="modal-header">
           <h3>Thêm Sprint Backlog</h3>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <button className="close-btn" onClick={onClose}>
+            ×
+          </button>
         </div>
         <div className="modal-body">
           <input
@@ -31,8 +38,16 @@ const AddSprintBacklog = ({ sprintId, onClose, onSubmit }) => {
           />
         </div>
         <div className="modal-footer">
-          <button className="cancel-btn" onClick={onClose}>Hủy</button>
-          <button className="submit-btn" onClick={handleSubmit} disabled={!title}>Tạo</button>
+          <button className="cancel-btn" onClick={onClose}>
+            Hủy
+          </button>
+          <button
+            className="submit-btn"
+            onClick={handleSubmit}
+            disabled={!title}
+          >
+            Tạo
+          </button>
         </div>
       </div>
     </div>
