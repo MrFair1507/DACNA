@@ -1,33 +1,47 @@
 // 📁 src/pages/tasks/TaskPage.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Sidebar from "../../components/Layout/Sidebar/Sidebar";
-// import Header from "../../components/Layout/Header/Header";
 import KanbanBoard from "../../components/Project/KanbanBoard";
 import AddTaskForm from "../../components/Project/AddTaskForm";
 import TaskDetailModal from "../../components/Project/TaskDetailModal";
 import "../dashboard/DashboardPage/DashboardPage.css";
 import MainHeader from "../../components/Layout/Header/MainHeader/MainHeader";
 
+
 const TaskPage = ({
+  project,
   projectId,
+  sprintId,
   sprint,
-  columns,
   user,
   projects = [],
   projectMembers = [],
 }) => {
+  const templateType = project?.template_type || "default";
+
+  const getDefaultColumns = () => ({
+    uncategorized: { id: "uncategorized", title: "Chưa phân loại", tasks: [] },
+    todo: { id: "todo", title: "To Do", tasks: [] },
+    inProgress: { id: "inProgress", title: "In Progress", tasks: [] },
+    ...(templateType === "scrum"
+      ? {}
+      : { review: { id: "review", title: "Review", tasks: [] } }),
+    done: { id: "done", title: "Done", tasks: [] },
+  });
+
   const [showAddTaskForm, setShowAddTaskForm] = useState(false);
   const [showTaskDetailModal, setShowTaskDetailModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedColumn, setSelectedColumn] = useState(null);
-  const [taskColumns, setTaskColumns] = useState(columns);
+  const [taskCreatedCallback, setTaskCreatedCallback] = useState(null);
+  // const templateType = project?.template_type || "default";
 
-  useEffect(() => {
-    setTaskColumns(columns);
-  }, [columns]);
+  const realProjectId = projectId?.replace("project", "");
+  const realSprintId = sprintId || sprint?.id || sprint?.sprint_id;
 
-  const handleAddTask = (columnId) => {
+  const handleAddTask = (columnId, onTaskCreatedCallback) => {
     setSelectedColumn(columnId);
+    setTaskCreatedCallback(() => onTaskCreatedCallback);
     setShowAddTaskForm(true);
   };
 
@@ -37,60 +51,25 @@ const TaskPage = ({
     setShowTaskDetailModal(true);
   };
 
-  const handleTaskSubmit = (taskData) => {
-    const newTask = {
-      id: `t${Date.now()}`,
-      content: taskData.title,
-      priority: taskData.priority,
-      assignee: taskData.assignee,
-      assigneeId: taskData.assigneeId,
-      assigneeInitial: taskData.assignee ? taskData.assignee[0] : "",
-      dueDate: taskData.dueDate,
-      description: taskData.description,
-    };
-
-    const updated = { ...taskColumns };
-    updated[selectedColumn].tasks.push(newTask);
-    setTaskColumns(updated);
-
+  const handleTaskSubmit = (newTask) => {
+    if (taskCreatedCallback) taskCreatedCallback(newTask);
     setShowAddTaskForm(false);
     setSelectedColumn(null);
+    setTaskCreatedCallback(null);
+  };
+
+  const handleTaskError = (error) => {
+    console.error("❌ Lỗi tạo task:", error);
   };
 
   const handleTaskUpdate = (updatedTask) => {
-    const updated = { ...taskColumns };
-
     if (updatedTask.deleted) {
-      updated[selectedColumn].tasks = updated[selectedColumn].tasks.filter(
-        (t) => t.id !== updatedTask.id
-      );
-    } else {
-      const index = updated[selectedColumn].tasks.findIndex(
-        (t) => t.id === updatedTask.id
-      );
-      if (index !== -1) {
-        updated[selectedColumn].tasks[index] = updatedTask;
-      }
+      // có thể reload
     }
-
-    setTaskColumns(updated);
     setShowTaskDetailModal(false);
     setSelectedTask(null);
     setSelectedColumn(null);
   };
-
-  const handleTaskMoved = (taskId, sourceColumnId, targetColumnId) => {
-    const updated = { ...taskColumns };
-    const source = updated[sourceColumnId];
-    const taskIndex = source.tasks.findIndex((t) => t.id === taskId);
-    if (taskIndex === -1) return;
-
-    const task = source.tasks[taskIndex];
-    source.tasks.splice(taskIndex, 1);
-    updated[targetColumnId].tasks.push(task);
-    setTaskColumns(updated);
-  };
-
   return (
     <div className="dashboard-container">
       <Sidebar
@@ -98,51 +77,58 @@ const TaskPage = ({
         activeTab="sprints"
         activeProjectId={projectId}
         onProjectSelect={(id) => {
-          if (!id) {
-            window.location.href = "/dashboard";
-          } else {
-            const realId = id?.replace("project", "");
-            window.location.href = `/dashboard/${realId}/sprints`;
-          }
+          const realId = id?.replace("project", "");
+          window.location.href = `/dashboard/${realId}/sprints`;
         }}
         onTabSelect={(id, tab) => {
-          if (tab === "project") {
-            window.location.href = "/dashboard";
-          } else if (tab === "board") {
-            window.location.href = `/dashboard/${id}/sprints/${id}/tasks`;
+          const realId = id?.replace("project", "");
+          if (tab === "board") {
+            window.location.href = `/dashboard/${realId}/sprints/${realSprintId}/tasks`;
           } else if (tab === "sprints") {
-            window.location.href = `/dashboard/${id}/sprints`;
+            window.location.href = `/dashboard/${realId}/sprints`;
           } else if (tab === "backlog") {
-            window.location.href = `/dashboard/${id}/backlog`;
+            window.location.href = `/dashboard/${realId}/backlog`;
           } else if (tab === "reports") {
-            window.location.href = `/dashboard/${id}/reports`;
+            window.location.href = `/dashboard/${realId}/reports`;
           }
         }}
       />
 
       <div className="main-content">
-         <MainHeader />
+        <MainHeader />
 
         <div className="content-area">
           <KanbanBoard
             boardId={projectId}
-            columns={taskColumns}
+            sprintId={realSprintId}
+            projectId={realProjectId}
             sprint={sprint}
             onAddTask={handleAddTask}
             onTaskClick={handleTaskClick}
-            onTaskMoved={handleTaskMoved}
+            onTaskMoved={() => {}}
+            templateType={templateType}
           />
         </div>
       </div>
 
+      {/* Modal thêm task */}
       {showAddTaskForm && (
         <AddTaskForm
+          sprintId={realSprintId}
+          projectId={realProjectId}
           projectMembers={projectMembers}
-          onClose={() => setShowAddTaskForm(false)}
+          initialColumnId={selectedColumn}
+          onClose={() => {
+            setShowAddTaskForm(false);
+            setSelectedColumn(null);
+            setTaskCreatedCallback(null);
+          }}
           onSubmit={handleTaskSubmit}
+          onError={handleTaskError}
         />
       )}
 
+      {/* Modal chi tiết task */}
       {showTaskDetailModal && selectedTask && (
         <TaskDetailModal
           task={selectedTask}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './TaskDetailModal.css';
-
+import api from '../../services/api'; 
 const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
   const [editedTask, setEditedTask] = useState({ ...task });
   const [isEditing, setIsEditing] = useState(false);
@@ -38,18 +38,38 @@ const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
     }));
   };
 
-  const handleSave = () => {
-    if (!editedTask.title?.trim()) {
-      setError('Tiêu đề không được để trống');
-      return;
-    }
+const handleSave = async () => {
+  if (!editedTask.title?.trim()) {
+    setError('Tiêu đề không được để trống');
+    return;
+  }
+
+  try {
+    await api.put(`/tasks/${editedTask.task_id}`, {
+      task_title: editedTask.title,
+      task_description: editedTask.description,
+      task_status: editedTask.status,
+      priority: editedTask.priority,
+      start_date: editedTask.start_date || null,
+      due_date: editedTask.dueDate
+    });
 
     onTaskUpdate(editedTask);
-  };
+    setIsEditing(false);
+  } catch (error) {
+    setError('Lỗi khi cập nhật task');
+  }
+};
 
-  const handleDelete = () => {
+ const handleDelete = async () => {
+  try {
+    await api.delete(`/tasks/${editedTask.task_id}`);
     onTaskUpdate({ ...editedTask, deleted: true });
-  };
+    onClose();
+  } catch (error) {
+    setError('Không thể xoá task');
+  }
+};
 
   return (
     <div className="modal-overlay">

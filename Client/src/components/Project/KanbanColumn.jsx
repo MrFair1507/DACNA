@@ -1,17 +1,16 @@
-import React from 'react';
-import './KanbanColumn.css';
-import TaskCard from './TaskCard';
+import React from "react";
+import "./KanbanColumn.css";
+import TaskCard from "./TaskCard";
 
-const KanbanColumn = ({ 
-  column, 
-  onDragStart, 
-  onDragOver, 
-  onDrop, 
+const KanbanColumn = ({
+  column,
+  onDragStart,
+  onDragOver,
+  onDrop,
   onTaskClick,
-  onAddTask
 }) => {
   return (
-    <div 
+    <div
       className="kanban-column"
       onDragOver={onDragOver}
       onDrop={() => onDrop(column.id)}
@@ -23,9 +22,9 @@ const KanbanColumn = ({
           <i className="icon-more">⋮</i>
         </button>
       </div>
-      
+
       <div className="column-tasks">
-        {column.tasks.map(task => (
+        {column.tasks.map((task) => (
           <TaskCard
             key={task.id}
             task={task}
@@ -33,14 +32,6 @@ const KanbanColumn = ({
             onClick={() => onTaskClick(task, column.id)}
           />
         ))}
-        
-        <button 
-          className="add-card-btn"
-          onClick={onAddTask}
-        >
-          <span className="btn-icon">+</span>
-          <span>Thêm thẻ</span>
-        </button>
       </div>
     </div>
   );

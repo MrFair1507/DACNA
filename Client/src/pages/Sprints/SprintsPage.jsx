@@ -113,8 +113,8 @@ const SprintsPage = ({
             onCreateSprint={() => setShowCreateSprintForm(true)}
             onSprintClick={onSprintClick}
             activeProjectId={activeProjectId}
-            projectId={realProjectId} // truyền thêm xuống
-            projectMembers={user ? [user] : []} // hoặc danh sách thành viên thật nếu có
+            projectId={realProjectId}
+            projectMembers={user ? [user] : []}
             onTaskCreated={(task) => {
               console.log("✅ Task đã tạo:", task);
             }}
