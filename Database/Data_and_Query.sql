@@ -34,16 +34,17 @@ VALUES
 	('Business Analyst', 'Phân tích yêu cầu và nghiệp vụ'),
 	('Scrum Master', 'Điều phối theo mô hình Agile Scrum');
 
-#User_Project Table
-INSERT INTO User_Project (user_id, project_id, role_id, cost)
+-- Người tạo dự án hoặc đã xác nhận tham gia
+INSERT INTO User_Project (user_id, project_id, role_id, cost, status)
 VALUES 
-(1, 1, 1, 15000.0),
-(2, 1, 2, 12000.0),
-(3, 1, 3, 11000.0),
-(4, 2, 4, 10000.0),
-(5, 3, 5, 9000.0),
-(6, 4, 6, 8000.0),
-(3, 5, 3, 9500.0);
+(1, 1, 1, 15000.0, 'accepted'),
+(2, 1, 2, 12000.0, 'accepted'),
+(3, 1, 3, 11000.0, 'accepted'),
+(4, 2, 4, 10000.0, 'accepted'),
+(5, 3, 5, 9000.0, 'accepted'),
+(6, 4, 6, 8000.0, 'accepted'),
+(3, 5, 3, 9500.0, 'pending');  -- ví dụ: user 3 được mời nhưng chưa xác nhận
+
 
 #Sprint Table
 INSERT INTO Sprints (project_id, name, description, start_date, end_date, created_by)
@@ -159,6 +160,7 @@ VALUES
  SELECT * FROM Sprints;
  Select * from Temp_Users;
  SELECT * FROM Sprint_Backlog;
+ SELECT * FROM UserOTPs;
 -- SOME QUERIES COMMAND
 Delete from users where user_id = 9;
 

@@ -52,22 +52,40 @@ CREATE TABLE ProjectRole (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+DROP TABLE IF EXISTS User_Project;
 
 CREATE TABLE User_Project (
-    user_project_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    project_id INT NOT NULL,
-    role_id INT NOT NULL,
-    cost FLOAT DEFAULT 0.0,
-    startDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    endDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('Active', 'Inactive') DEFAULT 'Active',
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (project_id) REFERENCES Projects(project_id) ON DELETE CASCADE,
-    FOREIGN KEY (role_id) REFERENCES ProjectRole(role_id) ON DELETE CASCADE,
-    UNIQUE (user_id, project_id)
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  project_id INT NOT NULL,
+  role_id INT NOT NULL,
+  cost DECIMAL(10,2) DEFAULT 0,
+  startDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  endDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  status ENUM('pending', 'accepted') DEFAULT 'pending',
+  FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+  FOREIGN KEY (project_id) REFERENCES Projects(project_id) ON DELETE CASCADE,
+  FOREIGN KEY (role_id) REFERENCES ProjectRole(role_id),
+  UNIQUE (user_id, project_id)
 );
+
+
+-- CREATE TABLE User_Project (
+--     user_project_id INT AUTO_INCREMENT PRIMARY KEY,
+--     user_id INT NOT NULL,
+--     project_id INT NOT NULL,
+--     role_id INT NOT NULL,
+--     cost FLOAT DEFAULT 0.0,
+--     startDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     endDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     status ENUM('Active', 'Inactive') DEFAULT 'Active',
+--     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+--     FOREIGN KEY (project_id) REFERENCES Projects(project_id) ON DELETE CASCADE,
+--     FOREIGN KEY (role_id) REFERENCES ProjectRole(role_id) ON DELETE CASCADE,
+--     UNIQUE (user_id, project_id)
+-- );
 
 CREATE TABLE Sprints (
     sprint_id INT AUTO_INCREMENT PRIMARY KEY,
