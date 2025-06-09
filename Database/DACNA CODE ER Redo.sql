@@ -207,7 +207,7 @@ CREATE TABLE Temp_Users (
 );
 
 
+ALTER TABLE UserOTPs
+ADD COLUMN purpose ENUM('register', 'reset_password') DEFAULT 'register';
 
-
-drop database taskmanagement;
 

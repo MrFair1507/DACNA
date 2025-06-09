@@ -58,20 +58,11 @@ exports.login = async (req, res) => {
     }
 
     // Tạo access token
-    const token = jwt.sign(
-      {
-        user_id: user.user_id,
-        email: user.email,
-        role: user.role
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
-    );
-
+    const token = generateToken(user);
     // Lưu vào cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: false, // 👉 đặt true nếu dùng HTTPS
+      secure: true, // 👉 đặt true nếu dùng HTTPS
       sameSite: 'strict',
       maxAge: 60 * 60 * 1000 // 1 giờ
     });

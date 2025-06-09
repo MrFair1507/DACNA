@@ -1,0 +1,101 @@
+{
+  "info": {
+    "name": "Project API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "dacn-a-project-api"
+  },
+  "item": [
+    {
+      "name": "Get My Projects",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://localhost:3000/api/projects/my-projects",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "projects",
+            "my-projects"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Project",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_name\": \"Test Project\",\n  \"project_description\": \"Test m\\u00f4 t\\u1ea3\",\n  \"members\": [\n    {\n      \"email\": \"member@example.com\",\n      \"role_id\": 2\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "https://localhost:3000/api/projects",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "projects"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Accept Invitation",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "https://localhost:3000/api/projects/invite/accept?email={{email}}&project={{project_id}}",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "projects",
+            "invite",
+            "accept"
+          ],
+          "query": [
+            {
+              "key": "email",
+              "value": "{{email}}"
+            },
+            {
+              "key": "project",
+              "value": "{{project_id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
