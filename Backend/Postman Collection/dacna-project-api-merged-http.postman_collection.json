@@ -1,0 +1,341 @@
+{
+  "info": {
+    "name": "DACNA Project API (Merged HTTP)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "📊 Reports",
+      "item": [
+        {
+          "name": "📄 Get All Tasks Report (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reports/tasks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reports",
+                "tasks"
+              ]
+            }
+          }
+        },
+        {
+          "name": "📄 Export Tasks Report (CSV)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reports/tasks?format=csv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reports",
+                "tasks"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "📘 Export Project Report as PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reports/project/1/pdf",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reports",
+                "project",
+                "1",
+                "pdf"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/auth/register"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"full_name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"123456\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/auth/login"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"123456\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Project - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/projects"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_name\": \"New Project\",\n  \"project_description\": \"Demo project\",\n  \"members\": [\n    {\n      \"email\": \"member@example.com\",\n      \"role_id\": 2\n    }\n  ]\n}"
+        }
+      }
+    },
+    {
+      "name": "Sprint - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/sprints"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_id\": 1,\n  \"name\": \"Sprint 1\",\n  \"description\": \"Planning phase\",\n  \"start_date\": \"2025-06-01\",\n  \"end_date\": \"2025-06-15\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Sprint Backlog - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/sprint-backlog/projects/1/backlog"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Thi\\u1ebft k\\u1ebf giao di\\u1ec7n \\u0111\\u0103ng nh\\u1eadp\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Tasks - Create from Sprint Backlog",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/tasks/backlog/1/tasks"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"task_title\": \"T\\u1ea1o form \\u0111\\u0103ng nh\\u1eadp\",\n  \"task_description\": \"Giao di\\u1ec7n React + API login\",\n  \"task_status\": \"Not Started\",\n  \"priority\": \"High\",\n  \"start_date\": \"2025-06-01\",\n  \"due_date\": \"2025-06-05\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Auth - Forgot Password (Send OTP)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/auth/forgot-password"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john@example.com\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Auth - Reset Password (with OTP)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/auth/reset-password"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john@example.com\",\n  \"otp\": \"123456\",\n  \"new_password\": \"newsecurepass123\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Get My Projects",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://localhost:3000/api/projects/my-projects",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "projects",
+            "my-projects"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Project",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_name\": \"Test Project\",\n  \"project_description\": \"Test m\\u00f4 t\\u1ea3\",\n  \"members\": [\n    {\n      \"email\": \"member@example.com\",\n      \"role_id\": 2\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "https://localhost:3000/api/projects",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "projects"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Accept Invitation",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "https://localhost:3000/api/projects/invite/accept?email={{email}}&project={{project_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "projects",
+            "invite",
+            "accept"
+          ],
+          "query": [
+            {
+              "key": "email",
+              "value": "{{email}}"
+            },
+            {
+              "key": "project",
+              "value": "{{project_id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    }
+  ]
+}

@@ -1,25 +1,24 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../models/db");
-const authenticate = require("../middlewares/authMiddleware");
-const { sendInvitationEmail } = require("../utils/mailer");
+const db = require('../models/db');
+const authenticate = require('../middlewares/authMiddleware');
+const requestlogger = require('../middlewares/requestLogger');
+const { sendInvitationEmail } = require('../utils/mailer');
 
 // Lấy dự án mà người dùng tham gia
-router.get("/my-projects", authenticate, async (req, res) => {
+router.get('/my-projects', authenticate, requestlogger, async (req, res) => {
   const user_id = req.user.user_id;
   const [projects] = await db.query(
     `
     SELECT p.* FROM Projects p
     JOIN User_Project up ON p.project_id = up.project_id
     WHERE up.user_id = ? AND up.status = 'accepted'
-  `,
-    [user_id]
-  );
+  `, [user_id]);
   res.json(projects);
 });
 
 // Tạo dự án và mời thành viên
-router.post("/", authenticate, async (req, res) => {
+router.post('/', authenticate, requestlogger, async (req, res) => {
   const created_by = req.user.user_id;
   const { project_name, project_description, members = [] } = req.body;
 
@@ -63,8 +62,7 @@ router.post("/", authenticate, async (req, res) => {
 });
 
 // Mời thêm thành viên vào dự án đã tạo
-// POST /api/projects/:id/invite
-router.post("/:id/invite", authenticate, async (req, res) => {
+router.post('/:id/invite', authenticate, requestlogger, async (req, res) => {
   const project_id = req.params.id;
   const { email, role_id } = req.body;
   const inviter_id = req.user.user_id;
@@ -146,7 +144,7 @@ router.get("/invite/accept", async (req, res) => {
 });
 
 // Cập nhật dự án
-router.put("/:id", authenticate, async (req, res) => {
+router.put('/:id', authenticate, requestlogger,  async (req, res) => {
   const { project_name, project_description, project_status } = req.body;
   await db.query(
     `
