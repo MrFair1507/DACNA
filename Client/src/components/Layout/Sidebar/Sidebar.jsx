@@ -7,6 +7,9 @@ const Sidebar = ({
   activeProjectId,
   onProjectSelect,
   onTabSelect,
+  showMemberMenu = false,
+  onInviteClick,
+  onManageClick,
 }) => {
   return (
     <div className="sidebar">
@@ -65,69 +68,24 @@ const Sidebar = ({
           ))}
         </ul>
       </div>
-
-      {activeProjectId && (
-        <>
-          <div className="sidebar-section">
-            <h4>DỰ ÁN HIỆN TẠI</h4>
-            <ul className="sidebar-menu">
-              <li
-                className={activeTab === "board" ? "active" : ""}
-                onClick={() => onTabSelect(activeProjectId, "board")}
-              >
-                <span className="menu-icon">
-                  <i className="icon-board"></i>
-                </span>
-                <span>Board</span>
-              </li>
-              <li
-                className={activeTab === "sprints" ? "active" : ""}
-                onClick={() => onTabSelect(activeProjectId, "sprints")}
-              >
-                <span className="menu-icon">
-                  <i className="icon-sprint"></i>
-                </span>
-                <span>Sprints</span>
-              </li>
-              <li
-                className={activeTab === "backlog" ? "active" : ""}
-                onClick={() => onTabSelect(activeProjectId, "backlog")}
-              >
-                <span className="menu-icon">
-                  <i className="icon-backlog"></i>
-                </span>
-                <span>Backlog</span>
-              </li>
-              <li
-                className={activeTab === "reports" ? "active" : ""}
-                onClick={() => onTabSelect(activeProjectId, "reports")}
-              >
-                <span className="menu-icon">
-                  <i className="icon-reports"></i>
-                </span>
-                <span>Báo cáo</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="sidebar-section">
-            <h4>THÀNH VIÊN</h4>
-            <ul className="sidebar-menu">
-              <li>
-                <span className="menu-icon">
-                  <i className="icon-members"></i>
-                </span>
-                <span>Quản lý thành viên</span>
-              </li>
-              <li>
-                <span className="menu-icon">
-                  <i className="icon-invite"></i>
-                </span>
-                <span>Mời thành viên</span>
-              </li>
-            </ul>
-          </div>
-        </>
+      {showMemberMenu && ( // 👈 THÊM điều kiện ở đây
+        <div className="sidebar-section">
+          <h4>THÀNH VIÊN</h4>
+          <ul className="sidebar-menu">
+            <li onClick={onManageClick}>
+              <span className="menu-icon">
+                <i className="icon-members"></i>
+              </span>
+              <span>Quản lý thành viên</span>
+            </li>
+            <li onClick={onInviteClick}>
+              <span className="menu-icon">
+                <i className="icon-invite"></i>
+              </span>
+              <span>Mời thành viên</span>
+            </li>
+          </ul>
+        </div>
       )}
     </div>
   );

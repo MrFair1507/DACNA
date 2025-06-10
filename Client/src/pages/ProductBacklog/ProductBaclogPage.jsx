@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Sidebar from "../../components/Layout/Sidebar/Sidebar";
 import MainHeader from "../../components/Layout/Header/MainHeader/MainHeader";
 import SprintsHeader from "../../components/Layout/Header/SprintsHeader/SprintsHeader";
@@ -6,77 +7,71 @@ import api from "../../services/api";
 import BacklogList from "../../components/SprintBacklog/BacklogList";
 import AddSprintBacklog from "../../components/SprintBacklog/AddSprintBacklog";
 import "../dashboard/DashboardPage/DashboardPage.css";
+import "./ProductBacklogPage.css"; // ✅ thêm file CSS mới nếu cần
+import { useNavigate } from "react-router-dom";
 
 const ProductBacklogPage = () => {
+  const { projectId } = useParams();
+  const realProjectId = projectId;
+  const activeProjectId = `project${projectId}`;
+
   const [projects, setProjects] = useState([]);
   const [backlogs, setBacklogs] = useState([]);
-  const [activeProjectId, setActiveProjectId] = useState(null);
   const [showAddBacklog, setShowAddBacklog] = useState(false);
 
-  // ✅ realProjectId luôn đúng theo activeProjectId
-  const realProjectId = useMemo(() => {
-    return activeProjectId ? activeProjectId.replace("project", "") : null;
-  }, [activeProjectId]);
-
   const currentProject = projects.find((p) => p.id === activeProjectId);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await api.get("/projects");
+        const res = await api.get("/projects/my-projects", {
+          withCredentials: true,
+        });
+
         const formatted = res.data.map((p) => ({
           id: `project${p.project_id}`,
           title: p.project_name,
           description: p.project_description,
           color: p.color || "blue",
         }));
-        setProjects(formatted);
 
-        // ✅ Nếu không có project đang chọn, chọn project đầu tiên
-        if (!activeProjectId && formatted.length > 0) {
-          setActiveProjectId(formatted[0].id);
-        }
+        setProjects(formatted);
       } catch (err) {
         console.error("❌ Lỗi khi lấy project:", err);
       }
     };
     fetchProjects();
-    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
-  const fetchAllBacklogs = async () => {
-    try {
-      // 1. Lấy backlog chưa gán sprint
-      const [unassignedRes, sprintsRes] = await Promise.all([
-        api.get(`/projects/${realProjectId}/backlog`),
-        api.get(`/sprints?project_id=${realProjectId}`)
-      ]);
+    const fetchAllBacklogs = async () => {
+      try {
+        const [unassignedRes, sprintsRes] = await Promise.all([
+          api.get(`/projects/${realProjectId}/backlog`),
+          api.get(`/sprints?project_id=${realProjectId}`),
+        ]);
 
-      const unassigned = unassignedRes.data || [];
-      const sprints = sprintsRes.data.sprints || [];
+        const unassigned = unassignedRes.data || [];
+        const sprints = sprintsRes.data.sprints || [];
 
-      // 2. Lấy backlog đã gán từ từng sprint
-      const assignedResList = await Promise.all(
-        sprints.map((s) => api.get(`/sprints/${s.sprint_id}/backlog`))
-      );
+        const assignedResList = await Promise.all(
+          sprints.map((s) => api.get(`/sprints/${s.sprint_id}/backlog`))
+        );
 
-      const assigned = assignedResList.flatMap((res) => res.data || []);
+        const assigned = assignedResList.flatMap((res) => res.data || []);
+        const allBacklogs = [...unassigned, ...assigned];
 
-      // 3. Gộp cả hai lại
-      const allBacklogs = [...unassigned, ...assigned];
+        setBacklogs(allBacklogs);
+      } catch (err) {
+        console.error("❌ Lỗi khi tải toàn bộ backlog:", err);
+      }
+    };
 
-      setBacklogs(allBacklogs);
-    } catch (err) {
-      console.error("❌ Lỗi khi tải toàn bộ backlog:", err);
+    if (realProjectId) {
+      fetchAllBacklogs();
     }
-  };
-
-  if (realProjectId) {
-    fetchAllBacklogs();
-  }
-}, [realProjectId]);
-
+  }, [realProjectId]);
 
   return (
     <div className="dashboard-container">
@@ -84,16 +79,15 @@ const ProductBacklogPage = () => {
         projects={projects}
         activeProjectId={activeProjectId}
         activeTab="backlog"
-        onProjectSelect={(id) => setActiveProjectId(id)}
+        onProjectSelect={(id) => {
+          const realId = id.replace("project", "");
+          navigate(`/dashboard/${realId}/backlog`);
+        }}
         onTabSelect={(id, tab) => {
           if (tab === "project") {
             window.location.href = "/dashboard";
-          } else if (tab === "sprints") {
-            window.location.href = `/dashboard/${id}/sprints`;
-          } else if (tab === "backlog") {
-            window.location.href = `/dashboard/${id}/backlog`;
-          } else if (tab === "reports") {
-            window.location.href = `/dashboard/${id}/reports`;
+          } else {
+            window.location.href = `/dashboard/${id}/${tab}`;
           }
         }}
       />
@@ -107,20 +101,14 @@ const ProductBacklogPage = () => {
         />
 
         <div className="content-area">
-          <h2 style={{ color: "#f1f1f1" }}>Product Backlog</h2>
+          <div className="product-backlog-header">
+            <h2 className="backlog-title">Product Backlog</h2>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginBottom: "12px",
-            }}
-          >
             <button
               className="create-sprint-btn"
               onClick={() => setShowAddBacklog(true)}
             >
-              + Thêm Sprint Backlog
+              + Tạo Product Backlog
             </button>
           </div>
 

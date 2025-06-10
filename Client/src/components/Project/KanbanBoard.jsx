@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// 📁 src/components/Project/KanbanBoard.jsx
+import React, { useState, useEffect, useCallback } from "react";
 import "./KanbanBoard.css";
 import KanbanColumn from "./KanbanColumn";
 import api from "../../services/api";
@@ -11,69 +12,64 @@ const KanbanBoard = ({
   onTaskMoved,
   templateType = "default",
 }) => {
-  const getDefaultColumns = () => ({
-    notStarted: { id: "notStarted", title: "Chưa phân loại", tasks: [] },
-    todo: { id: "todo", title: "To Do", tasks: [] },
-    inProgress: { id: "inProgress", title: "In Progress", tasks: [] },
-    ...(templateType !== "scrum"
-      ? { review: { id: "review", title: "Review", tasks: [] } }
-      : {}),
-    done: { id: "done", title: "Done", tasks: [] },
-  });
-
-  const [columns, setColumns] = useState(getDefaultColumns());
+  const [columns, setColumns] = useState({});
+  const [progress, setProgress] = useState(0);
   const [draggedTask, setDraggedTask] = useState(null);
   const [draggedColumn, setDraggedColumn] = useState(null);
 
-  useEffect(() => {
-    if (sprintId) loadTasksFromAPI();
-    else setColumns(getDefaultColumns());
-    // eslint-disable-next-line
-  }, [sprintId]);
+  const getDefaultColumns = useCallback(() => {
+    const base = {
+      notStarted: { id: "notStarted", title: "Chưa phân loại", tasks: [] },
+      todo: { id: "todo", title: "To Do", tasks: [] },
+      inProgress: { id: "inProgress", title: "In Progress", tasks: [] },
+    };
+    if (templateType !== "scrum") {
+      base.review = { id: "review", title: "Review", tasks: [] };
+    }
+    base.done = { id: "done", title: "Done", tasks: [] };
+    return base;
+  }, [templateType]);
 
-  const loadTasksFromAPI = async () => {
-    try {
-      const newColumns = getDefaultColumns();
-      const backlogRes = await api.get(`/sprints/${sprintId}/backlog`);
-      const backlogs = backlogRes.data || [];
-
-      for (const backlog of backlogs) {
-        const { sprint_backlog_id, title } = backlog;
-        try {
-          const tasksRes = await api.get(
-            `/tasks/backlog/${sprint_backlog_id}/tasks`
-          );
-          const tasks = tasksRes.data || [];
-
-          for (const task of tasks) {
-            const formatted = {
-              ...formatTask(task),
-              sprint_backlog_title: title || "",
-            };
-            const columnId = mapStatusToColumn(formatted.task_status);
-            (newColumns[columnId] || newColumns.notStarted).tasks.push(
-              formatted
-            );
-          }
-        } catch (taskErr) {
-          console.error("❌ Lỗi lấy task:", sprint_backlog_id, taskErr);
-        }
+  const mapStatusToColumn = useCallback(
+    (status) => {
+      const normalized = (status || "").toLowerCase().replace(/\s/g, "");
+      if (normalized === "notstarted") return "notStarted";
+      if (normalized === "todo") return "todo";
+      if (normalized === "inprogress") return "inProgress";
+      if (normalized === "review") {
+        return templateType === "scrum" ? "inProgress" : "review";
       }
+      if (normalized === "completed") return "done";
+      return "notStarted";
+    },
+    [templateType]
+  );
 
-      setColumns(newColumns);
-    } catch (err) {
-      console.error("❌ Lỗi khi tải backlog:", err);
-      setColumns(getDefaultColumns());
+  const reverseMapColumnToStatus = (columnId) => {
+    switch (columnId) {
+      case "notStarted":
+      case "todo":
+        return "Not Started";
+      case "inProgress":
+      case "review":
+        return "In Progress";
+      case "done":
+        return "Completed";
+      default:
+        return "Not Started";
     }
   };
 
   const formatPriority = (value) => {
     if (!value) return "Medium";
-    const normalized = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-    return ["Low", "Medium", "High"].includes(normalized) ? normalized : "Medium";
+    const normalized =
+      value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    return ["Low", "Medium", "High"].includes(normalized)
+      ? normalized
+      : "Medium";
   };
 
-  const formatTask = (task) => {
+  const formatTask = useCallback((task) => {
     const rawStatus = (task.task_status || "")
       .trim()
       .toLowerCase()
@@ -90,10 +86,10 @@ const KanbanBoard = ({
     return {
       id: `task-${task.task_id}`,
       task_id: task.task_id,
-      content: task.task_title || "(Không có tiêu đề)",
       title: task.task_title || "(Không có tiêu đề)",
       description: task.task_description || "",
-      priority: formatPriority(task.priority), // ✅ xử lý chuẩn hóa
+      content: task.task_title || "(Không có tiêu đề)",
+      priority: formatPriority(task.priority),
       assignee: task.assignee_name || "Unassigned",
       assigneeId: task.assigned_user_id || null,
       assigneeInitial: (task.assignee_name?.[0] || "U").toUpperCase(),
@@ -105,33 +101,53 @@ const KanbanBoard = ({
       task_status: finalStatus,
       sprint_backlog_id: task.sprint_backlog_id,
     };
-  };
+  }, []);
 
-  const mapStatusToColumn = (status) => {
-    const normalized = (status || "").toLowerCase().replace(/\s/g, "");
-    if (normalized === "notstarted") return "notStarted";
-    if (normalized === "todo") return "todo";
-    if (normalized === "inprogress") return "inProgress";
-    if (normalized === "review") return "review";
-    if (normalized === "completed") return "done";
-    return "notStarted";
-  };
+  const loadTasksFromAPI = useCallback(async () => {
+    try {
+      const newColumns = getDefaultColumns();
+      const backlogRes = await api.get(`/sprints/${sprintId}/backlog`);
+      const backlogs = backlogRes.data || [];
 
-  const reverseMapColumnToStatus = (columnId) => {
-    switch (columnId) {
-      case "notStarted":
-        return "Not Started";
-      case "todo":
-        return "Not Started";
-      case "inProgress":
-      case "review":
-        return "In Progress";
-      case "done":
-        return "Completed";
-      default:
-        return "Not Started";
+      for (const backlog of backlogs) {
+        const { sprint_backlog_id, title } = backlog;
+        const tasksRes = await api.get(
+          `/tasks/backlog/${sprint_backlog_id}/tasks`
+        );
+        const tasks = tasksRes.data || [];
+
+        for (const task of tasks) {
+          const formatted = {
+            ...formatTask(task),
+            sprint_backlog_title: title || "",
+          };
+          const columnId = mapStatusToColumn(formatted.task_status);
+          (newColumns[columnId] || newColumns.notStarted).tasks.push(formatted);
+        }
+      }
+
+      setColumns(newColumns);
+
+      let total = 0;
+      let completed = 0;
+      Object.values(newColumns).forEach((col) => {
+        col.tasks.forEach((task) => {
+          total++;
+          if (task.task_status === "Completed") completed++;
+        });
+      });
+      setProgress(total > 0 ? Math.round((completed / total) * 100) : 0);
+    } catch (err) {
+      console.error("❌ Lỗi khi tải backlog:", err);
+      setColumns(getDefaultColumns());
+      setProgress(0);
     }
-  };
+  }, [sprintId, getDefaultColumns, formatTask, mapStatusToColumn]);
+
+  useEffect(() => {
+    if (sprintId) loadTasksFromAPI();
+    else setColumns(getDefaultColumns());
+  }, [sprintId, loadTasksFromAPI, getDefaultColumns]);
 
   const handleDragStart = (task, columnId) => {
     setDraggedTask(task);
@@ -140,18 +156,12 @@ const KanbanBoard = ({
 
   const handleDragOver = (e) => e.preventDefault();
 
- const handleDrop = async (targetColumnId) => {
-  if (!draggedTask || draggedColumn === targetColumnId)
-    return resetDragState();
+  const handleDrop = async (targetColumnId) => {
+  if (!draggedTask || draggedColumn === targetColumnId) return resetDragState();
 
   try {
     const newStatus = reverseMapColumnToStatus(targetColumnId);
-
-    const formatDate = (dateString) => {
-      if (!dateString) return null;
-      const date = new Date(dateString);
-      return isNaN(date.getTime()) ? null : date.toISOString().split("T")[0];
-    };
+    const formatDate = (d) => (d ? new Date(d).toISOString().split("T")[0] : null);
 
     const payload = {
       task_title: draggedTask.title,
@@ -173,23 +183,21 @@ const KanbanBoard = ({
     setColumns((prev) => {
       const updated = { ...prev };
 
-      // ❌ Xoá khỏi cột cũ
-      updated[draggedColumn].tasks = updated[draggedColumn].tasks.filter(
-        (t) => t.id !== draggedTask.id
-      );
+      const sourceCol = { ...updated[draggedColumn], tasks: [...updated[draggedColumn].tasks] };
+      const targetCol = { ...updated[targetColumnId], tasks: [...updated[targetColumnId].tasks] };
 
-      // ✅ Thêm vào cột mới, đảm bảo không trùng key
-      updated[targetColumnId].tasks = [
-        ...updated[targetColumnId].tasks.filter(t => t.id !== updatedTask.id),
-        updatedTask
-      ];
+      sourceCol.tasks = sourceCol.tasks.filter((t) => t.id !== draggedTask.id);
+      targetCol.tasks.push(updatedTask);
+
+      updated[draggedColumn] = sourceCol;
+      updated[targetColumnId] = targetCol;
 
       return updated;
     });
 
     onTaskMoved?.(draggedTask.id, draggedColumn, targetColumnId);
-  } catch (error) {
-    console.error("❌ Lỗi khi chuyển task:", error);
+  } catch (err) {
+    console.error("❌ Lỗi khi cập nhật task:", err);
   } finally {
     resetDragState();
   }
@@ -222,12 +230,12 @@ const KanbanBoard = ({
           <div className="sprint-progress">
             <div className="progress-info">
               <span>Tiến độ</span>
-              <span>{sprint.progress || 0}%</span>
+              <span>{progress}%</span>
             </div>
             <div className="progress-bar">
               <div
                 className="progress-fill"
-                style={{ width: `${sprint.progress || 0}%` }}
+                style={{ width: `${progress}%` }}
               ></div>
             </div>
           </div>

@@ -18,7 +18,7 @@ const TaskPageWrapper = () => {
       try {
         // Lấy tất cả projects và sprint hiện tại
         const [projectsRes, sprintRes] = await Promise.all([
-          api.get("/projects"),
+          api.get("/projects/my-projects", { withCredentials: true }),
           api.get(`/sprints?sprint_id=${sprintId}`),
         ]);
 

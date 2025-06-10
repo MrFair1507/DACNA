@@ -10,31 +10,30 @@ const AddTaskForm = ({ sprintBacklogId, onTaskCreated, onClose }) => {
   const [dueDate, setDueDate] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!title.trim()) {
-      alert("Vui lòng nhập tiêu đề task.");
-      return;
-    }
+  if (!title.trim()) {
+    alert("Vui lòng nhập tiêu đề task.");
+    return;
+  }
 
-    try {
-      const res = await api.post("/tasks", {
-        sprint_backlog_id: sprintBacklogId,
-        task_title: title,
-        task_description: description,
-        priority,
-        assigned_user_id: assigneeId,
-        due_date: dueDate,
-        task_status: "Not Started", // ✅ khởi tạo đúng cột "Chưa phân loại"
-      });
+  try {
+    const res = await api.post(`/tasks/backlog/${sprintBacklogId}/tasks`, {
+      task_title: title,
+      task_description: description,
+      priority,
+      due_date: dueDate,
+      start_date: null ,
+      task_status: "Not Started",
+    });
 
-      if (onTaskCreated) onTaskCreated(res.data);
-      if (onClose) onClose();
-    } catch (err) {
-      console.error("❌ Lỗi khi tạo task:", err);
-      alert("Không thể tạo task. Vui lòng thử lại.");
-    }
-  };
+    if (onTaskCreated) onTaskCreated(res.data);
+    if (onClose) onClose();
+  } catch (err) {
+    console.error("❌ Lỗi khi tạo task:", err.response?.data || err.message);
+    alert("Không thể tạo task. Vui lòng thử lại.");
+  }
+};
 
   return (
     <div className="modal-overlay">
@@ -92,7 +91,7 @@ const AddTaskForm = ({ sprintBacklogId, onTaskCreated, onClose }) => {
             </div>
           </div>
 
-          <div className="form-group">
+          {/* <div className="form-group">
             <label className="form-label">Người thực hiện (ID)</label>
             <input
               type="number"
@@ -101,7 +100,7 @@ const AddTaskForm = ({ sprintBacklogId, onTaskCreated, onClose }) => {
               onChange={(e) => setAssigneeId(Number(e.target.value))}
               placeholder="ID người dùng (nếu có)"
             />
-          </div>
+          </div> */}
         </form>
 
         <div className="modal-footer">

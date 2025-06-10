@@ -1,12 +1,9 @@
-
-// 📁 src/pages/dashboard/DashboardPage/DashboardPage.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import "./DashboardPage.css";
 
 import Sidebar from "../../../components/Layout/Sidebar/Sidebar";
-// import Header from "../../../components/Layout/Header/MainHeader/MainHeader";
 import ProjectList from "../../../components/Project/ProjectList/ProjectList";
 import SprintsPage from "../../Sprints/SprintsPage";
 import CreateProjectForm from "../../../components/UI/CreateProjectForm/CreateProjectForm";
@@ -32,7 +29,10 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await api.get("/projects", { withCredentials: true });
+        const response = await api.get("/projects/my-projects", {
+          withCredentials: true,
+        });
+
         const formatted = response.data.map((p) => ({
           id: `project${p.project_id}`,
           title: p.project_name,
@@ -40,7 +40,7 @@ const DashboardPage = () => {
           color: "blue",
           owner: `User ${p.created_by}`,
           members: 1,
-          template: "default",
+          template: p.template_type || "default",
           lastModified: new Date(
             p.updated_at || p.created_at
           ).toLocaleDateString("vi-VN"),
@@ -50,35 +50,26 @@ const DashboardPage = () => {
         console.error("Lỗi khi lấy danh sách dự án:", error);
       }
     };
+
     fetchProjects();
   }, []);
 
-  useEffect(() => {
-    if (justCreatedProjectId) {
-      handleTabSelect(justCreatedProjectId, "sprints");
-      setJustCreatedProjectId(null);
-    }
-  }, [justCreatedProjectId]);
-
-  const handleProjectSelect = (projectId) => {
-    if (projectId) {
-      const realProjectId = projectId.replace("project", "");
-      navigate(`/dashboard/${realProjectId}/sprints`);
-    }
-  };
-
-  const handleTabSelect = async (projectId, tab) => {
+  const handleTabSelect = useCallback(async (projectId, tab) => {
     setActiveProjectId(projectId);
     setActiveTab(tab);
 
+    const realProjectId = Number(projectId.replace("project", ""));
+
     if (tab === "sprints") {
       setActiveView("sprints");
-      const realProjectId = Number(projectId.replace("project", ""));
+      navigate(`/dashboard/${realProjectId}/sprints`);
+
       try {
         const response = await api.get(`/sprints?project_id=${realProjectId}`);
         const sprintsFromApi = Array.isArray(response.data)
           ? response.data
           : response.data.sprints;
+
         const mapped = sprintsFromApi.map((s) => ({
           id: s.sprint_id,
           name: s.name,
@@ -90,16 +81,27 @@ const DashboardPage = () => {
           completedTasks: s.completedTasks || 0,
           progress: s.progress || 0,
         }));
+
         setSprints((prev) => ({
           ...prev,
           [`project${realProjectId}`]: mapped,
         }));
       } catch (error) {
-        console.error(
-          "❌ Lỗi khi gọi API:",
-          error.response?.data || error.message
-        );
+        console.error("❌ Lỗi khi gọi API:", error.response?.data || error.message);
       }
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    if (justCreatedProjectId) {
+      handleTabSelect(justCreatedProjectId, "sprints");
+      setJustCreatedProjectId(null);
+    }
+  }, [justCreatedProjectId, handleTabSelect]);
+
+  const handleProjectSelect = (projectId) => {
+    if (projectId) {
+      handleTabSelect(projectId, "sprints");
     }
   };
 
@@ -110,11 +112,11 @@ const DashboardPage = () => {
     const newProject = {
       id: newProjectId,
       title: projectData.title,
-      color: projectData.color,
+      color: "blue",
       description: projectData.description,
       owner: `${user?.firstName || "Người"} ${user?.lastName || "dùng"}`,
       members: projectData.members?.length || 1,
-      template: projectData.templateType,
+      template: projectData.template_type || "default",
       lastModified: currentDate,
     };
     setProjects((prev) => [...prev, newProject]);
@@ -142,9 +144,7 @@ const DashboardPage = () => {
             onCreateSprint={handleCreateSprint}
             onSprintClick={(sprint) => {
               const realProjectId = activeProjectId.replace("project", "");
-              navigate(
-                `/dashboard/${realProjectId}/sprints/${sprint.id}/tasks`
-              );
+              navigate(`/dashboard/${realProjectId}/sprints/${sprint.id}/tasks`);
             }}
             activeProjectId={activeProjectId}
           />
@@ -171,16 +171,7 @@ const DashboardPage = () => {
       />
 
       <div className="main-content">
-        {/* <Header
-          user={user}
-          activeView={activeView}
-          activeTab={activeTab}
-          activeProjectId={activeProjectId}
-          project={projects.find((p) => p.id === activeProjectId)}
-          onTabSelect={handleTabSelect}
-        /> */}
-         <MainHeader />
-
+        <MainHeader />
         <div className="content-area">{renderContent()}</div>
       </div>
 
@@ -188,7 +179,7 @@ const DashboardPage = () => {
         <CreateProjectForm
           onClose={() => setShowCreateProjectForm(false)}
           onProjectCreated={handleProjectCreated}
-          availableUsers={[]} // optional
+          availableUsers={[]}
           currentUserId={user?.user_id}
         />
       )}

@@ -71,7 +71,7 @@ const SignInForm = () => {
       if (result.success) {
         // Navigate to dashboard
         navigate("/dashboard");
-      } else {
+      } else {  
         // Display appropriate error message based on the error
         if (result.error.includes("không tồn tại")) {
           setErrors({ email: result.error });

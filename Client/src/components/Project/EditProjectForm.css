@@ -1,0 +1,202 @@
+/* 📁 src/components/Project/EditProjectForm.css */
+
+/* Overlay */
+.edit-project-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* Container */
+.edit-project-form {
+  background-color: var(--dark-bg);
+  border-radius: 8px;
+  width: 500px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-light);
+}
+
+/* Title */
+.edit-project-form h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Form group */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+.edit-project-form input,
+.edit-project-form textarea,
+.edit-project-form select {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--secondary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+.edit-project-form input:focus,
+.edit-project-form textarea:focus,
+.edit-project-form select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
+}
+
+/* Error message */
+.error-message {
+  color: #f87171;
+  background-color: rgba(248, 113, 113, 0.1);
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  border-left: 4px solid #f87171;
+}
+
+/* Buttons */
+.form-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.form-actions button[type="submit"] {
+  padding: 8px 16px;
+  border-radius: 4px;
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 500;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.form-actions button[type="submit"]:hover:not(:disabled) {
+  background-color: var(--primary-light);
+}
+
+.form-actions button[type="submit"]:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-actions button[type="button"] {
+  padding: 8px 16px;
+  border-radius: 4px;
+  background-color: transparent;
+  color: var(--text-light);
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.form-actions button[type="button"]:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Delete button */
+.delete-btn {
+  background-color: transparent;
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+}
+
+.delete-btn:hover {
+  background-color: rgba(248, 113, 113, 0.1);
+}
+
+/* Delete confirmation modal */
+.modal-overlay {
+  position: fixed;
+  z-index: 1001;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-container.small {
+  background-color: var(--dark-bg);
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  color: var(--text-light);
+}
+
+.modal-container.small h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.modal-container.small p {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.modal-footer .cancel-btn,
+.modal-footer .submit-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-footer .cancel-btn {
+  background-color: transparent;
+  color: var(--text-light);
+  border: 1px solid var(--border-color);
+}
+
+.modal-footer .cancel-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.modal-footer .submit-btn {
+  background-color: #f87171;
+  color: white;
+}
+
+.modal-footer .submit-btn:hover {
+  background-color: #ef4444;
+}

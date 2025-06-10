@@ -1,15 +1,15 @@
 import React, { useState } from "react";
+import axios from "axios";
 import AddMembersForm from "../AddMembersForm/AddMembersForm";
 import "./CreateProjectForm.css";
-import axios from "axios";
 
-const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentUserId }) => {
+const CreateProjectForm = ({ onClose, onProjectCreated }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    color: "blue",
     templateType: "default",
   });
+
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [showAddMembersPopup, setShowAddMembersPopup] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -20,9 +20,7 @@ const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentU
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleOpenAddMembers = () => setShowAddMembersPopup(true);
-
-  const handleMembersSelected = (newMembers, method) => {
+  const handleMembersSelected = (newMembers) => {
     const unique = newMembers.filter(
       (u) => !selectedMembers.find((m) => m.email === u.email)
     );
@@ -36,37 +34,33 @@ const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentU
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:3000/api/projects", {
-        project_name: formData.title,
-        project_description: formData.description,
-        project_status: "In Progress",
-        created_by: currentUserId,
-        template_type: formData.templateType,
-      }, { withCredentials: true });
+      const response = await axios.post(
+        "http://localhost:3000/api/projects",
+        {
+          project_name: formData.title,
+          project_description: formData.description,
+          template_type: formData.templateType,
+          members: selectedMembers.map((m) => ({
+            email: m.email,
+            role_id: m.role_id || 2,
+          })),
+        },
+        { withCredentials: true }
+      );
 
       const newProjectId = response.data.project_id;
 
-      if (selectedMembers.length > 0) {
-        const emails = selectedMembers.map((u) => u.email);
-        await axios.post("http://localhost:3000/api/invitations/send", {
-          projectId: newProjectId,
-          emails,
-          role: 2,
-          message: "Bạn được mời tham gia dự án.",
-        }, { withCredentials: true });
-      }
-
       onProjectCreated({
         ...formData,
-        id: `project${newProjectId}`,
+        project_id: newProjectId,
         members: selectedMembers,
       });
 
       setLoading(false);
       onClose();
     } catch (err) {
-      console.error("Lỗi chi tiết:", err.response?.data || err.message);
-      setError("Đã xảy ra lỗi khi tạo dự án hoặc gửi lời mời.");
+      console.error("❌ Lỗi tạo dự án:", err.response?.data || err.message);
+      setError("Không thể tạo dự án hoặc mời thành viên.");
       setLoading(false);
     }
   };
@@ -75,7 +69,6 @@ const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentU
     <div className="create-project-form-overlay">
       <div className="create-project-form">
         <h2>Tạo dự án mới</h2>
-
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Tên dự án</label>
@@ -94,17 +87,7 @@ const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentU
               name="description"
               value={formData.description}
               onChange={handleChange}
-            ></textarea>
-          </div>
-
-          <div className="form-group">
-            <label>Màu</label>
-            <select name="color" value={formData.color} onChange={handleChange}>
-              <option value="blue">Xanh</option>
-              <option value="green">Lục</option>
-              <option value="purple">Tím</option>
-              <option value="red">Đỏ</option>
-            </select>
+            />
           </div>
 
           <div className="form-group">
@@ -123,13 +106,17 @@ const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentU
 
           <div className="form-group">
             <label>Thành viên</label>
-            <button type="button" className="add-members-btn" onClick={handleOpenAddMembers}>
+            <button
+              type="button"
+              className="add-members-btn"
+              onClick={() => setShowAddMembersPopup(true)}
+            >
               + Thêm thành viên
             </button>
             <div className="selected-members-preview">
               {selectedMembers.map((user) => (
                 <div key={user.email} className="member-chip">
-                  {user.name || user.email}
+                  {user.email} ({user.role_id})
                 </div>
               ))}
             </div>
@@ -149,7 +136,6 @@ const CreateProjectForm = ({ onClose, onProjectCreated, availableUsers, currentU
 
         {showAddMembersPopup && (
           <AddMembersForm
-            mode="select"
             onClose={() => setShowAddMembersPopup(false)}
             onAddMembers={handleMembersSelected}
           />

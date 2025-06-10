@@ -5,9 +5,9 @@ import api from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
 
 const SprintsPageWrapper = () => {
-  const { projectId } = useParams(); // ✅ ok
+  const { projectId } = useParams(); 
   const { user } = useAuth();
-  const navigate = useNavigate(); // ✅ sửa đúng tên
+  const navigate = useNavigate(); 
   const [sprints, setSprints] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +18,7 @@ const SprintsPageWrapper = () => {
       try {
         const [sprintRes, projectRes] = await Promise.all([
           api.get(`/sprints?project_id=${projectId}`),
-          api.get("/projects"),
+         api.get("/projects/my-projects", { withCredentials: true }),
         ]);
 
         const sprintList = Array.isArray(sprintRes.data)
@@ -50,7 +50,7 @@ const SprintsPageWrapper = () => {
       sprints={sprints}
       onCreateSprint={() => {}}
       onSprintClick={(sprint) => {
-        const sprintId = sprint.id || sprint.sprint_id; // ✅ tránh lỗi undefined
+        const sprintId = sprint.id || sprint.sprint_id; 
         if (sprintId) {
           navigate(`/dashboard/${projectId}/sprints/${sprintId}/tasks`);
         } else {
