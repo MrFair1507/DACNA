@@ -37,10 +37,10 @@ const DashboardPage = () => {
           id: `project${p.project_id}`,
           title: p.project_name,
           description: p.project_description,
-          color: "blue",
+          
           owner: `User ${p.created_by}`,
           members: 1,
-          template: p.template_type || "default",
+          template_type: p.template_type || "default", 
           lastModified: new Date(
             p.updated_at || p.created_at
           ).toLocaleDateString("vi-VN"),
@@ -54,43 +54,51 @@ const DashboardPage = () => {
     fetchProjects();
   }, []);
 
-  const handleTabSelect = useCallback(async (projectId, tab) => {
-    setActiveProjectId(projectId);
-    setActiveTab(tab);
+  const handleTabSelect = useCallback(
+    async (projectId, tab) => {
+      setActiveProjectId(projectId);
+      setActiveTab(tab);
 
-    const realProjectId = Number(projectId.replace("project", ""));
+      const realProjectId = Number(projectId.replace("project", ""));
 
-    if (tab === "sprints") {
-      setActiveView("sprints");
-      navigate(`/dashboard/${realProjectId}/sprints`);
+      if (tab === "sprints") {
+        setActiveView("sprints");
+        navigate(`/dashboard/${realProjectId}/sprints`);
 
-      try {
-        const response = await api.get(`/sprints?project_id=${realProjectId}`);
-        const sprintsFromApi = Array.isArray(response.data)
-          ? response.data
-          : response.data.sprints;
+        try {
+          const response = await api.get(
+            `/sprints?project_id=${realProjectId}`
+          );
+          const sprintsFromApi = Array.isArray(response.data)
+            ? response.data
+            : response.data.sprints;
 
-        const mapped = sprintsFromApi.map((s) => ({
-          id: s.sprint_id,
-          name: s.name,
-          description: s.description,
-          startDate: s.start_date,
-          endDate: s.end_date,
-          status: s.status || "planned",
-          totalTasks: s.totalTasks || 0,
-          completedTasks: s.completedTasks || 0,
-          progress: s.progress || 0,
-        }));
+          const mapped = sprintsFromApi.map((s) => ({
+            id: s.sprint_id,
+            name: s.name,
+            description: s.description,
+            startDate: s.start_date,
+            endDate: s.end_date,
+            status: s.status || "planned",
+            totalTasks: s.totalTasks || 0,
+            completedTasks: s.completedTasks || 0,
+            progress: s.progress || 0,
+          }));
 
-        setSprints((prev) => ({
-          ...prev,
-          [`project${realProjectId}`]: mapped,
-        }));
-      } catch (error) {
-        console.error("❌ Lỗi khi gọi API:", error.response?.data || error.message);
+          setSprints((prev) => ({
+            ...prev,
+            [`project${realProjectId}`]: mapped,
+          }));
+        } catch (error) {
+          console.error(
+            "❌ Lỗi khi gọi API:",
+            error.response?.data || error.message
+          );
+        }
       }
-    }
-  }, [navigate]);
+    },
+    [navigate]
+  );
 
   useEffect(() => {
     if (justCreatedProjectId) {
@@ -116,7 +124,7 @@ const DashboardPage = () => {
       description: projectData.description,
       owner: `${user?.firstName || "Người"} ${user?.lastName || "dùng"}`,
       members: projectData.members?.length || 1,
-      template: projectData.template_type || "default",
+      template_type: projectData.template_type || "default",
       lastModified: currentDate,
     };
     setProjects((prev) => [...prev, newProject]);
@@ -144,7 +152,9 @@ const DashboardPage = () => {
             onCreateSprint={handleCreateSprint}
             onSprintClick={(sprint) => {
               const realProjectId = activeProjectId.replace("project", "");
-              navigate(`/dashboard/${realProjectId}/sprints/${sprint.id}/tasks`);
+              navigate(
+                `/dashboard/${realProjectId}/sprints/${sprint.id}/tasks`
+              );
             }}
             activeProjectId={activeProjectId}
           />
