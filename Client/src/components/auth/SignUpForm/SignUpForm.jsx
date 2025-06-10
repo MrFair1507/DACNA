@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import "./SignUpForm.css";
-import OAuthLogin from "../OAuthLogin/OAuthLogin";
+
+import OAuthRegisterButtons from "../OAuthRegisterButton/OAuthRegisterButton";
 
 const SignUpForm = () => {
   const [formData, setFormData] = useState({
@@ -289,7 +290,7 @@ const SignUpForm = () => {
       </div>
 
       {renderForm()}
-      <OAuthLogin />
+      <OAuthRegisterButtons />
       <div className="form-bottom">
         <p>
           Đã có tài khoản?{" "}
