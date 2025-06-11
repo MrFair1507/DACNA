@@ -1,9 +1,9 @@
 // src/pages/auth/SignInPage/SignInPage.jsx
-import React from 'react';
-import { useLocation } from 'react-router-dom';
-import './SignInPage.css';
-import AuthLayout from '../../../components/auth/AuthLayout/AuthLayout';
-import SignInForm from '../../../components/auth/SignInForm/SignInForm';
+import React from "react";
+import { useLocation } from "react-router-dom";
+import "./SignInPage.css";
+import AuthLayout from "../../../components/auth/AuthLayout/AuthLayout";
+import SignInForm from "../../../components/auth/SignInForm/SignInForm";
 
 const SignInPage = () => {
   const location = useLocation();
@@ -11,7 +11,7 @@ const SignInPage = () => {
 
   return (
     <div className="sign-in-page">
-      <AuthLayout 
+      <AuthLayout
         title="Đăng nhập"
         subtitle="Đăng nhập để truy cập vào tài khoản của bạn"
         bannerTitle="Chào mừng trở lại"

@@ -68,7 +68,7 @@ const Sidebar = ({
           ))}
         </ul>
       </div>
-      {showMemberMenu && ( // 👈 THÊM điều kiện ở đây
+      {showMemberMenu && ( 
         <div className="sidebar-section">
           <h4>THÀNH VIÊN</h4>
           <ul className="sidebar-menu">

@@ -4,10 +4,11 @@ import SprintsList from "../../components/Sprints/SprintsList";
 import CreateSprintForm from "../../components/Sprints/CreateSprintForm";
 import SprintsHeader from "../../components/Layout/Header/SprintsHeader/SprintsHeader";
 import MainHeader from "../../components/Layout/Header/MainHeader/MainHeader";
-import AddMembersForm from "../../components/UI/AddMembersForm/AddMembersForm";
+// import AddMembersForm from "../../components/UI/AddMembersForm/AddMembersForm";
 import MemberManagement from "../../components/UI/MemberManagement/MemberManagement";
 import api from "../../services/api";
 import "./SprintsPage.css";
+import InviteMembersForm from "../../components/UI/AddMembersForm/InviteMembersForm";
 
 const SprintsPage = ({
   sprints: initialSprints,
@@ -18,7 +19,8 @@ const SprintsPage = ({
 }) => {
   const [sprints, setSprints] = useState(initialSprints || []);
   const [showCreateSprintForm, setShowCreateSprintForm] = useState(false);
-  const [showAddMembersForm, setShowAddMembersForm] = useState(false);
+  const [showInviteForm, setShowInviteForm] = useState(false);
+
   const [showMemberManagement, setShowMemberManagement] = useState(false);
 
   const currentProject = projects.find((p) => p.id === activeProjectId);
@@ -63,29 +65,29 @@ const SprintsPage = ({
     }
   };
 
-  const handleAddMembers = async (members) => {
-    for (const m of members) {
-      try {
-        await api.post(
-          "/dashboard/add-member",
-          {
-            project_id: realProjectId,
-            email_or_name: m.email,
-            role_name: m.role_name || "Backend Developer",
-          },
-          { withCredentials: true }
-        );
-        console.log("✅ Đã mời:", m.email);
-      } catch (err) {
-        const msg = err.response?.data?.message || err.message;
-        if (msg === "User already in project") {
-          alert(`${m.email} đã là thành viên trong dự án.`);
-        } else {
-          alert(`Không thể mời ${m.email}: ${msg}`);
-        }
-      }
-    }
-  };
+  // const handleAddMembers = async (members) => {
+  //   for (const m of members) {
+  //     try {
+  //       await api.post(
+  //         "/dashboard/add-member",
+  //         {
+  //           project_id: realProjectId,
+  //           email_or_name: m.email,
+  //           role_name: m.role_name || "Backend Developer",
+  //         },
+  //         { withCredentials: true }
+  //       );
+  //       console.log("✅ Đã mời:", m.email);
+  //     } catch (err) {
+  //       const msg = err.response?.data?.message || err.message;
+  //       if (msg === "User already in project") {
+  //         alert(`${m.email} đã là thành viên trong dự án.`);
+  //       } else {
+  //         alert(`Không thể mời ${m.email}: ${msg}`);
+  //       }
+  //     }
+  //   }
+  // };
 
   return (
     <div className="dashboard-container">
@@ -94,18 +96,23 @@ const SprintsPage = ({
         activeTab="sprints"
         activeProjectId={activeProjectId}
         showMemberMenu={true}
-        onInviteClick={() => setShowAddMembersForm(true)}
+        onInviteClick={() => setShowInviteForm(true)}
         onManageClick={() => setShowMemberManagement(true)}
         onProjectSelect={(id) => {
           const realId = id?.replace("project", "");
-          window.location.href = id ? `/dashboard/${realId}/sprints` : "/dashboard";
+          window.location.href = id
+            ? `/dashboard/${realId}/sprints`
+            : "/dashboard";
         }}
         onTabSelect={(id, tab) => {
           const realId = id?.replace("project", "");
           if (tab === "project") window.location.href = "/dashboard";
-          else if (tab === "sprints") window.location.href = `/dashboard/${realId}/sprints`;
-          else if (tab === "backlog") window.location.href = `/dashboard/${realId}/backlog`;
-          else if (tab === "reports") window.location.href = `/dashboard/${realId}/reports`;
+          else if (tab === "sprints")
+            window.location.href = `/dashboard/${realId}/sprints`;
+          else if (tab === "backlog")
+            window.location.href = `/dashboard/${realId}/backlog`;
+          else if (tab === "reports")
+            window.location.href = `/dashboard/${realId}/reports`;
         }}
       />
 
@@ -116,9 +123,12 @@ const SprintsPage = ({
           activeTab="sprints"
           onTabSelect={(id, tab) => {
             const realId = id?.replace("project", "");
-            if (tab === "sprints") window.location.href = `/dashboard/${realId}/sprints`;
-            else if (tab === "backlog") window.location.href = `/dashboard/${realId}/backlog`;
-            else if (tab === "reports") window.location.href = `/dashboard/${realId}/reports`;
+            if (tab === "sprints")
+              window.location.href = `/dashboard/${realId}/sprints`;
+            else if (tab === "backlog")
+              window.location.href = `/dashboard/${realId}/backlog`;
+            else if (tab === "reports")
+              window.location.href = `/dashboard/${realId}/reports`;
           }}
         />
 
@@ -148,14 +158,10 @@ const SprintsPage = ({
         />
       )}
 
-      {showAddMembersForm && (
-        <AddMembersForm
+      {showInviteForm && (
+        <InviteMembersForm
           projectId={realProjectId}
-          onClose={() => setShowAddMembersForm(false)}
-          onAddMembers={(members) => {
-            handleAddMembers(members);
-            setShowAddMembersForm(false);
-          }}
+          onClose={() => setShowInviteForm(false)}
         />
       )}
     </div>

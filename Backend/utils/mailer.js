@@ -31,7 +31,7 @@ const sendInvitationEmail = async (to, projectName) => {
     <h3>Xin chào,</h3>
     <p>Bạn được mời tham gia dự án <strong>${projectName}</strong>.</p>
     <p>Vui lòng đăng ký tài khoản để tham gia:</p>
-    <a href="https://localhost:5173/register?email=${encodeURIComponent(to)}"
+    <a href="https://localhost:5173/signup?email=${encodeURIComponent(to)}"
        style="display:inline-block; padding:10px 20px; background-color:#4CAF50; color:white; text-decoration:none; border-radius:4px;">
        Đăng ký ngay
     </a>

@@ -9,7 +9,7 @@ require('dotenv').config();
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "https://localhost:3000/api/auth/google/callback"
+  callbackURL: "https://localhost:5173/api/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
   const email = profile.emails[0].value;
 
@@ -36,9 +36,9 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
   clientID: process.env.FACEBOOK_CLIENT_ID,
   clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-  callbackURL: "https://localhost:3000/api/auth/facebook/callback",
+  callbackURL: "https://localhost:5173/api/auth/facebook/callback",
   profileFields: ['id', 'name', 'displayName'],
-  enableProof: true
+  enableProof: 51735173
 }, async (accessToken, refreshToken, profile, done) => {
   const facebookId = profile.id;
   const email = profile.emails?.[0]?.value || `${facebookId}@facebook.com`; // fallback nếu không có email
