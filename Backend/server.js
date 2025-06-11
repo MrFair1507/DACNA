@@ -31,6 +31,7 @@ app.use('/api/reports', require('./routes/report'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/userRoutes', require('./routes/userRoutes'));
 app.use('/api/projects', require('./routes/projects'));
+app.use('/api/projects', require('./routes/invitations'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/task-assignments', require('./routes/taskAssignments'));
 app.use('/api/comments', require('./routes/comments'));

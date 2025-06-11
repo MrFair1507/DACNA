@@ -211,3 +211,18 @@ ALTER TABLE UserOTPs
 ADD COLUMN purpose ENUM('register', 'reset_password') DEFAULT 'register';
 
 
+CREATE TABLE ProjectInvitations (
+  invitation_id INT AUTO_INCREMENT PRIMARY KEY,
+  project_id INT NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  invited_by INT NOT NULL,
+  role_id INT NOT NULL,
+  token VARCHAR(255) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  status ENUM('pending', 'accepted', 'expired', 'cancelled') DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (project_id) REFERENCES Projects(project_id),
+  FOREIGN KEY (invited_by) REFERENCES Users(user_id),
+  FOREIGN KEY (role_id) REFERENCES ProjectRole(role_id)
+);
+

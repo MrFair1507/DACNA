@@ -3,17 +3,18 @@ const router = express.Router();
 const db = require("../models/db");
 const authenticate = require("../middlewares/authMiddleware");
 const requestlogger = require("../middlewares/requestLogger");
+const invitationController = require("../controllers/invitationController");
 const { sendInvitationEmail } = require("../utils/mailer");
 
 // Lấy dự án mà người dùng tham gia
-router.get("/my-projects", authenticate, requestlogger, async (req, res) => {
+router.get("/my-projects", authenticate, async (req, res) => {
   const user_id = req.user.user_id;
   const [projects] = await db.query(
     `
-          SELECT p.* FROM Projects p
-          JOIN User_Project up ON p.project_id = up.project_id
-          WHERE up.user_id = ? AND up.status = 'accepted'
-        `,
+    SELECT p.* FROM Projects p
+    JOIN User_Project up ON p.project_id = up.project_id
+    WHERE up.user_id = ? AND up.status = 'accepted'
+  `,
     [user_id]
   );
   res.json(projects);
@@ -33,9 +34,9 @@ router.post("/", authenticate, requestlogger, async (req, res) => {
 
     await db.query(
       `
-            INSERT INTO User_Project (user_id, project_id, role_id, cost, status)
-            VALUES (?, ?, 1, 0, 'accepted')
-          `,
+      INSERT INTO User_Project (user_id, project_id, role_id, cost, status)
+      VALUES (?, ?, 1, 0, 'accepted')
+    `,
       [created_by, project_id]
     );
 
@@ -47,9 +48,9 @@ router.post("/", authenticate, requestlogger, async (req, res) => {
       if (existing) {
         await db.query(
           `
-                INSERT INTO User_Project (user_id, project_id, role_id, cost, status)
-                VALUES (?, ?, ?, 0, 'pending')
-              `,
+          INSERT INTO User_Project (user_id, project_id, role_id, cost, status)
+          VALUES (?, ?, ?, 0, 'pending')
+        `,
           [existing.user_id, project_id, role_id]
         );
       }
@@ -62,84 +63,52 @@ router.post("/", authenticate, requestlogger, async (req, res) => {
     res.status(500).json({ error: "Không thể tạo dự án" });
   }
 });
-// Trong routes/projects.js
-router.get("/:id/members", authenticate, async (req, res) => {
-  const project_id = req.params.id;
-
-  try {
-    const [members] = await db.query(
-      `
-      SELECT u.user_id, u.full_name, u.email, up.status, pr.role_name
-      FROM User_Project up
-      JOIN Users u ON up.user_id = u.user_id
-      JOIN ProjectRole pr ON up.role_id = pr.role_id
-      WHERE up.project_id = ?
-    `,
-      [project_id]
-    );
-
-    res.json(members);
-  } catch (err) {
-    console.error("❌ Lỗi khi lấy danh sách thành viên:", err.message);
-    res.status(500).json({ error: "Không thể lấy danh sách thành viên" });
-  }
-});
 
 // Mời thêm thành viên vào dự án đã tạo
 router.post("/:id/invite", authenticate, requestlogger, async (req, res) => {
   const project_id = req.params.id;
+  const user_id = req.user.user_id;
   const { email, role_id } = req.body;
-  const inviter_id = req.user.user_id;
 
   try {
-    // 1. Kiểm tra inviter có phải PM của dự án này không
     const [[pm]] = await db.query(
       `
-            SELECT * FROM User_Project 
-            WHERE user_id = ? AND project_id = ? AND role_id = 1
-          `,
-      [inviter_id, project_id]
+      SELECT * FROM User_Project WHERE user_id = ? AND project_id = ? AND role_id = 1
+    `,
+      [user_id, project_id]
     );
-    if (!pm)
-      return res
-        .status(403)
-        .json({ error: "Chỉ Project Manager mới được mời người dùng" });
 
-    // 2. Tìm người dùng qua email
+    if (!pm)
+      return res.status(403).json({ error: "Chỉ PM được mời thành viên" });
+
     const [[user]] = await db.query("SELECT * FROM Users WHERE email = ?", [
       email,
     ]);
-
-    // 3. Kiểm tra xem người này đã có trong dự án này chưa
-    let isInProject = false;
     if (user) {
-      const [[existingRecord]] = await db.query(
-        `
-              SELECT * FROM User_Project 
-              WHERE user_id = ? AND project_id = ?
-            `,
-        [user.user_id, project_id]
-      );
-      isInProject = !!existingRecord;
-    }
-
-    // 4. Nếu chưa, thêm vào User_Project với status 'pending'
-    if (user && !isInProject) {
       await db.query(
         `
-              INSERT INTO User_Project (user_id, project_id, role_id, cost, status)
-              VALUES (?, ?, ?, 0, 'pending')
-            `,
+        INSERT INTO User_Project (user_id, project_id, role_id, cost, status)
+        VALUES (?, ?, ?, 0, 'pending')
+      `,
         [user.user_id, project_id, role_id]
       );
     }
 
-    // 5. Gửi mail mời tham gia
-    await sendInvitationEmail(email, "(Tên dự án)", project_id);
-    res.status(200).json({ message: "Đã gửi lời mời" });
+    await invitationController.sendInvitationByEmail(
+      {
+        body: {
+          projectId: project_id,
+          emails: [email],
+          role: role_id,
+          message: "Tham gia dự án",
+        },
+        user: { user_id: created_by },
+      },
+      res
+    );
+    res.json({ message: "Đã gửi lời mời" });
   } catch (err) {
-    console.error("❌ Lỗi khi mời người dùng:", err.message);
-    res.status(500).json({ error: "Không thể mời người dùng vào dự án" });
+    res.status(500).json({ error: "Lỗi mời người dùng" });
   }
 });
 
@@ -155,9 +124,9 @@ router.get("/invite/accept", async (req, res) => {
 
     await db.query(
       `
-            UPDATE User_Project SET status = 'accepted'
-            WHERE project_id = ? AND user_id = ?
-          `,
+      UPDATE User_Project SET status = 'accepted'
+      WHERE project_id = ? AND user_id = ?
+    `,
       [project, user.user_id]
     );
 
@@ -172,10 +141,10 @@ router.put("/:id", authenticate, requestlogger, async (req, res) => {
   const { project_name, project_description, project_status } = req.body;
   await db.query(
     `
-          UPDATE Projects
-          SET project_name = ?, project_description = ?, project_status = ?
-          WHERE project_id = ?
-        `,
+    UPDATE Projects
+    SET project_name = ?, project_description = ?, project_status = ?
+    WHERE project_id = ?
+  `,
     [project_name, project_description, project_status, req.params.id]
   );
   res.json({ message: "Cập nhật dự án thành công" });
