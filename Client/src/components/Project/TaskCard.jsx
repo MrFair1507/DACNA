@@ -2,18 +2,19 @@ import React from "react";
 import "./TaskCard.css";
 
 const TaskCard = ({ task, onDragStart, onClick }) => {
-  const getPriorityClass = (priority) => {
-    switch (priority) {
-      case "high":
-        return "priority-high";
-      case "medium":
-        return "priority-medium";
-      case "low":
-        return "priority-low";
-      default:
-        return "";
-    }
-  };
+const getPriorityClass = (priority) => {
+  const p = (priority || "").toLowerCase();
+  switch (p) {
+    case "high":
+      return "priority-high";
+    case "medium":
+      return "priority-medium";
+    case "low":
+      return "priority-low";
+    default:
+      return "";
+  }
+};
 
   const getPriorityText = (priority) => {
     switch (priority) {
@@ -35,12 +36,13 @@ const TaskCard = ({ task, onDragStart, onClick }) => {
       onDragStart={onDragStart}
       onClick={onClick}
     >
-      <h4 className="task-title">{task.title}</h4>
+      <div className="task-card-header">
+        <h4 className="task-title">{task.title}</h4>
+        <div className={`priority-dot ${getPriorityClass(task.priority)}`} />
+      </div>
 
       {task.sprint_backlog_title && (
-        <div className="task-backlog-label">
-          📋 {task.sprint_backlog_title}
-        </div>
+        <div className="task-backlog-label">📋 {task.sprint_backlog_title}</div>
       )}
 
       <div className="task-meta">

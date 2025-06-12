@@ -1,21 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import './TaskDetailModal.css';
-import api from '../../services/api';
+import React, { useState, useEffect } from "react";
+import "./TaskDetailModal.css";
+import api from "../../services/api";
+import useAssigneeManager from "../../hooks/useAssigneeManager";
 
 const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
   const [editedTask, setEditedTask] = useState({ ...task });
   const [isEditing, setIsEditing] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const { assignUserToTask } = useAssigneeManager(task.task_id);
 
   useEffect(() => {
     setEditedTask({ ...task });
     setIsEditing(false);
-    setError('');
+    setError("");
   }, [task]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditedTask((prev) => ({ ...prev, [name]: value }));
+    let formattedValue = value;
+
+    if (name === "dueDate" && value) {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        formattedValue = date.toISOString().split("T")[0];
+      }
+    }
+
+    setEditedTask((prev) => ({
+      ...prev,
+      [name]: formattedValue,
+    }));
   };
 
   const handleAssigneeChange = (e) => {
@@ -23,9 +37,9 @@ const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
     const member = projectMembers.find((m) => m.user_id.toString() === memberId);
     setEditedTask((prev) => ({
       ...prev,
-      assignee: member?.full_name || '',
-      assigneeId: member?.user_id || '',
-      assigneeInitial: member?.full_name?.[0]?.toUpperCase() || 'U',
+      assignee: member?.full_name || "",
+      assigneeId: member?.user_id || "",
+      assigneeInitial: member?.full_name?.[0]?.toUpperCase() || "U",
     }));
   };
 
@@ -33,29 +47,53 @@ const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
     setEditedTask((prev) => ({ ...prev, priority: level }));
   };
 
-  const handleSave = async () => {
-    if (!editedTask.title?.trim()) {
-      setError('Tiêu đề không được để trống');
-      return;
+const handleSave = async () => {
+  if (!editedTask.title?.trim()) {
+    setError("Tiêu đề không được để trống");
+    return;
+  }
+
+  try {
+    // Tạo bản sao chứa đủ dữ liệu
+    const payload = {
+      task_title: editedTask.title || task.title,
+      task_description: editedTask.description ?? task.description,
+      task_status: editedTask.status || task.task_status || "Not Started",
+      priority: editedTask.priority || task.priority || "Medium",
+      start_date: editedTask.start_date || task.start_date || null,
+      due_date: editedTask.dueDate || task.dueDate || null,
+    };
+
+    await api.put(`/tasks/${editedTask.task_id}`, payload);
+
+    // Gán người phụ trách nếu có thay đổi
+    if (
+      editedTask.assigneeId &&
+      editedTask.assigneeId !== task.assigneeId
+    ) {
+      await assignUserToTask(editedTask.assigneeId);
     }
 
-    try {
-      await api.put(`/tasks/${editedTask.task_id}`, {
-        task_title: editedTask.title,
-        task_description: editedTask.description,
-        task_status: editedTask.status,
-        priority: editedTask.priority,
-        start_date: editedTask.start_date || null,
-        due_date: editedTask.dueDate,
-        assigned_user_id: editedTask.assigneeId || null
-      });
+    const assignedMember = projectMembers.find(
+      (m) => m.user_id === editedTask.assigneeId
+    );
 
-      onTaskUpdate(editedTask);
-      setIsEditing(false);
-    } catch (error) {
-      setError('Lỗi khi cập nhật task');
-    }
-  };
+    onTaskUpdate({
+      ...task,
+      ...editedTask,
+      ...payload,
+      assignee: assignedMember?.full_name || "Unassigned",
+      assigneeInitial: assignedMember?.full_name?.[0]?.toUpperCase() || "U",
+    });
+
+    setIsEditing(false);
+  } catch (error) {
+    console.error(error);
+    setError("Lỗi khi cập nhật task");
+  }
+};
+
+
 
   const handleDelete = async () => {
     try {
@@ -63,7 +101,7 @@ const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
       onTaskUpdate({ ...editedTask, deleted: true });
       onClose();
     } catch (error) {
-      setError('Không thể xoá task');
+      setError("Không thể xoá task");
     }
   };
 
@@ -89,18 +127,18 @@ const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
                   <label>Người phụ trách</label>
                   <div className="assignee-info">
                     <div className="assignee-avatar">{task.assigneeInitial}</div>
-                    <span>{task.assignee || 'Chưa chỉ định'}</span>
+                    <span>{task.assignee || "Chưa chỉ định"}</span>
                   </div>
                 </div>
 
                 <div className="detail-group">
                   <label>Hạn chót</label>
-                  <span>{task.dueDate || 'Không có'}</span>
+                  <span>{task.dueDate || "Không có"}</span>
                 </div>
 
                 <div className="detail-group">
                   <label>Ưu tiên</label>
-                  <span className={`priority-badge priority-${(task.priority || '').toLowerCase()}`}>
+                  <span className={`priority-badge priority-${(task.priority || "").toLowerCase()}`}>
                     {task.priority}
                   </span>
                 </div>
@@ -108,7 +146,7 @@ const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
 
               <div className="task-detail-description">
                 <label>Mô tả</label>
-                <p>{task.description || 'Không có mô tả'}</p>
+                <p>{task.description || "Không có mô tả"}</p>
               </div>
             </>
           ) : (
@@ -125,7 +163,10 @@ const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
 
               <div className="form-group">
                 <label>Người phụ trách</label>
-                <select value={editedTask.assigneeId || ''} onChange={handleAssigneeChange}>
+                <select
+                  value={editedTask.assigneeId || ""}
+                  onChange={handleAssigneeChange}
+                >
                   <option value="">-- Chọn người phụ trách --</option>
                   {projectMembers.map((member) => (
                     <option key={member.user_id} value={member.user_id}>
@@ -140,7 +181,7 @@ const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
                 <input
                   type="date"
                   name="dueDate"
-                  value={editedTask.dueDate || ''}
+                  value={editedTask.dueDate || ""}
                   onChange={handleInputChange}
                 />
               </div>
@@ -148,13 +189,15 @@ const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
               <div className="form-group">
                 <label>Mức độ ưu tiên</label>
                 <div className="priority-options">
-                  {['High', 'Medium', 'Low'].map((level) => (
+                  {["High", "Medium", "Low"].map((level) => (
                     <span
                       key={level}
-                      className={`priority-badge priority-${level.toLowerCase()} ${editedTask.priority === level ? 'selected' : ''}`}
+                      className={`priority-badge priority-${level.toLowerCase()} ${
+                        editedTask.priority === level ? "selected" : ""
+                      }`}
                       onClick={() => handlePriorityChange(level)}
                     >
-                      {level === 'High' ? 'Cao' : level === 'Medium' ? 'Trung bình' : 'Thấp'}
+                      {level === "High" ? "Cao" : level === "Medium" ? "Trung bình" : "Thấp"}
                     </span>
                   ))}
                 </div>

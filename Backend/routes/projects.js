@@ -19,6 +19,26 @@ router.get("/my-projects", authenticate, async (req, res) => {
   );
   res.json(projects);
 });
+//  API: Lấy danh sách thành viên của một project
+router.get('/:projectId/members', authenticate, async (req, res) => {
+  const { projectId } = req.params;
+
+  try {
+    const [members] = await db.query(`
+      SELECT u.user_id, u.full_name, u.email, pr.role_name
+      FROM User_Project up
+      JOIN Users u ON u.user_id = up.user_id
+      JOIN ProjectRole pr ON pr.role_id = up.role_id
+      WHERE up.project_id = ? AND up.status = 'accepted'
+    `, [projectId]);
+
+    res.status(200).json(members);
+  } catch (err) {
+    console.error("❌ Lỗi lấy thành viên dự án:", err.message);
+    res.status(500).json({ error: 'Không thể lấy danh sách thành viên' });
+  }
+});
+
 
 // Tạo dự án và mời thành viên
 router.post("/", authenticate, requestlogger, async (req, res) => {

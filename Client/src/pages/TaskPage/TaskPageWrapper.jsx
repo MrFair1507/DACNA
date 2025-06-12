@@ -1,3 +1,4 @@
+// 📁 src/pages/tasks/TaskPageWrapper.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import TaskPage from "./TaskPage";
@@ -16,10 +17,11 @@ const TaskPageWrapper = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Lấy tất cả projects và sprint hiện tại
-        const [projectsRes, sprintRes] = await Promise.all([
+        // ✅ Gọi đồng thời 3 API: danh sách project, sprint hiện tại, và thành viên dự án
+        const [projectsRes, sprintRes, membersRes] = await Promise.all([
           api.get("/projects/my-projects", { withCredentials: true }),
           api.get(`/sprints?sprint_id=${sprintId}`),
+          api.get(`/projects/${projectId}/members`), // 🎯 Lấy danh sách thành viên dự án
         ]);
 
         const formattedProjects = projectsRes.data.map((p) => ({
@@ -36,9 +38,8 @@ const TaskPageWrapper = () => {
 
         setProjects(formattedProjects);
         setSprint(sprintData);
+        setProjectMembers(membersRes.data); // ✅ Gán danh sách thành viên
 
-        // ✅ Bỏ gọi API `/projects/:id/members` vì chưa có backend
-        setProjectMembers([]);
       } catch (err) {
         console.error("❌ Lỗi khi tải dữ liệu TaskPageWrapper:", err);
       }
@@ -54,7 +55,7 @@ const TaskPageWrapper = () => {
       projectId={fullProjectId}
       project={currentProject}
       sprint={sprint}
-      sprintId={sprintId} // ✅ Bổ sung dòng này
+      sprintId={sprintId}
       user={user}
       projects={projects}
       projectMembers={projectMembers}
