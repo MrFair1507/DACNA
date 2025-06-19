@@ -65,6 +65,9 @@ const cert = fs.readFileSync(process.env.SSL_CERT_PATH, 'utf8');
 //   console.log('HTTPS server running at https://localhost:3000');
 // });
 
+const notifyExpiringSprints = require("./jobs/notifyExpiringSprints");
+cron.schedule("0 8 * * *", notifyExpiringSprints);
+// cron.schedule("*/1 * * * *", notifyExpiringSprints);
 
 const PORT = 3000;
 app.listen(PORT, () => {

@@ -3,6 +3,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./MainHeader.css";
 import { useAuth } from "../../../../hooks/useAuth";
+import NotificationBellSocket from "../../NotificationBellSocket/NotificationBellSocket";
 
 const MainHeader = () => {
   const { user, logout } = useAuth();
@@ -33,10 +34,7 @@ const MainHeader = () => {
       </div>
 
       <div className="header-right">
-        <div className="notification-btn">
-          <i className="icon-notification">🔔</i>
-        </div>
-
+        <NotificationBellSocket userId={user?.user_id} />
         <div className="user-menu">
           <Link to="/profile" className="user-profile">
             <div className="user-avatar">

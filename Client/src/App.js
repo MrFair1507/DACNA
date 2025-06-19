@@ -2,6 +2,8 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AuthProvider from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Pages
 import SignInPage from "./pages/auth/SignInPage/SignInPage";
@@ -11,12 +13,15 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage/ForgotPasswordPa
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage/ResetPasswordPage";
 // import SprintsPage from "./pages/Sprints/SprintsPage";
 
+import InvitationAcceptPage from "./pages/InvitationAcceptPage/InvitationAcceptPage";
+
 import ProfilePage from "./pages/profile/ProfilePage";
 // Styles
 import "./App.css";
 import SprintsPageWrapper from "./pages/Sprints/SprintsPageWrapper";
 import TaskPageWrapper from "./pages/TaskPage/TaskPageWrapper";
 import ProductBacklogPage from "./pages/ProductBacklog/ProductBaclogPage";
+import ReportsPageWrapper from "./pages/ProjectReportPage/ReportsPageWrapper";
 
 
 // Protected route component
@@ -37,10 +42,11 @@ const ProtectedRoute = ({ children }) => {
 function AppRoutes() {
   return (
     <Routes>
-    
       {/* Auth Routes */}
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/signup" element={<SignUpPage />} />
+
+      <Route path="/invitation/accept" element={<InvitationAcceptPage />} />
 
       {/* Password Recovery Routes */}
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -58,6 +64,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/:projectId/reports"
+        element={
+          <ProtectedRoute>
+            <ReportsPageWrapper />
           </ProtectedRoute>
         }
       />
@@ -116,6 +130,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <AppRoutes />
+        <ToastContainer position="top-right" autoClose={4000} />
       </BrowserRouter>
     </AuthProvider>
   );

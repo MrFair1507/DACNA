@@ -7,7 +7,6 @@ const CreateProjectForm = ({ onClose, onProjectCreated }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    templateType: "default",
   });
 
   const [selectedMembers, setSelectedMembers] = useState([]);
@@ -39,7 +38,7 @@ const CreateProjectForm = ({ onClose, onProjectCreated }) => {
         {
           project_name: formData.title,
           project_description: formData.description,
-          template_type: formData.templateType,
+          template_type: "kanban", // ✅ fix cứng tại đây
           members: selectedMembers.map((m) => ({
             email: m.email,
             role_id: m.role_id || 2,
@@ -88,20 +87,6 @@ const CreateProjectForm = ({ onClose, onProjectCreated }) => {
               value={formData.description}
               onChange={handleChange}
             />
-          </div>
-
-          <div className="form-group">
-            <label>Loại dự án (Template)</label>
-            <select
-              name="templateType"
-              value={formData.templateType}
-              onChange={handleChange}
-            >
-              <option value="default">Mặc định</option>
-              <option value="kanban">Kanban</option>
-              <option value="scrum">Scrum</option>
-              <option value="project">Quản lý dự án</option>
-            </select>
           </div>
 
           <div className="form-group">

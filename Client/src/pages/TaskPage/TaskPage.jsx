@@ -4,7 +4,6 @@ import Sidebar from "../../components/Layout/Sidebar/Sidebar";
 import KanbanBoard from "../../components/Project/KanbanBoard";
 import AddTaskForm from "../../components/Project/AddTaskForm";
 import TaskDetailModal from "../../components/Project/TaskDetailModal";
-import "../dashboard/DashboardPage/DashboardPage.css";
 import MainHeader from "../../components/Layout/Header/MainHeader/MainHeader";
 
 const TaskPage = ({
@@ -24,9 +23,9 @@ const TaskPage = ({
 
   const realProjectId = projectId?.replace("project", "");
   const realSprintId = sprintId || sprint?.id || sprint?.sprint_id;
-  const templateType = project?.template_type || "default";
 
-  // ✅ Ref để gọi method từ KanbanBoard
+  const isExpired = sprint?.end_date && new Date(sprint.end_date) < new Date();
+
   const kanbanRef = useRef(null);
 
   const handleAddTask = (columnId, onTaskCreatedCallback) => {
@@ -48,20 +47,12 @@ const TaskPage = ({
     setTaskCreatedCallback(null);
   };
 
-  const handleTaskError = (error) => {
-    console.error("❌ Lỗi tạo task:", error);
-  };
-
   const handleTaskUpdate = (updatedTask) => {
     if (updatedTask.deleted) {
-      // Nếu đã xoá → reload nếu cần
-      return;
+      kanbanRef.current?.handleTaskDeleteInternal?.(updatedTask.task_id);
+    } else {
+      kanbanRef.current?.handleTaskUpdateInternal?.(updatedTask);
     }
-
-    if (kanbanRef.current?.handleTaskUpdateInternal) {
-      kanbanRef.current.handleTaskUpdateInternal(updatedTask);
-    }
-
     setShowTaskDetailModal(false);
     setSelectedTask(null);
     setSelectedColumn(null);
@@ -80,15 +71,11 @@ const TaskPage = ({
         showMemberMenu={true}
         onTabSelect={(id, tab) => {
           const realId = id?.replace("project", "");
-          if (tab === "board") {
-            window.location.href = `/dashboard/${realId}/sprints/${realSprintId}/tasks`;
-          } else if (tab === "sprints") {
-            window.location.href = `/dashboard/${realId}/sprints`;
-          } else if (tab === "backlog") {
-            window.location.href = `/dashboard/${realId}/backlog`;
-          } else if (tab === "reports") {
-            window.location.href = `/dashboard/${realId}/reports`;
-          }
+          const base = `/dashboard/${realId}`;
+          if (tab === "board") window.location.href = `${base}/sprints/${realSprintId}/tasks`;
+          else if (tab === "sprints") window.location.href = `${base}/sprints`;
+          else if (tab === "backlog") window.location.href = `${base}/backlog`;
+          else if (tab === "reports") window.location.href = `${base}/reports`;
         }}
       />
 
@@ -97,19 +84,16 @@ const TaskPage = ({
         <div className="content-area">
           <KanbanBoard
             ref={kanbanRef}
-            boardId={projectId}
             sprintId={realSprintId}
-            projectId={realProjectId}
             sprint={sprint}
-            onAddTask={handleAddTask}
+            onAddTask={!isExpired ? handleAddTask : undefined}
             onTaskClick={handleTaskClick}
             onTaskMoved={() => {}}
-            templateType={templateType}
           />
         </div>
       </div>
 
-      {showAddTaskForm && (
+      {showAddTaskForm && !isExpired && (
         <AddTaskForm
           sprintId={realSprintId}
           projectId={realProjectId}
@@ -121,7 +105,7 @@ const TaskPage = ({
             setTaskCreatedCallback(null);
           }}
           onSubmit={handleTaskSubmit}
-          onError={handleTaskError}
+          onError={(err) => console.error("❌ Lỗi tạo task:", err)}
         />
       )}
 
@@ -129,6 +113,7 @@ const TaskPage = ({
         <TaskDetailModal
           task={selectedTask}
           projectMembers={projectMembers}
+          readOnly={isExpired}
           onClose={() => setShowTaskDetailModal(false)}
           onTaskUpdate={handleTaskUpdate}
         />

@@ -124,7 +124,7 @@ const DashboardPage = () => {
       description: projectData.description,
       owner: `${user?.firstName || "Người"} ${user?.lastName || "dùng"}`,
       members: projectData.members?.length || 1,
-      template_type: projectData.template_type || "default",
+      template_type:  "kanban",
       lastModified: currentDate,
     };
     setProjects((prev) => [...prev, newProject]);

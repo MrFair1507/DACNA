@@ -1,0 +1,93 @@
+/* Container của nút chuông */
+.notification-btn {
+  position: relative;
+  font-size: 20px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.notification-btn:hover {
+  color: var(--primary-light);
+}
+
+/* Badge số lượng chưa đọc */
+.notification-btn .badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ff4d4f;
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-weight: bold;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+/* Dropdown hiển thị danh sách thông báo */
+.notification-dropdown {
+  position: absolute;
+  top: 38px;
+  right: 0;
+  width: 320px;
+  background-color: var(--dark-bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+/* Dòng thông báo */
+.notification-item {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-light);
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background-color: #2c2c46;
+}
+
+.notification-item.unread {
+  font-weight: 600;
+  background-color: rgba(157, 78, 221, 0.07);
+  border-left: 3px solid var(--primary-color);
+}
+
+.notification-item.read {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Phần mô tả nhỏ bên dưới */
+.notification-item .meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Trạng thái không có thông báo */
+.no-notification {
+  text-align: center;
+  padding: 16px;
+  color: var(--text-muted);
+  font-style: italic;
+}

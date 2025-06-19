@@ -26,7 +26,7 @@ const AddSprintBacklog = ({ projectId, onClose, onSubmit }) => {
         </div>
         <div className="modal-body">
           <input
-            type="text"
+            type="teaxt"
             placeholder="Tiêu đề"
             value={title}
             onChange={(e) => setTitle(e.target.value)}

@@ -1,0 +1,36 @@
+/* src/pages/InvitationAcceptPage/InvitationAcceptPage.css */
+.invitation-accept-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #f1f1f1;
+}
+
+.invitation-box {
+  background-color: #252535;
+  border: 1px solid #2e2e3f;
+  padding: 32px;
+  border-radius: 8px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.success {
+  color: #2ecc71;
+  background-color: rgba(46, 204, 113, 0.1);
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.error {
+  color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}

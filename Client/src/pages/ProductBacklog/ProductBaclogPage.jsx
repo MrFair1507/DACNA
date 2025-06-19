@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Layout/Sidebar/Sidebar";
 import MainHeader from "../../components/Layout/Header/MainHeader/MainHeader";
 import SprintsHeader from "../../components/Layout/Header/SprintsHeader/SprintsHeader";
@@ -7,8 +7,7 @@ import api from "../../services/api";
 import BacklogList from "../../components/SprintBacklog/BacklogList";
 import AddSprintBacklog from "../../components/SprintBacklog/AddSprintBacklog";
 import "../dashboard/DashboardPage/DashboardPage.css";
-import "./ProductBacklogPage.css"; // ✅ thêm file CSS mới nếu cần
-import { useNavigate } from "react-router-dom";
+import "./ProductBacklogPage.css";
 
 const ProductBacklogPage = () => {
   const { projectId } = useParams();
@@ -18,9 +17,31 @@ const ProductBacklogPage = () => {
   const [projects, setProjects] = useState([]);
   const [backlogs, setBacklogs] = useState([]);
   const [showAddBacklog, setShowAddBacklog] = useState(false);
+  const navigate = useNavigate();
 
   const currentProject = projects.find((p) => p.id === activeProjectId);
-  const navigate = useNavigate();
+
+  const fetchAllBacklogs = async (projId) => {
+    try {
+      const [unassignedRes, sprintsRes] = await Promise.all([
+        api.get(`/projects/${projId}/backlog`),
+        api.get(`/sprints?project_id=${projId}`),
+      ]);
+
+      const unassigned = unassignedRes.data || [];
+      const sprints = sprintsRes.data.sprints || [];
+
+      const assignedResList = await Promise.all(
+        sprints.map((s) => api.get(`/sprints/${s.sprint_id}/backlog`))
+      );
+
+      const assigned = assignedResList.flatMap((res) => res.data || []);
+      const allBacklogs = [...unassigned, ...assigned];
+      setBacklogs(allBacklogs);
+    } catch (err) {
+      console.error("❌ Lỗi khi tải backlog:", err);
+    }
+  };
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -45,31 +66,8 @@ const ProductBacklogPage = () => {
   }, []);
 
   useEffect(() => {
-    const fetchAllBacklogs = async () => {
-      try {
-        const [unassignedRes, sprintsRes] = await Promise.all([
-          api.get(`/projects/${realProjectId}/backlog`),
-          api.get(`/sprints?project_id=${realProjectId}`),
-        ]);
-
-        const unassigned = unassignedRes.data || [];
-        const sprints = sprintsRes.data.sprints || [];
-
-        const assignedResList = await Promise.all(
-          sprints.map((s) => api.get(`/sprints/${s.sprint_id}/backlog`))
-        );
-
-        const assigned = assignedResList.flatMap((res) => res.data || []);
-        const allBacklogs = [...unassigned, ...assigned];
-
-        setBacklogs(allBacklogs);
-      } catch (err) {
-        console.error("❌ Lỗi khi tải toàn bộ backlog:", err);
-      }
-    };
-
     if (realProjectId) {
-      fetchAllBacklogs();
+      fetchAllBacklogs(realProjectId);
     }
   }, [realProjectId]);
 
@@ -103,7 +101,6 @@ const ProductBacklogPage = () => {
         <div className="content-area">
           <div className="product-backlog-header">
             <h2 className="backlog-title">Product Backlog</h2>
-
             <button
               className="create-sprint-btn"
               onClick={() => setShowAddBacklog(true)}
@@ -131,9 +128,7 @@ const ProductBacklogPage = () => {
                 title,
                 description,
               });
-
-              const res = await api.get(`/projects/${projectId}/backlog`);
-              setBacklogs(res.data || []);
+              await fetchAllBacklogs(projectId);
               setShowAddBacklog(false);
             } catch (err) {
               console.error("❌ Lỗi tạo backlog:", err);

@@ -11,9 +11,9 @@ const KanbanColumn = ({
 }) => {
   return (
     <div
-      className="kanban-column"
+      className={`kanban-column column-${column.id}`}
       onDragOver={onDragOver}
-      onDrop={() => onDrop(column.id)}
+      onDrop={() => onDrop?.(column.id)}
     >
       <div className="column-header">
         <h3>{column.title}</h3>
@@ -28,7 +28,7 @@ const KanbanColumn = ({
           <TaskCard
             key={task.id}
             task={task}
-            onDragStart={() => onDragStart(task, column.id)}
+            onDragStart={() => onDragStart?.(task, column.id)}
             onClick={() => onTaskClick(task, column.id)}
           />
         ))}

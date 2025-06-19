@@ -1,73 +1,86 @@
 /* KanbanColumn.css */
 .kanban-column {
-    flex: 0 0 var(--column-width);
-    min-width: var(--column-width);
-    margin-right: var(--column-gap);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-  }
-  
-  .column-header {
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid var(--border-color);
-  }
-  
-  .column-header h3 {
-    font-size: 16px;
-    font-weight: 600;
-    flex: 1;
-  }
-  
-  .task-count {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--text-muted);
-    font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    margin: 0 8px;
-  }
-  
-  .column-menu-btn {
-    color: var(--text-muted);
-    width: 24px;
-    height: 24px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .column-menu-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--text-light);
-  }
-  
-  .column-tasks {
-    padding: 12px;
-    overflow-y: auto;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .add-card-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 0;
-    margin-top: 8px;
-    border-radius: 4px;
-    color: var(--text-muted);
-    transition: background-color 0.2s;
-  }
-  
-  .add-card-btn:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: var(--text-light);
-  }
+  background-color: #1e1e2f;
+  border-radius: 8px;
+  border-left: 6px solid transparent;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+  transition: background-color 0.2s ease;
+}
+.column-notStarted {
+  border-left-color: #9e9e9e; /* xám */
+}
+.column-todo {
+  border-left-color: #42a5f5; /* xanh dương */
+}
+.column-inProgress {
+  border-left-color: #ffb300; /* vàng cam */
+}
+.column-review {
+  border-left-color: #ab47bc; /* tím */
+}
+.column-done {
+  border-left-color: #66bb6a; /* xanh lá */
+}
+
+.column-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.column-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+  color: #f1f1f1;
+}
+
+.task-count {
+  color: #ccc;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin: 0 8px;
+}
+
+.column-menu-btn {
+  color: var(--text-muted);
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.column-menu-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+}
+
+.column-tasks {
+  padding: 12px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.add-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  margin-top: 8px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: background-color 0.2s;
+}
+
+.add-card-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-light);
+}

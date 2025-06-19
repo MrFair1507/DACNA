@@ -3,7 +3,7 @@ import "./TaskDetailModal.css";
 import api from "../../services/api";
 import useAssigneeManager from "../../hooks/useAssigneeManager";
 
-const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
+const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate, readOnly = false }) => {
   const [editedTask, setEditedTask] = useState({ ...task });
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
@@ -47,55 +47,49 @@ const TaskDetailModal = ({ task, projectMembers, onClose, onTaskUpdate }) => {
     setEditedTask((prev) => ({ ...prev, priority: level }));
   };
 
-const handleSave = async () => {
-  if (!editedTask.title?.trim()) {
-    setError("Tiêu đề không được để trống");
-    return;
-  }
+  const handleSave = async () => {
+    if (readOnly || !editedTask.title?.trim()) return;
 
-  try {
-    // Tạo bản sao chứa đủ dữ liệu
-    const payload = {
-      task_title: editedTask.title || task.title,
-      task_description: editedTask.description ?? task.description,
-      task_status: editedTask.status || task.task_status || "Not Started",
-      priority: editedTask.priority || task.priority || "Medium",
-      start_date: editedTask.start_date || task.start_date || null,
-      due_date: editedTask.dueDate || task.dueDate || null,
-    };
+    try {
+      const payload = {
+        task_title: editedTask.title || task.title,
+        task_description: editedTask.description ?? task.description,
+        task_status: editedTask.status || task.task_status || "Not Started",
+        priority: editedTask.priority || task.priority || "Medium",
+        start_date: editedTask.start_date || task.start_date || null,
+        due_date: editedTask.dueDate || task.dueDate || null,
+      };
 
-    await api.put(`/tasks/${editedTask.task_id}`, payload);
+      await api.put(`/tasks/${editedTask.task_id}`, payload);
 
-    // Gán người phụ trách nếu có thay đổi
-    if (
-      editedTask.assigneeId &&
-      editedTask.assigneeId !== task.assigneeId
-    ) {
-      await assignUserToTask(editedTask.assigneeId);
+      if (
+        editedTask.assigneeId &&
+        editedTask.assigneeId !== task.assigneeId
+      ) {
+        await assignUserToTask(editedTask.assigneeId);
+      }
+
+      const assignedMember = projectMembers.find(
+        (m) => m.user_id === editedTask.assigneeId
+      );
+
+      onTaskUpdate({
+        ...task,
+        ...editedTask,
+        ...payload,
+        assignee: assignedMember?.full_name || "Unassigned",
+        assigneeInitial: assignedMember?.full_name?.[0]?.toUpperCase() || "U",
+      });
+
+      setIsEditing(false);
+    } catch (error) {
+      console.error(error);
+      setError("Lỗi khi cập nhật task");
     }
-
-    const assignedMember = projectMembers.find(
-      (m) => m.user_id === editedTask.assigneeId
-    );
-
-    onTaskUpdate({
-      ...task,
-      ...editedTask,
-      ...payload,
-      assignee: assignedMember?.full_name || "Unassigned",
-      assigneeInitial: assignedMember?.full_name?.[0]?.toUpperCase() || "U",
-    });
-
-    setIsEditing(false);
-  } catch (error) {
-    console.error(error);
-    setError("Lỗi khi cập nhật task");
-  }
-};
-
-
+  };
 
   const handleDelete = async () => {
+    if (readOnly) return;
     try {
       await api.delete(`/tasks/${editedTask.task_id}`);
       onTaskUpdate({ ...editedTask, deleted: true });
@@ -158,6 +152,7 @@ const handleSave = async () => {
                   name="title"
                   value={editedTask.title}
                   onChange={handleInputChange}
+                  disabled={readOnly}
                 />
               </div>
 
@@ -166,6 +161,7 @@ const handleSave = async () => {
                 <select
                   value={editedTask.assigneeId || ""}
                   onChange={handleAssigneeChange}
+                  disabled={readOnly}
                 >
                   <option value="">-- Chọn người phụ trách --</option>
                   {projectMembers.map((member) => (
@@ -183,6 +179,7 @@ const handleSave = async () => {
                   name="dueDate"
                   value={editedTask.dueDate || ""}
                   onChange={handleInputChange}
+                  disabled={readOnly}
                 />
               </div>
 
@@ -195,7 +192,7 @@ const handleSave = async () => {
                       className={`priority-badge priority-${level.toLowerCase()} ${
                         editedTask.priority === level ? "selected" : ""
                       }`}
-                      onClick={() => handlePriorityChange(level)}
+                      onClick={() => !readOnly && handlePriorityChange(level)}
                     >
                       {level === "High" ? "Cao" : level === "Medium" ? "Trung bình" : "Thấp"}
                     </span>
@@ -210,6 +207,7 @@ const handleSave = async () => {
                   value={editedTask.description}
                   onChange={handleInputChange}
                   rows="4"
+                  disabled={readOnly}
                 />
               </div>
             </>
@@ -220,12 +218,16 @@ const handleSave = async () => {
           {isEditing ? (
             <>
               <button className="cancel-btn" onClick={() => setIsEditing(false)}>Hủy</button>
-              <button className="submit-btn" onClick={handleSave}>Lưu</button>
+              <button className="submit-btn" onClick={handleSave} disabled={readOnly}>Lưu</button>
             </>
           ) : (
             <>
-              <button className="cancel-btn" onClick={handleDelete}>Xóa</button>
-              <button className="submit-btn" onClick={() => setIsEditing(true)}>Chỉnh sửa</button>
+              {!readOnly && (
+                <>
+                  <button className="cancel-btn" onClick={handleDelete}>Xóa</button>
+                  <button className="submit-btn" onClick={() => setIsEditing(true)}>Chỉnh sửa</button>
+                </>
+              )}
             </>
           )}
         </div>

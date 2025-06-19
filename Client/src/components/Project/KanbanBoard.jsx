@@ -1,4 +1,3 @@
-// 📁 src/components/Project/KanbanBoard.jsx
 import React, {
   useState,
   useEffect,
@@ -10,302 +9,255 @@ import "./KanbanBoard.css";
 import KanbanColumn from "./KanbanColumn";
 import api from "../../services/api";
 
-const KanbanBoard = forwardRef(
-  (
-    {
-      sprintId,
-      sprint,
-      onAddTask,
-      onTaskClick,
-      onTaskMoved,
-      templateType = "default",
-    },
-    ref
-  ) => {
-    const [columns, setColumns] = useState({});
-    const [progress, setProgress] = useState(0);
-    const [draggedTask, setDraggedTask] = useState(null);
-    const [draggedColumn, setDraggedColumn] = useState(null);
+const statusToColumn = {
+  notstarted: "notStarted",
+  todo: "todo",
+  inprogress: "inProgress",
+  review: "review",
+  completed: "done",
+};
 
-    const getDefaultColumns = useCallback(() => {
-      const base = {
-        notStarted: { id: "notStarted", title: "Chưa phân loại", tasks: [] },
-        todo: { id: "todo", title: "To Do", tasks: [] },
-        inProgress: { id: "inProgress", title: "In Progress", tasks: [] },
-      };
-      if (templateType !== "scrum") {
-        base.review = { id: "review", title: "Review", tasks: [] };
-      }
-      base.done = { id: "done", title: "Done", tasks: [] };
-      return base;
-    }, [templateType]);
+const columnToStatus = {
+  notStarted: "Not Started",
+  todo: "Not Started",
+  inProgress: "In Progress",
+  review: "In Progress",
+  done: "Completed",
+};
 
-    const mapStatusToColumn = useCallback(
-      (status) => {
-        const normalized = (status || "").toLowerCase().replace(/\s/g, "");
-        if (normalized === "notstarted") return "notStarted";
-        if (normalized === "todo") return "todo";
-        if (normalized === "inprogress") return "inProgress";
-        if (normalized === "review") {
-          return templateType === "scrum" ? "inProgress" : "review";
-        }
-        if (normalized === "completed") return "done";
-        return "notStarted";
-      },
-      [templateType]
+const KanbanBoard = forwardRef(({ sprintId, sprint, onAddTask, onTaskClick, onTaskMoved }, ref) => {
+  const [columns, setColumns] = useState({});
+  const [progress, setProgress] = useState(0);
+  const [draggedTask, setDraggedTask] = useState(null);
+  const [draggedColumn, setDraggedColumn] = useState(null);
+
+  const isExpired = sprint?.end_date && new Date(sprint.end_date) < new Date();
+
+  const getDefaultColumns = () => ({
+    notStarted: { id: "notStarted", title: "Chưa phân loại", tasks: [] },
+    todo: { id: "todo", title: "To Do", tasks: [] },
+    inProgress: { id: "inProgress", title: "In Progress", tasks: [] },
+    review: { id: "review", title: "Review", tasks: [] },
+    done: { id: "done", title: "Done", tasks: [] },
+  });
+
+  const mapStatusToColumn = (status) =>
+    statusToColumn[(status || "").toLowerCase().replace(/\s/g, "")] || "notStarted";
+
+  const reverseMapColumnToStatus = (colId) => columnToStatus[colId] || "Not Started";
+
+  const formatPriority = (val) => {
+    if (!val) return "Medium";
+    const v = val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
+    return ["Low", "Medium", "High"].includes(v) ? v : "Medium";
+  };
+
+  const formatTask = useCallback((task) => {
+    const normalized = (task.task_status || "").trim().toLowerCase().replace(/\s+/g, "");
+    const finalStatus = columnToStatus[statusToColumn[normalized]] || "Not Started";
+    return {
+      task_id: task.task_id,
+      title: task.task_title || "(Không có tiêu đề)",
+      description: task.task_description || "",
+      priority: formatPriority(task.priority),
+      assignee: task.assignee_name || "Unassigned",
+      assigneeId: task.assigned_user_id || null,
+      assigneeInitial: (task.assignee_name?.[0] || "U").toUpperCase(),
+      dueDate: task.due_date
+        ? new Date(task.due_date).toLocaleDateString("vi-VN")
+        : "",
+      start_date: task.start_date || null,
+      task_status: finalStatus,
+      sprint_backlog_id: task.sprint_backlog_id,
+      sprint_backlog_title: task.sprint_backlog_title || "",
+    };
+  }, []);
+
+  const calculateProgress = (cols) => {
+    let total = 0, done = 0;
+    Object.values(cols).forEach(col =>
+      col.tasks.forEach((t) => {
+        total++;
+        if (t.task_status === "Completed") done++;
+      })
     );
+    return total > 0 ? Math.round((done / total) * 100) : 0;
+  };
 
-    const reverseMapColumnToStatus = (columnId) => {
-      switch (columnId) {
-        case "notStarted":
-        case "todo":
-          return "Not Started";
-        case "inProgress":
-        case "review":
-          return "In Progress";
-        case "done":
-          return "Completed";
-        default:
-          return "Not Started";
-      }
-    };
-
-    const formatPriority = (value) => {
-      if (!value) return "Medium";
-      const normalized =
-        value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-      return ["Low", "Medium", "High"].includes(normalized)
-        ? normalized
-        : "Medium";
-    };
-
-    const formatTask = useCallback((task) => {
-      const rawStatus = (task.task_status || "")
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, "");
-      const finalStatus =
-        {
-          notstarted: "Not Started",
-          todo: "To Do",
-          inprogress: "In Progress",
-          review: "In Progress",
-          completed: "Completed",
-        }[rawStatus] || "Not Started";
-
-      return {
-        id: `task-${task.task_id}`,
-        task_id: task.task_id,
-        title: task.task_title || "(Không có tiêu đề)",
-        description: task.task_description || "",
-        content: task.task_title || "(Không có tiêu đề)",
-        priority: formatPriority(task.priority),
-        assignee: task.assignee_name || "Unassigned",
-        assigneeId: task.assigned_user_id || null,
-        assigneeInitial: (task.assignee_name?.[0] || "U").toUpperCase(),
-        dueDate: task.due_date
-          ? new Date(task.due_date).toLocaleDateString("vi-VN")
-          : "",
-        start_date: task.start_date || null,
-        status: finalStatus,
-        task_status: finalStatus,
-        sprint_backlog_id: task.sprint_backlog_id,
-      };
-    }, []);
-
-    const loadTasksFromAPI = useCallback(async () => {
-      try {
-        const newColumns = getDefaultColumns();
-        const backlogRes = await api.get(`/sprints/${sprintId}/backlog`);
-        const backlogs = backlogRes.data || [];
-
-        for (const backlog of backlogs) {
-          const { sprint_backlog_id, title } = backlog;
-          const tasksRes = await api.get(
-            `/tasks/backlog/${sprint_backlog_id}/tasks`
-          );
-          const tasks = tasksRes.data || [];
-
-          for (const task of tasks) {
-            const formatted = {
-              ...formatTask(task),
-              sprint_backlog_title: title || "",
-            };
-            const columnId = mapStatusToColumn(formatted.task_status);
-            (newColumns[columnId] || newColumns.notStarted).tasks.push(
-              formatted
-            );
-          }
+  const loadTasks = useCallback(async () => {
+    try {
+      const cols = getDefaultColumns();
+      const backlogRes = await api.get(`/sprints/${sprintId}/backlog`);
+      for (const b of backlogRes.data || []) {
+        const tasksRes = await api.get(`/tasks/backlog/${b.sprint_backlog_id}/tasks`);
+        for (const t of tasksRes.data || []) {
+          const task = formatTask({ ...t, sprint_backlog_title: b.title });
+          const colId = mapStatusToColumn(task.task_status);
+          cols[colId].tasks.push(task);
         }
-
-        setColumns(newColumns);
-
-        let total = 0;
-        let completed = 0;
-        Object.values(newColumns).forEach((col) => {
-          col.tasks.forEach((task) => {
-            total++;
-            if (task.task_status === "Completed") completed++;
-          });
-        });
-        setProgress(total > 0 ? Math.round((completed / total) * 100) : 0);
-      } catch (err) {
-        console.error("❌ Lỗi khi tải backlog:", err);
-        setColumns(getDefaultColumns());
-        setProgress(0);
       }
-    }, [sprintId, getDefaultColumns, formatTask, mapStatusToColumn]);
+      setColumns(cols);
+    } catch (err) {
+      console.error("❌ Lỗi load backlog:", err);
+      setColumns(getDefaultColumns());
+    }
+  }, [sprintId, formatTask]);
 
-    useEffect(() => {
-      if (sprintId) loadTasksFromAPI();
-      else setColumns(getDefaultColumns());
-    }, [sprintId, loadTasksFromAPI, getDefaultColumns]);
+  useEffect(() => {
+    if (sprintId) loadTasks();
+    else setColumns(getDefaultColumns());
+  }, [sprintId, loadTasks]);
 
-    const handleDragStart = (task, columnId) => {
-      setDraggedTask(task);
-      setDraggedColumn(columnId);
+  useEffect(() => {
+    setProgress(calculateProgress(columns));
+  }, [columns]);
+
+const handleDrop = async (targetCol) => {
+  if (isExpired || !draggedTask || draggedColumn === targetCol) {
+    return resetDragState();
+  }
+
+  const taskId = draggedTask.task_id || draggedTask.id?.replace("task-", "");
+  if (!taskId) {
+    console.warn("⚠️ Không tìm thấy task_id hợp lệ:", draggedTask);
+    return resetDragState();
+  }
+
+  try {
+    const newStatus = reverseMapColumnToStatus(targetCol);
+
+    const payload = {
+      task_title: draggedTask.title,
+      task_description: draggedTask.description || "",
+      task_status: newStatus,
+      priority: formatPriority(draggedTask.priority),
+      start_date: draggedTask.start_date || null,
+      due_date: draggedTask.dueDate || null,
     };
 
-    const handleDragOver = (e) => e.preventDefault();
+    // ✅ Cập nhật trạng thái task
+    await api.put(`/tasks/${taskId}`, payload);
 
-    const handleDrop = async (targetColumnId) => {
-      if (!draggedTask || draggedColumn === targetColumnId)
-        return resetDragState();
-
+    // ✅ Nếu chuyển sang Completed thì cập nhật cả task_assignment
+    if (newStatus === "Completed" && draggedTask.assigneeId) {
       try {
-        const newStatus = reverseMapColumnToStatus(targetColumnId);
-        const formatDate = (value) => {
-          if (!value) return null;
-          const parsed = new Date(value);
-          return isNaN(parsed.getTime())
-            ? null
-            : parsed.toISOString().split("T")[0];
-        };
+        const res = await api.get("/task-assignments");
+        const assignment = res.data.find(
+          (a) => a.task_id === taskId && a.user_id === draggedTask.assigneeId
+        );
 
-        const payload = {
-          task_title: draggedTask.title,
-          task_description: draggedTask.description,
-          task_status: newStatus,
-          priority: formatPriority(draggedTask.priority),
-          start_date: formatDate(draggedTask.start_date),
-          due_date: formatDate(draggedTask.dueDate),
-        };
-
-        await api.put(`/tasks/${draggedTask.task_id}`, payload);
-
-        const updatedTask = {
-          ...draggedTask,
-          status: newStatus,
-          task_status: newStatus,
-        };
-
-        setColumns((prev) => {
-          const updated = { ...prev };
-
-          const sourceCol = {
-            ...updated[draggedColumn],
-            tasks: [...updated[draggedColumn].tasks],
-          };
-          const targetCol = {
-            ...updated[targetColumnId],
-            tasks: [...updated[targetColumnId].tasks],
-          };
-
-          sourceCol.tasks = sourceCol.tasks.filter(
-            (t) => t.id !== draggedTask.id
-          );
-          targetCol.tasks.push(updatedTask);
-
-          updated[draggedColumn] = sourceCol;
-          updated[targetColumnId] = targetCol;
-
-          return updated;
-        });
-
-        onTaskMoved?.(draggedTask.id, draggedColumn, targetColumnId);
+        if (assignment) {
+          await api.put(`/task-assignments/${assignment.assignment_id}`, {
+            completion_percentage: 100,
+            status: "Completed",
+          });
+        }
       } catch (err) {
-        console.error("❌ Lỗi khi cập nhật task:", err);
-      } finally {
-        resetDragState();
+        console.warn("⚠️ Không thể cập nhật trạng thái phân công:", err.message);
       }
+    }
+
+    // ✅ Cập nhật UI
+    const updatedTask = {
+      ...draggedTask,
+      task_id: taskId,
+      task_status: newStatus,
+      status: newStatus,
     };
 
-    const resetDragState = () => {
-      setDraggedTask(null);
-      setDraggedColumn(null);
-    };
+    setColumns((prev) => {
+      const updated = getDefaultColumns();
+      Object.values(prev).forEach((col) =>
+        col.tasks.forEach((t) => {
+          if (t.task_id !== taskId)
+            updated[mapStatusToColumn(t.task_status)].tasks.push(t);
+        })
+      );
+      updated[targetCol].tasks.push(updatedTask);
+      return updated;
+    });
 
-    // ✅ Cho phép bên ngoài gọi cập nhật
-    const handleTaskUpdateInternal = (updatedTask) => {
-      setColumns((prev) => {
-        const updated = { ...prev };
-        Object.keys(updated).forEach((colId) => {
-          const idx = updated[colId].tasks.findIndex(
-            (t) => t.task_id === updatedTask.task_id
-          );
-          if (idx !== -1) {
-            updated[colId].tasks[idx] = {
-              ...updated[colId].tasks[idx],
-              ...updatedTask,
-            };
-          }
-        });
-        return updated;
+    onTaskMoved?.(taskId, draggedColumn, targetCol);
+  } catch (err) {
+    console.error("❌ Drop lỗi:", err);
+  } finally {
+    resetDragState();
+  }
+};
+
+
+
+
+  const resetDragState = () => {
+    setDraggedTask(null);
+    setDraggedColumn(null);
+  };
+
+  const handleTaskUpdateInternal = (task) => {
+    setColumns((prev) => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach((colId) => {
+        updated[colId].tasks = updated[colId].tasks.map((t) =>
+          t.task_id === task.task_id ? { ...t, ...task } : t
+        );
       });
-    };
+      return updated;
+    });
+  };
 
-    useImperativeHandle(ref, () => ({
-      handleTaskUpdateInternal,
-    }));
+  const handleTaskDeleteInternal = (taskId) => {
+    setColumns((prev) => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach((colId) => {
+        updated[colId].tasks = updated[colId].tasks.filter((t) => t.task_id !== taskId);
+      });
+      return updated;
+    });
+  };
 
-    return (
-      <div className="kanban-container">
-        {sprint && (
-          <div className="sprint-info">
-            <div className="sprint-info-header">
-              <h3>{sprint.name}</h3>
-              <span className={`sprint-status status-${sprint.status}`}>
-                {sprint.status === "active"
-                  ? "Đang tiến hành"
-                  : sprint.status === "completed"
-                  ? "Hoàn thành"
-                  : "Đã lên kế hoạch"}
-              </span>
+  useImperativeHandle(ref, () => ({
+    handleTaskUpdateInternal,
+    handleTaskDeleteInternal,
+  }));
+
+  return (
+    <div className="kanban-container">
+      {sprint && (
+        <div className="sprint-info">
+          <div className="sprint-info-header">
+            <h3>{sprint.name}</h3>
+            <span className={`sprint-status status-${sprint.status}`}>
+              {sprint.status === "active" ? "Đang tiến hành" : sprint.status === "completed" ? "Hoàn thành" : "Đã lên kế hoạch"}
+            </span>
+          </div>
+          <div className="sprint-progress">
+            <div className="progress-info">
+              <span>Tiến độ</span>
+              <span>{progress}%</span>
             </div>
-            <div className="sprint-dates">
-              <span>Bắt đầu: {sprint.startDate}</span>
-              <span>Kết thúc: {sprint.endDate}</span>
-            </div>
-            <div className="sprint-progress">
-              <div className="progress-info">
-                <span>Tiến độ</span>
-                <span>{progress}%</span>
-              </div>
-              <div className="progress-bar">
-                <div
-                  className="progress-fill"
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: `${progress}%` }} />
             </div>
           </div>
-        )}
-
-        <div className="kanban-board">
-          {Object.values(columns).map((column) => (
-            <KanbanColumn
-              key={column.id}
-              column={column}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onTaskClick={onTaskClick}
-            />
-          ))}
         </div>
+      )}
+      <div className="kanban-board">
+        {Object.values(columns).map((col) => (
+          <KanbanColumn
+            key={col.id}
+            column={col}
+            onDragStart={!isExpired ? (t) => {
+              setDraggedTask(t);
+              setDraggedColumn(col.id);
+            } : undefined}
+            onDragOver={(e) => e.preventDefault()}
+             onDrop={isExpired ? undefined : () => handleDrop(col.id)}
+            onTaskClick={onTaskClick}
+          />
+        ))}
       </div>
-    );
-  }
-);
+    </div>
+  );
+});
 
 export default KanbanBoard;
