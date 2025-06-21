@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import "./CreateSprintBacklogForm.css";
 import api from "../../services/api";
 import SprintBacklogCard from "../SprintBacklog/SprintBacklogCard";
@@ -10,39 +10,38 @@ const CreateSprintBacklogForm = ({
   onClose,
   onSubmit,
   onTaskCreated,
+  isExpired,
 }) => {
   const [backlogs, setBacklogs] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [tab, setTab] = useState("add");
   const [sprintBacklogs, setSprintBacklogs] = useState([]);
 
-  const fetchBacklogs = async () => {
+  const fetchBacklogs = useCallback(async () => {
     try {
       const res = await api.get(`/projects/${projectId}/backlog`);
       setBacklogs(res.data || []);
     } catch (err) {
       console.error("❌ Lỗi tải backlog:", err);
     }
-  };
+  }, [projectId]);
 
-  const fetchSprintBacklogs = async () => {
+  const fetchSprintBacklogs = useCallback(async () => {
     try {
       const res = await api.get(`/sprints/${sprint.sprint_id}/backlog`);
       setSprintBacklogs(res.data || []);
     } catch (err) {
       console.error("❌ Lỗi tải backlog của Sprint:", err);
     }
-  };
+  }, [sprint?.sprint_id]);
 
   useEffect(() => {
     fetchBacklogs();
-    // eslint-disable-next-line
-  }, [projectId]);
+  }, [fetchBacklogs]);
 
   useEffect(() => {
     if (tab === "view") fetchSprintBacklogs();
-    // eslint-disable-next-line
-  }, [tab]);
+  }, [tab, fetchSprintBacklogs]);
 
   const toggleSelect = (id) => {
     setSelectedIds((prev) =>
@@ -84,28 +83,52 @@ const CreateSprintBacklogForm = ({
       <div className="modal-container">
         <div className="modal-header">
           <div className="modal-tabs">
-            <button className={tab === "add" ? "active-tab" : ""} onClick={() => setTab("add")}>➕ Thêm backlog</button>
-            <button className={tab === "view" ? "active-tab" : ""} onClick={() => setTab("view")}>📋 Xem backlog</button>
+            {!isExpired && (
+              <button
+                className={tab === "add" ? "active-tab" : ""}
+                onClick={() => setTab("add")}
+              >
+                ➕ Thêm backlog
+              </button>
+            )}
+            <button
+              className={tab === "view" ? "active-tab" : ""}
+              onClick={() => setTab("view")}
+            >
+              📋 Xem backlog
+            </button>
           </div>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <button className="close-btn" onClick={onClose}>
+            ×
+          </button>
         </div>
 
         <div className="modal-body">
-          {tab === "add" && (
+          {tab === "add" && !isExpired && (
             <>
               <p>Chọn các Product Backlog để thêm vào Sprint:</p>
               <ol className="backlog-list">
                 {backlogs.length === 0 ? (
-                  <p style={{ color: "#888", marginTop: 16 }}>Không có backlog nào chưa được gán sprint.</p>
+                  <p style={{ color: "#888", marginTop: 16 }}>
+                    Không có backlog nào chưa được gán sprint.
+                  </p>
                 ) : (
                   backlogs.map((item) => {
-                    const selected = selectedIds.includes(item.sprint_backlog_id);
+                    const selected = selectedIds.includes(
+                      item.sprint_backlog_id
+                    );
                     return (
-                      <li key={item.sprint_backlog_id} className={`backlog-item ${selected ? "selected" : ""}`} onClick={() => toggleSelect(item.sprint_backlog_id)}>
+                      <li
+                        key={item.sprint_backlog_id}
+                        className={`backlog-item ${selected ? "selected" : ""}`}
+                        onClick={() => toggleSelect(item.sprint_backlog_id)}
+                      >
                         <div className="tick">{selected && "✔"}</div>
                         <div className="backlog-text">
                           <strong>{item.title}</strong>
-                          <div className="description">{item.description || <i>Không có mô tả</i>}</div>
+                          <div className="description">
+                            {item.description || <i>Không có mô tả</i>}
+                          </div>
                         </div>
                       </li>
                     );
@@ -118,7 +141,9 @@ const CreateSprintBacklogForm = ({
           {tab === "view" && (
             <div className="sprint-backlog-list">
               {sprintBacklogs.length === 0 ? (
-                <p style={{ color: "#aaa", marginTop: 16 }}>⚠️ Chưa có backlog nào trong Sprint.</p>
+                <p style={{ color: "#aaa", marginTop: 16 }}>
+                  ⚠️ Chưa có backlog nào trong Sprint.
+                </p>
               ) : (
                 sprintBacklogs.map((item) => (
                   <SprintBacklogCard
@@ -128,17 +153,24 @@ const CreateSprintBacklogForm = ({
                     projectId={projectId}
                     projectMembers={projectMembers}
                     onTaskCreated={onTaskCreated}
-                  />
+                    isExpired={isExpired} // ✅
+                  />    
                 ))
               )}
             </div>
           )}
         </div>
 
-        {tab === "add" && (
+        {tab === "add" && !isExpired && (
           <div className="modal-footer">
-            <button className="cancel-btn" onClick={onClose}>Hủy</button>
-            <button className="submit-btn" onClick={handleSubmit} disabled={selectedIds.length === 0}>
+            <button className="cancel-btn" onClick={onClose}>
+              Hủy
+            </button>
+            <button
+              className="submit-btn"
+              onClick={handleSubmit}
+              disabled={selectedIds.length === 0}
+            >
               Thêm vào Sprint
             </button>
           </div>

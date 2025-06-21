@@ -63,9 +63,7 @@ const KanbanBoard = forwardRef(({ sprintId, sprint, onAddTask, onTaskClick, onTa
       assignee: task.assignee_name || "Unassigned",
       assigneeId: task.assigned_user_id || null,
       assigneeInitial: (task.assignee_name?.[0] || "U").toUpperCase(),
-      dueDate: task.due_date
-        ? new Date(task.due_date).toLocaleDateString("vi-VN")
-        : "",
+      dueDate: task.due_date ? new Date(task.due_date).toLocaleDateString("vi-VN") : "",
       start_date: task.start_date || null,
       task_status: finalStatus,
       sprint_backlog_id: task.sprint_backlog_id,
@@ -112,81 +110,63 @@ const KanbanBoard = forwardRef(({ sprintId, sprint, onAddTask, onTaskClick, onTa
     setProgress(calculateProgress(columns));
   }, [columns]);
 
-const handleDrop = async (targetCol) => {
-  if (isExpired || !draggedTask || draggedColumn === targetCol) {
-    return resetDragState();
-  }
+  const handleDrop = async (targetCol) => {
+    if (isExpired || !draggedTask || draggedColumn === targetCol) return resetDragState();
 
-  const taskId = draggedTask.task_id || draggedTask.id?.replace("task-", "");
-  if (!taskId) {
-    console.warn("⚠️ Không tìm thấy task_id hợp lệ:", draggedTask);
-    return resetDragState();
-  }
+    const taskId = draggedTask.task_id || draggedTask.id?.replace("task-", "");
+    if (!taskId) return resetDragState();
 
-  try {
-    const newStatus = reverseMapColumnToStatus(targetCol);
+    try {
+      const newStatus = reverseMapColumnToStatus(targetCol);
 
-    const payload = {
-      task_title: draggedTask.title,
-      task_description: draggedTask.description || "",
-      task_status: newStatus,
-      priority: formatPriority(draggedTask.priority),
-      start_date: draggedTask.start_date || null,
-      due_date: draggedTask.dueDate || null,
-    };
+      await api.put(`/tasks/${taskId}`, {
+        task_title: draggedTask.title,
+        task_description: draggedTask.description || "",
+        task_status: newStatus,
+        priority: formatPriority(draggedTask.priority),
+        start_date: draggedTask.start_date || null,
+        due_date: draggedTask.dueDate || null,
+      });
 
-    // ✅ Cập nhật trạng thái task
-    await api.put(`/tasks/${taskId}`, payload);
-
-    // ✅ Nếu chuyển sang Completed thì cập nhật cả task_assignment
-    if (newStatus === "Completed" && draggedTask.assigneeId) {
-      try {
+      if (newStatus === "Completed" && draggedTask.assigneeId) {
         const res = await api.get("/task-assignments");
         const assignment = res.data.find(
           (a) => a.task_id === taskId && a.user_id === draggedTask.assigneeId
         );
-
         if (assignment) {
           await api.put(`/task-assignments/${assignment.assignment_id}`, {
             completion_percentage: 100,
             status: "Completed",
           });
         }
-      } catch (err) {
-        console.warn("⚠️ Không thể cập nhật trạng thái phân công:", err.message);
       }
+
+      const updatedTask = {
+        ...draggedTask,
+        task_id: taskId,
+        task_status: newStatus,
+        status: newStatus,
+      };
+
+      setColumns((prev) => {
+        const updated = getDefaultColumns();
+        Object.values(prev).forEach((col) =>
+          col.tasks.forEach((t) => {
+            if (t.task_id !== taskId)
+              updated[mapStatusToColumn(t.task_status)].tasks.push(t);
+          })
+        );
+        updated[targetCol].tasks.push(updatedTask);
+        return updated;
+      });
+
+      onTaskMoved?.(taskId, draggedColumn, targetCol);
+    } catch (err) {
+      console.error("❌ Drop lỗi:", err);
+    } finally {
+      resetDragState();
     }
-
-    // ✅ Cập nhật UI
-    const updatedTask = {
-      ...draggedTask,
-      task_id: taskId,
-      task_status: newStatus,
-      status: newStatus,
-    };
-
-    setColumns((prev) => {
-      const updated = getDefaultColumns();
-      Object.values(prev).forEach((col) =>
-        col.tasks.forEach((t) => {
-          if (t.task_id !== taskId)
-            updated[mapStatusToColumn(t.task_status)].tasks.push(t);
-        })
-      );
-      updated[targetCol].tasks.push(updatedTask);
-      return updated;
-    });
-
-    onTaskMoved?.(taskId, draggedColumn, targetCol);
-  } catch (err) {
-    console.error("❌ Drop lỗi:", err);
-  } finally {
-    resetDragState();
-  }
-};
-
-
-
+  };
 
   const resetDragState = () => {
     setDraggedTask(null);
@@ -227,7 +207,9 @@ const handleDrop = async (targetCol) => {
           <div className="sprint-info-header">
             <h3>{sprint.name}</h3>
             <span className={`sprint-status status-${sprint.status}`}>
-              {sprint.status === "active" ? "Đang tiến hành" : sprint.status === "completed" ? "Hoàn thành" : "Đã lên kế hoạch"}
+              {sprint.status === "active" ? "Đang tiến hành" :
+               sprint.status === "completed" ? "Hoàn thành" :
+               "Đã lên kế hoạch"}
             </span>
           </div>
           <div className="sprint-progress">
@@ -250,8 +232,8 @@ const handleDrop = async (targetCol) => {
               setDraggedTask(t);
               setDraggedColumn(col.id);
             } : undefined}
-            onDragOver={(e) => e.preventDefault()}
-             onDrop={isExpired ? undefined : () => handleDrop(col.id)}
+            onDragOver={!isExpired ? (e) => e.preventDefault() : undefined}
+            onDrop={!isExpired ? () => handleDrop(col.id) : undefined}
             onTaskClick={onTaskClick}
           />
         ))}

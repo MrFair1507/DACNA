@@ -5,7 +5,9 @@ import { toast } from "react-toastify";
 // 🔁 Helper lưu ID thông báo đã hiện trong localStorage
 const getSeenIds = () => {
   try {
-    return new Set(JSON.parse(localStorage.getItem("seenNotificationIds") || "[]"));
+    return new Set(
+      JSON.parse(localStorage.getItem("seenNotificationIds") || "[]")
+    );
   } catch {
     return new Set();
   }
@@ -27,11 +29,15 @@ const NotificationBellSocket = ({ userId }) => {
 
     const fetchNotifications = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/notifications/user/${userId}`);
+        const res = await fetch(
+          `http://localhost:3000/api/notifications/user/${userId}`
+        );
         const data = await res.json();
 
         const seen = getSeenIds();
-        const newNotified = data.filter(n => !n.is_read && !seen.has(n.notification_id));
+        const newNotified = data.filter(
+          (n) => !n.is_read && !seen.has(n.notification_id)
+        );
 
         newNotified.forEach((n) => {
           const toastId = `notif-${n.notification_id}`;
@@ -68,9 +74,12 @@ const NotificationBellSocket = ({ userId }) => {
       await fetch(`http://localhost:3000/api/notifications/${id}/read`, {
         method: "PUT",
       });
-      setNotifications((prev) =>
-        prev.map((n) => (n.notification_id === id ? { ...n, is_read: true } : n))
-      );
+
+      // ✅ Xóa khỏi danh sách khi đã đọc
+      setNotifications((prev) => prev.filter((n) => n.notification_id !== id));
+
+      // ✅ Đồng thời cập nhật localStorage (không hiển toast lại)
+      addSeenId(id);
     } catch (err) {
       console.error("❌ Không thể đánh dấu đã đọc:", err);
     }
@@ -87,19 +96,22 @@ const NotificationBellSocket = ({ userId }) => {
 
       {showDropdown && (
         <div className="notification-dropdown">
-          {notifications.length === 0 ? (
+          {notifications.filter((n) => !n.is_read).length === 0 ? (
             <div className="no-notification">Không có thông báo</div>
           ) : (
-            notifications.slice(0, 5).map((n) => (
-              <div
-                key={n.notification_id}
-                className={`notification-item ${n.is_read ? "read" : "unread"}`}
-                onClick={() => markAsRead(n.notification_id)}
-              >
-                <div className="message">{n.message}</div>
-                <div className="meta">Dự án #{n.project_id}</div>
-              </div>
-            ))
+            notifications
+              .filter((n) => !n.is_read) // 🔥 chỉ hiển thị chưa đọc
+              .slice(0, 5)
+              .map((n) => (
+                <div
+                  key={n.notification_id}
+                  className="notification-item unread"
+                  onClick={() => markAsRead(n.notification_id)}
+                >
+                  <div className="message">{n.message}</div>
+                  <div className="meta">Dự án #{n.project_id}</div>
+                </div>
+              ))
           )}
         </div>
       )}

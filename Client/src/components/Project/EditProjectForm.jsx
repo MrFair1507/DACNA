@@ -1,4 +1,3 @@
-// 📁 src/components/Project/EditProjectForm.jsx
 import React, { useState } from "react";
 import axios from "axios";
 import "./EditProjectForm.css";
@@ -49,6 +48,7 @@ const EditProjectForm = ({ project, onClose, onProjectUpdated, onProjectDeleted 
         withCredentials: true,
       });
 
+      console.log("🧨 Xoá dự án:", project.project_id);
       if (onProjectDeleted) {
         onProjectDeleted(project.project_id);
       }
@@ -113,7 +113,6 @@ const EditProjectForm = ({ project, onClose, onProjectUpdated, onProjectDeleted 
           </div>
         </form>
 
-        {/* Xác nhận xoá */}
         {showDeleteConfirm && (
           <div className="modal-overlay">
             <div className="modal-container small">

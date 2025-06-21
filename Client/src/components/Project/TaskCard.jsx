@@ -2,39 +2,34 @@ import React from "react";
 import "./TaskCard.css";
 
 const TaskCard = ({ task, onDragStart, onClick }) => {
-const getPriorityClass = (priority) => {
-  const p = (priority || "").toLowerCase();
-  switch (p) {
-    case "high":
-      return "priority-high";
-    case "medium":
-      return "priority-medium";
-    case "low":
-      return "priority-low";
-    default:
-      return "";
-  }
-};
-
-  const getPriorityText = (priority) => {
-    switch (priority) {
-      case "high":
-        return "Cao";
-      case "medium":
-        return "Trung bình";
-      case "low":
-        return "Thấp";
-      default:
-        return "";
+  const getPriorityClass = (priority) => {
+    const p = (priority || "").toLowerCase();
+    switch (p) {
+      case "high": return "priority-high";
+      case "medium": return "priority-medium";
+      case "low": return "priority-low";
+      default: return "";
     }
   };
 
+  const getPriorityText = (priority) => {
+    switch (priority) {
+      case "high": return "Cao";
+      case "medium": return "Trung bình";
+      case "low": return "Thấp";
+      default: return "";
+    }
+  };
+
+  const isCompleted = task.task_status === "Completed";
+
   return (
     <div
-      className="task-card"
-      draggable
-      onDragStart={onDragStart}
+      className={`task-card ${isCompleted ? "disabled-task" : ""}`}
+      draggable={!isCompleted}
+      onDragStart={isCompleted ? undefined : onDragStart}
       onClick={onClick}
+      title={isCompleted ? "Task đã hoàn thành. Không thể di chuyển." : ""}
     >
       <div className="task-card-header">
         <h4 className="task-title">{task.title}</h4>

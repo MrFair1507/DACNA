@@ -172,8 +172,61 @@ router.put("/:id", authenticate, requestlogger, async (req, res) => {
 
 // Xoá dự án
 router.delete("/:id", authenticate, async (req, res) => {
-  await db.query("DELETE FROM Projects WHERE project_id = ?", [req.params.id]);
-  res.json({ message: "Đã xoá dự án" });
+  const projectId = req.params.id;
+
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // 1. Xoá Task_Assignment
+    await conn.query(`
+      DELETE ta FROM Task_Assignment ta
+      JOIN Tasks t ON ta.task_id = t.task_id
+      JOIN Sprint_Backlog sb ON t.sprint_backlog_id = sb.sprint_backlog_id
+      WHERE sb.project_id = ?
+    `, [projectId]);
+
+    // 2. Xoá Attachments (chỉ task thôi)
+    await conn.query(`
+      DELETE a FROM Attachments a
+      JOIN Tasks t ON a.task_id = t.task_id
+      JOIN Sprint_Backlog sb ON t.sprint_backlog_id = sb.sprint_backlog_id
+      WHERE sb.project_id = ?
+    `, [projectId]);
+
+    // 3. Xoá Notifications
+    await conn.query(`DELETE FROM Notifications WHERE project_id = ?`, [projectId]);
+
+    // 4. Xoá Tasks
+    await conn.query(`
+      DELETE t FROM Tasks t
+      JOIN Sprint_Backlog sb ON t.sprint_backlog_id = sb.sprint_backlog_id
+      WHERE sb.project_id = ?
+    `, [projectId]);
+
+    // 5. Xoá Sprint_Backlog
+    await conn.query(`DELETE FROM Sprint_Backlog WHERE project_id = ?`, [projectId]);
+
+    // 6. Xoá Sprints
+    await conn.query(`DELETE FROM Sprints WHERE project_id = ?`, [projectId]);
+
+    // 7. Xoá User_Project
+    await conn.query(`DELETE FROM User_Project WHERE project_id = ?`, [projectId]);
+
+    // 8. Cuối cùng xoá Project
+    await conn.query(`DELETE FROM Projects WHERE project_id = ?`, [projectId]);
+
+    await conn.commit();
+    res.json({ message: "Đã xoá dự án và toàn bộ dữ liệu liên quan" });
+
+  } catch (err) {
+    await conn.rollback();
+    console.error("❌ Lỗi khi xoá project:", err.message);
+    res.status(500).json({ error: "Không thể xoá dự án" });
+  } finally {
+    conn.release();
+  }
 });
+
 
 module.exports = router;

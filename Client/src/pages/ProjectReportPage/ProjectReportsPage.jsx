@@ -5,10 +5,11 @@ import MainHeader from "../../components/Layout/Header/MainHeader/MainHeader";
 import SprintsHeader from "../../components/Layout/Header/SprintsHeader/SprintsHeader";
 import { Pie } from "react-chartjs-2";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
+
 import api from "../../services/api";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import "./ProjectReportsPage.css";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+Chart.register(ChartDataLabels);
 
 Chart.register(ArcElement, Tooltip, Legend);
 
@@ -100,19 +101,23 @@ const ProjectReportsPage = ({ projectId, user }) => {
       },
     ],
   };
-  const handleExportPDF = () => {
-    const target = document.querySelector(".report-container");
-    if (!target) return;
+  const handleExportPDF = async () => {
+  try {
+    const res = await fetch(`http://localhost:3000/api/reports/project/${projectId}/pdf`);
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `project-${projectId}-report.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    console.error("❌ Lỗi khi xuất PDF từ backend:", err);
+    alert("Không thể xuất PDF.");
+  }
+};
 
-    html2canvas(target, { scale: 2 }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const width = 210; // A4 width in mm
-      const height = (canvas.height * width) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 10, width, height);
-      pdf.save("baocao-tiendo.pdf");
-    });
-  };
   return (
     <div className="dashboard-container">
       <Sidebar
@@ -150,7 +155,6 @@ const ProjectReportsPage = ({ projectId, user }) => {
         <div className="content-area report-container">
           <div className="reports-header">
             <h2 className="reports-title">Báo cáo tiến độ</h2>
-            
 
             <select
               value={selectedSprintId}
@@ -168,7 +172,6 @@ const ProjectReportsPage = ({ projectId, user }) => {
           </div>
 
           <div className="chart-area">
-           
             <Pie
               data={data}
               options={{
@@ -176,20 +179,36 @@ const ProjectReportsPage = ({ projectId, user }) => {
                 maintainAspectRatio: false,
                 plugins: {
                   legend: {
-                    position: "top", // vẫn nằm trên
+                    position: "top",
                     labels: {
                       boxWidth: 20,
                       padding: 20,
                     },
                   },
-                },
-                layout: {
-                  padding: 10,
+                  datalabels: {
+                    color: "#fff",
+                    font: {
+                      weight: "bold",
+                      size: 14,
+                    },
+                    formatter: (value, context) => {
+                      const total = context.chart.data.datasets[0].data.reduce(
+                        (a, b) => a + b,
+                        0
+                      );
+                      const percent = total
+                        ? ((value / total) * 100).toFixed(0)
+                        : 0;
+                      return percent + "%";
+                    },
+                  },
                 },
               }}
-              style={{ maxWidth: 500, maxHeight: 500 }}
+              plugins={[ChartDataLabels]}
+              style={{ maxWidth: 400, maxHeight: 400 }}
             />
-             <button onClick={handleExportPDF} className="export-pdf-btn">
+
+            <button onClick={handleExportPDF} className="export-pdf-btn">
               📄 Xuất PDF
             </button>
           </div>
