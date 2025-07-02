@@ -39,7 +39,7 @@ const ProductBacklogPage = () => {
       const allBacklogs = [...unassigned, ...assigned];
       setBacklogs(allBacklogs);
     } catch (err) {
-      console.error("❌ Lỗi khi tải backlog:", err);
+      console.error(" Lỗi khi tải backlog:", err);
     }
   };
 
@@ -59,7 +59,7 @@ const ProductBacklogPage = () => {
 
         setProjects(formatted);
       } catch (err) {
-        console.error("❌ Lỗi khi lấy project:", err);
+        console.error(" Lỗi khi lấy project:", err);
       }
     };
     fetchProjects();
@@ -76,27 +76,21 @@ const ProductBacklogPage = () => {
       <Sidebar
         projects={projects}
         activeProjectId={activeProjectId}
-        activeTab="backlog"
+        activeTab="project"
         onProjectSelect={(id) => {
-          const realId = id.replace("project", "");
-          navigate(`/dashboard/${realId}/backlog`);
+          const realId = id?.replace("project", "");
+          navigate(id ? `/dashboard/${realId}/backlog` : "/dashboard");
         }}
         onTabSelect={(id, tab) => {
           if (tab === "project") {
             window.location.href = "/dashboard";
-          } else {
-            window.location.href = `/dashboard/${id}/${tab}`;
           }
         }}
       />
 
       <div className="main-content">
         <MainHeader />
-        <SprintsHeader
-          project={currentProject}
-          activeTab="backlog"
-          onTabSelect={() => {}}
-        />
+        <SprintsHeader project={currentProject} activeTab="project" />
 
         <div className="content-area">
           <div className="product-backlog-header">
@@ -119,7 +113,7 @@ const ProductBacklogPage = () => {
           onClose={() => setShowAddBacklog(false)}
           onSubmit={async ({ projectId, title, description }) => {
             if (!projectId || projectId === "null") {
-              alert("⚠️ Vui lòng chọn một dự án trước khi tạo backlog.");
+              alert("Vui lòng chọn một dự án trước khi tạo backlog.");
               return;
             }
 
@@ -131,7 +125,7 @@ const ProductBacklogPage = () => {
               await fetchAllBacklogs(projectId);
               setShowAddBacklog(false);
             } catch (err) {
-              console.error("❌ Lỗi tạo backlog:", err);
+              console.error("Lỗi tạo backlog:", err);
               alert("Không thể tạo backlog.");
             }
           }}

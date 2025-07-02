@@ -22,7 +22,8 @@ const InvitationAcceptPage = () => {
       }
 
       try {
-        const res = await api.post("/projects/accept", { token });
+       const res = await api.post("/invitations/accept", { token });
+
 
         if (res.data.requireRegistration) {
           // Nếu chưa có tài khoản → chuyển sang trang đăng ký

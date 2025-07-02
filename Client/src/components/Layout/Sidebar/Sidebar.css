@@ -6,7 +6,11 @@
   height: 100%;
   border-right: 1px solid var(--border-color);
   overflow-y: auto;
+  scrollbar-width: none;
   padding: 16px 0;
+}
+.sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .workspace-info {

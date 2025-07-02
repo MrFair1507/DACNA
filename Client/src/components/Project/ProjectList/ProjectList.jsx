@@ -2,10 +2,14 @@ import React, { useState } from "react";
 import "./ProjectList.css";
 import ProjectCard from "../ProjectCard";
 import EditProjectForm from "../EditProjectForm";
-// hoặc nơi bạn đặt form
 
-const ProjectList = ({ projects: initialProjects = [], onProjectSelect, onCreateProject }) => {
-  const [projects, setProjects] = useState(initialProjects);
+const ProjectList = ({
+  projects = [],
+  onProjectSelect,
+  onCreateProject,
+  onProjectUpdated,
+  onProjectDeleted,
+}) => {
   const [editingProject, setEditingProject] = useState(null);
 
   const handleEditClick = (project) => {
@@ -15,18 +19,6 @@ const ProjectList = ({ projects: initialProjects = [], onProjectSelect, onCreate
 
   const handleCloseEdit = () => {
     setEditingProject(null);
-  };
-
-  const handleProjectDeleted = (deletedId) => {
-    setProjects(prev =>
-      prev.filter(p => {
-        const id = typeof p.id === "string" && p.id.startsWith("project")
-          ? Number(p.id.replace("project", ""))
-          : p.id;
-        return id !== deletedId;
-      })
-    );
-    handleCloseEdit();
   };
 
   return (
@@ -43,13 +35,19 @@ const ProjectList = ({ projects: initialProjects = [], onProjectSelect, onCreate
         {projects.map((project) => (
           <ProjectCard
             key={project.id}
-            project={project}
+            project={{
+              ...project,
+              status: project.project_status || project.status,
+            }}
             onViewClick={() => onProjectSelect(project.id)}
             onEditClick={() => handleEditClick(project)}
           />
         ))}
 
-        <div className="project-card create-new-project" onClick={onCreateProject}>
+        <div
+          className="project-card create-new-project"
+          onClick={onCreateProject}
+        >
           <div className="create-icon">+</div>
           <h3>Tạo dự án mới</h3>
         </div>
@@ -61,16 +59,24 @@ const ProjectList = ({ projects: initialProjects = [], onProjectSelect, onCreate
             project_id: Number(editingProject.id?.replace("project", "")),
             project_name: editingProject.title,
             project_description: editingProject.description,
-            project_status: editingProject.status || "Planning",
+            project_status:
+              editingProject.project_status ||
+              editingProject.status ||
+              "Planning",
           }}
           onClose={handleCloseEdit}
-          onProjectUpdated={handleCloseEdit}
-          onProjectDeleted={handleProjectDeleted}
+          onProjectUpdated={(updatedProject) => {
+            handleCloseEdit();
+            onProjectUpdated && onProjectUpdated(updatedProject);
+          }}
+          onProjectDeleted={(deletedId) => {
+            handleCloseEdit();
+            onProjectDeleted && onProjectDeleted(deletedId);
+          }}
         />
       )}
     </div>
   );
 };
-
 
 export default ProjectList;

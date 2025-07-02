@@ -17,7 +17,7 @@ const TaskPageWrapper = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // ✅ Gọi đồng thời 3 API: danh sách project, sprint hiện tại, và thành viên dự án
+        //  Gọi đồng thời 3 API: danh sách project, sprint hiện tại, và thành viên dự án
         const [projectsRes, sprintRes, membersRes] = await Promise.all([
           api.get("/projects/my-projects", { withCredentials: true }),
           api.get(`/sprints?sprint_id=${sprintId}`),
@@ -38,10 +38,10 @@ const TaskPageWrapper = () => {
 
         setProjects(formattedProjects);
         setSprint(sprintData);
-        setProjectMembers(membersRes.data); // ✅ Gán danh sách thành viên
+        setProjectMembers(membersRes.data); //  Gán danh sách thành viên
 
       } catch (err) {
-        console.error("❌ Lỗi khi tải dữ liệu TaskPageWrapper:", err);
+        console.error(" Lỗi khi tải dữ liệu TaskPageWrapper:", err);
       }
     };
 

@@ -20,25 +20,27 @@ router.get("/my-projects", authenticate, async (req, res) => {
   res.json(projects);
 });
 //  API: Lấy danh sách thành viên của một project
-router.get('/:projectId/members', authenticate, async (req, res) => {
+router.get("/:projectId/members", authenticate, async (req, res) => {
   const { projectId } = req.params;
 
   try {
-    const [members] = await db.query(`
+    const [members] = await db.query(
+      `
       SELECT u.user_id, u.full_name, u.email, pr.role_name
       FROM User_Project up
       JOIN Users u ON u.user_id = up.user_id
       JOIN ProjectRole pr ON pr.role_id = up.role_id
       WHERE up.project_id = ? AND up.status = 'accepted'
-    `, [projectId]);
+    `,
+      [projectId]
+    );
 
     res.status(200).json(members);
   } catch (err) {
     console.error("❌ Lỗi lấy thành viên dự án:", err.message);
-    res.status(500).json({ error: 'Không thể lấy danh sách thành viên' });
+    res.status(500).json({ error: "Không thể lấy danh sách thành viên" });
   }
 });
-
 
 // Tạo dự án và mời thành viên
 router.post("/", authenticate, requestlogger, async (req, res) => {
@@ -60,21 +62,38 @@ router.post("/", authenticate, requestlogger, async (req, res) => {
       [created_by, project_id]
     );
 
+    // for (const { email, role_id } of members) {
+    //   const [[existing]] = await db.query(
+    //     "SELECT * FROM Users WHERE email = ?",
+    //     [email]
+    //   ); 
+    //   if (existing) {
+    //     await db.query(
+    //       `
+    //       INSERT INTO User_Project (user_id, project_id, role_id, cost, status)
+    //       VALUES (?, ?, ?, 0, 'pending')
+    //     `,
+    //       [existing.user_id, project_id, role_id]
+    //     );
+    //   }
+    //   await sendInvitationEmail(email, project_name, project_id);
+    // }
     for (const { email, role_id } of members) {
-      const [[existing]] = await db.query(
-        "SELECT * FROM Users WHERE email = ?",
-        [email]
+      await invitationController.sendInvitationByEmail(
+        {
+          body: {
+            projectId: project_id,
+            emails: [email],
+            role: role_id,
+            message: "",
+          },
+          user: { user_id: created_by },
+        },
+        {
+          json: () => {},
+          status: () => ({ json: () => {} }), // mock response object
+        }
       );
-      if (existing) {
-        await db.query(
-          `
-          INSERT INTO User_Project (user_id, project_id, role_id, cost, status)
-          VALUES (?, ?, ?, 0, 'pending')
-        `,
-          [existing.user_id, project_id, role_id]
-        );
-      }
-      await sendInvitationEmail(email, project_name, project_id);
     }
 
     res.status(201).json({ message: "Tạo dự án thành công", project_id });
@@ -179,46 +198,60 @@ router.delete("/:id", authenticate, async (req, res) => {
     await conn.beginTransaction();
 
     // 1. Xoá Task_Assignment
-    await conn.query(`
+    await conn.query(
+      `
       DELETE ta FROM Task_Assignment ta
       JOIN Tasks t ON ta.task_id = t.task_id
       JOIN Sprint_Backlog sb ON t.sprint_backlog_id = sb.sprint_backlog_id
       WHERE sb.project_id = ?
-    `, [projectId]);
+    `,
+      [projectId]
+    );
 
     // 2. Xoá Attachments (chỉ task thôi)
-    await conn.query(`
+    await conn.query(
+      `
       DELETE a FROM Attachments a
       JOIN Tasks t ON a.task_id = t.task_id
       JOIN Sprint_Backlog sb ON t.sprint_backlog_id = sb.sprint_backlog_id
       WHERE sb.project_id = ?
-    `, [projectId]);
+    `,
+      [projectId]
+    );
 
     // 3. Xoá Notifications
-    await conn.query(`DELETE FROM Notifications WHERE project_id = ?`, [projectId]);
+    await conn.query(`DELETE FROM Notifications WHERE project_id = ?`, [
+      projectId,
+    ]);
 
     // 4. Xoá Tasks
-    await conn.query(`
+    await conn.query(
+      `
       DELETE t FROM Tasks t
       JOIN Sprint_Backlog sb ON t.sprint_backlog_id = sb.sprint_backlog_id
       WHERE sb.project_id = ?
-    `, [projectId]);
+    `,
+      [projectId]
+    );
 
     // 5. Xoá Sprint_Backlog
-    await conn.query(`DELETE FROM Sprint_Backlog WHERE project_id = ?`, [projectId]);
+    await conn.query(`DELETE FROM Sprint_Backlog WHERE project_id = ?`, [
+      projectId,
+    ]);
 
     // 6. Xoá Sprints
     await conn.query(`DELETE FROM Sprints WHERE project_id = ?`, [projectId]);
 
     // 7. Xoá User_Project
-    await conn.query(`DELETE FROM User_Project WHERE project_id = ?`, [projectId]);
+    await conn.query(`DELETE FROM User_Project WHERE project_id = ?`, [
+      projectId,
+    ]);
 
     // 8. Cuối cùng xoá Project
     await conn.query(`DELETE FROM Projects WHERE project_id = ?`, [projectId]);
 
     await conn.commit();
     res.json({ message: "Đã xoá dự án và toàn bộ dữ liệu liên quan" });
-
   } catch (err) {
     await conn.rollback();
     console.error("❌ Lỗi khi xoá project:", err.message);
@@ -227,6 +260,5 @@ router.delete("/:id", authenticate, async (req, res) => {
     conn.release();
   }
 });
-
 
 module.exports = router;

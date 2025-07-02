@@ -38,16 +38,12 @@ const InviteMembersForm = ({ projectId, onClose }) => {
     }
 
     try {
-      await api.post(
-        "/projects/send",
-        {
-          projectId,
-          emails: [email.trim()],
-          role: selectedRole,
-          message: "",
-        },
-        { withCredentials: true }
-      );
+      await api.post("/invitations/send", {
+        projectId,
+        emails: [email],
+        role: selectedRole,
+        message: "",
+      });
 
       setSuccess(`✅ Đã gửi lời mời đến ${email.trim()}`);
       setEmail("");

@@ -13,7 +13,7 @@ const ProfilePage = () => {
     <div className="dashboard-container">
       <Sidebar
         user={user}
-        projects={[]} // 👈 truyền mảng rỗng để tránh map lỗi
+        projects={[]} //  truyền mảng rỗng để tránh map lỗi
         activeTab="profile"
         activeProjectId={null}
         onProjectSelect={() => {}}

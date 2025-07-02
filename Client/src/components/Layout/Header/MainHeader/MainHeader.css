@@ -28,7 +28,7 @@
   font-weight: 600;
   color: var(--text-light);
 }
-
+/* 
 .search-bar {
   display: flex;
   align-items: center;
@@ -62,7 +62,7 @@
   background: none;
   border: none;
   cursor: pointer;
-}
+} */
 
 /* .user-menu {
 width: 36px;

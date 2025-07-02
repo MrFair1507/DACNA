@@ -30,7 +30,9 @@ router.get('/google/callback',
   requestLogger,
   (req, res) => {
     const token = generateToken(req.user);
-    res.redirect(`http://localhost:5173/oauth-success?token=${token}`);
+
+    res.redirect(`http://localhost:5173/dashboard?token=${token}`);
+
   }
 );
 

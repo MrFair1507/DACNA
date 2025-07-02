@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "./MainHeader.css";
 import { useAuth } from "../../../../hooks/useAuth";
 import NotificationBellSocket from "../../NotificationBellSocket/NotificationBellSocket";
+import SearchBar from "../../SearchBar/SearchBar";
 
 const MainHeader = () => {
   const { user, logout } = useAuth();
@@ -26,12 +27,7 @@ const MainHeader = () => {
         <h1>Quản lý công việc</h1>
       </div>
 
-      <div className="search-bar">
-        <input type="text" placeholder="Tìm kiếm..." />
-        <button className="search-btn">
-          <i className="icon-search" />
-        </button>
-      </div>
+      <SearchBar />
 
       <div className="header-right">
         <NotificationBellSocket userId={user?.user_id} />

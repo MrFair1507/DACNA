@@ -37,10 +37,10 @@ const DashboardPage = () => {
           id: `project${p.project_id}`,
           title: p.project_name,
           description: p.project_description,
-          
+          project_status: p.project_status,
           owner: `User ${p.created_by}`,
           members: 1,
-          template_type: p.template_type || "default", 
+          template_type: p.template_type || "default",
           lastModified: new Date(
             p.updated_at || p.created_at
           ).toLocaleDateString("vi-VN"),
@@ -90,10 +90,7 @@ const DashboardPage = () => {
             [`project${realProjectId}`]: mapped,
           }));
         } catch (error) {
-          console.error(
-            "❌ Lỗi khi gọi API:",
-            error.response?.data || error.message
-          );
+          console.error("❌ Lỗi khi gọi API:", error.response?.data || error.message);
         }
       }
     },
@@ -122,15 +119,36 @@ const DashboardPage = () => {
       title: projectData.title,
       color: "blue",
       description: projectData.description,
+      project_status: projectData.project_status || "Planning",
       owner: `${user?.firstName || "Người"} ${user?.lastName || "dùng"}`,
       members: projectData.members?.length || 1,
-      template_type:  "kanban",
+      template_type: "kanban",
       lastModified: currentDate,
     };
     setProjects((prev) => [...prev, newProject]);
     setSprints((prev) => ({ ...prev, [newProjectId]: [] }));
     setShowCreateProjectForm(false);
     setJustCreatedProjectId(newProjectId);
+  };
+
+  const handleProjectUpdated = (updatedProject) => {
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === `project${updatedProject.project_id}`
+          ? {
+              ...p,
+              title: updatedProject.project_name,
+              description: updatedProject.project_description,
+              project_status: updatedProject.project_status,
+              lastModified: currentDate,
+            }
+          : p
+      )
+    );
+  };
+
+  const handleProjectDeleted = (deletedId) => {
+    setProjects((prev) => prev.filter((p) => p.id !== `project${deletedId}`));
   };
 
   const handleCreateSprint = () => setShowCreateSprintForm(true);
@@ -143,6 +161,8 @@ const DashboardPage = () => {
             projects={projects}
             onProjectSelect={handleProjectSelect}
             onCreateProject={handleCreateProject}
+            onProjectUpdated={handleProjectUpdated}
+            onProjectDeleted={handleProjectDeleted}
           />
         );
       case "sprints":
@@ -152,9 +172,7 @@ const DashboardPage = () => {
             onCreateSprint={handleCreateSprint}
             onSprintClick={(sprint) => {
               const realProjectId = activeProjectId.replace("project", "");
-              navigate(
-                `/dashboard/${realProjectId}/sprints/${sprint.id}/tasks`
-              );
+              navigate(`/dashboard/${realProjectId}/sprints/${sprint.id}/tasks`);
             }}
             activeProjectId={activeProjectId}
           />

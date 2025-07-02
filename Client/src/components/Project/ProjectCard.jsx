@@ -4,6 +4,11 @@ import "./ProjectCard.css";
 const ProjectCard = ({ project, onEditClick, onViewClick }) => {
   const [hovered, setHovered] = useState(false);
 
+const getStatusClass = (status) => {
+  const normalized = (status || "").toLowerCase().replace(/\s+/g, "-");
+  return `status-dot ${normalized}`;
+};
+
   return (
     <div
       className="project-card"
@@ -11,6 +16,7 @@ const ProjectCard = ({ project, onEditClick, onViewClick }) => {
       onMouseLeave={() => setHovered(false)}
     >
      
+      <div className={getStatusClass(project.status)} title={project.status}></div>
 
       <div className="project-info" style={{ opacity: hovered ? 0.15 : 1 }}>
         <h3 className="project-title">{project.title}</h3>

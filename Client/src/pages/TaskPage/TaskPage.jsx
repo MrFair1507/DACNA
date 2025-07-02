@@ -1,10 +1,11 @@
-// 📁 src/pages/tasks/TaskPage.jsx
 import React, { useState, useRef } from "react";
 import Sidebar from "../../components/Layout/Sidebar/Sidebar";
 import KanbanBoard from "../../components/Project/KanbanBoard";
 import AddTaskForm from "../../components/Project/AddTaskForm";
 import TaskDetailModal from "../../components/Project/TaskDetailModal";
 import MainHeader from "../../components/Layout/Header/MainHeader/MainHeader";
+import MemberManagement from "../../components/UI/MemberManagement/MemberManagement";
+import InviteMembersForm from "../../components/UI/AddMembersForm/InviteMembersForm";
 
 const TaskPage = ({
   project,
@@ -20,12 +21,12 @@ const TaskPage = ({
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedColumn, setSelectedColumn] = useState(null);
   const [taskCreatedCallback, setTaskCreatedCallback] = useState(null);
+  const [showInviteForm, setShowInviteForm] = useState(false);
+  const [showMemberManagement, setShowMemberManagement] = useState(false);
 
   const realProjectId = projectId?.replace("project", "");
   const realSprintId = sprintId || sprint?.id || sprint?.sprint_id;
-
   const isExpired = sprint?.end_date && new Date(sprint.end_date) < new Date();
-
   const kanbanRef = useRef(null);
 
   const handleAddTask = (columnId, onTaskCreatedCallback) => {
@@ -62,34 +63,34 @@ const TaskPage = ({
     <div className="dashboard-container">
       <Sidebar
         projects={projects}
-        activeTab="sprints"
+        activeTab="project"
         activeProjectId={projectId}
+        showMemberMenu={true}
+        onInviteClick={() => setShowInviteForm(true)}
+        onManageClick={() => setShowMemberManagement(true)}
         onProjectSelect={(id) => {
           const realId = id?.replace("project", "");
-          window.location.href = `/dashboard/${realId}/sprints`;
-        }}
-        showMemberMenu={true}
-        onTabSelect={(id, tab) => {
-          const realId = id?.replace("project", "");
-          const base = `/dashboard/${realId}`;
-          if (tab === "board") window.location.href = `${base}/sprints/${realSprintId}/tasks`;
-          else if (tab === "sprints") window.location.href = `${base}/sprints`;
-          else if (tab === "backlog") window.location.href = `${base}/backlog`;
-          else if (tab === "reports") window.location.href = `${base}/reports`;
+          window.location.href = id
+            ? `/dashboard/${realId}/sprints`
+            : "/dashboard";
         }}
       />
 
       <div className="main-content">
         <MainHeader />
         <div className="content-area">
-          <KanbanBoard
-            ref={kanbanRef}
-            sprintId={realSprintId}
-            sprint={sprint}
-            onAddTask={!isExpired ? handleAddTask : undefined}
-            onTaskClick={handleTaskClick}
-            onTaskMoved={() => {}}
-          />
+          {showMemberManagement ? (
+            <MemberManagement projectId={realProjectId} />
+          ) : (
+            <KanbanBoard
+              ref={kanbanRef}
+              sprintId={realSprintId}
+              sprint={sprint}
+              onAddTask={!isExpired ? handleAddTask : undefined}
+              onTaskClick={handleTaskClick}
+              onTaskMoved={() => {}}
+            />
+          )}
         </div>
       </div>
 
@@ -105,7 +106,7 @@ const TaskPage = ({
             setTaskCreatedCallback(null);
           }}
           onSubmit={handleTaskSubmit}
-          onError={(err) => console.error("❌ Lỗi tạo task:", err)}
+          onError={(err) => console.error(" Lỗi tạo task:", err)}
         />
       )}
 
@@ -116,6 +117,13 @@ const TaskPage = ({
           readOnly={isExpired}
           onClose={() => setShowTaskDetailModal(false)}
           onTaskUpdate={handleTaskUpdate}
+        />
+      )}
+
+      {showInviteForm && (
+        <InviteMembersForm
+          projectId={realProjectId}
+          onClose={() => setShowInviteForm(false)}
         />
       )}
     </div>

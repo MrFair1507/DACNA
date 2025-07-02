@@ -152,12 +152,12 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  const resetPassword = async (email, token, newPassword) => {
+  const resetPassword = async (email, otp, newPassword) => {
     try {
       const response = await api.post("/auth/reset-password", {
         email,
-        token,
-        newPassword,
+        otp,
+        new_password: newPassword
       });
       return {
         success: true,

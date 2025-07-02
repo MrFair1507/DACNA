@@ -5,13 +5,11 @@ import MainHeader from "../../components/Layout/Header/MainHeader/MainHeader";
 import SprintsHeader from "../../components/Layout/Header/SprintsHeader/SprintsHeader";
 import { Pie } from "react-chartjs-2";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
-
+import ChartDataLabels from "chartjs-plugin-datalabels";
 import api from "../../services/api";
 import "./ProjectReportsPage.css";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-Chart.register(ChartDataLabels);
 
-Chart.register(ArcElement, Tooltip, Legend);
+Chart.register(ChartDataLabels, ArcElement, Tooltip, Legend);
 
 const ProjectReportsPage = ({ projectId, user }) => {
   const [sprints, setSprints] = useState([]);
@@ -73,12 +71,8 @@ const ProjectReportsPage = ({ projectId, user }) => {
         await fetchTasksFromSprint(selectedSprintId);
       }
 
-      const completed = tasks.filter(
-        (t) => t.task_status === "Completed"
-      ).length;
-      const inProgress = tasks.filter(
-        (t) => t.task_status === "In Progress"
-      ).length;
+      const completed = tasks.filter((t) => t.task_status === "Completed").length;
+      const inProgress = tasks.filter((t) => t.task_status === "In Progress").length;
       const notStarted = tasks.length - completed - inProgress;
 
       setReportData({ completed, inProgress, notStarted });
@@ -101,61 +95,44 @@ const ProjectReportsPage = ({ projectId, user }) => {
       },
     ],
   };
+
   const handleExportPDF = async () => {
-  try {
-    const res = await fetch(`http://localhost:3000/api/reports/project/${projectId}/pdf`);
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `project-${projectId}-report.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (err) {
-    console.error("❌ Lỗi khi xuất PDF từ backend:", err);
-    alert("Không thể xuất PDF.");
-  }
-};
+    try {
+      const res = await fetch(`http://localhost:3000/api/reports/project/${projectId}/pdf`);
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `project-${projectId}-report.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error(" Lỗi khi xuất PDF:", err);
+      alert("Không thể xuất PDF.");
+    }
+  };
 
   return (
     <div className="dashboard-container">
       <Sidebar
         projects={projects}
-        activeTab="reports"
+        activeTab="project"
         activeProjectId={fullProjectId}
         showMemberMenu={false}
         onProjectSelect={(id) => {
           const realId = id?.replace("project", "");
-          navigate(`/dashboard/${realId}/reports`);
-        }}
-        onTabSelect={(id, tab) => {
-          const realId = id?.replace("project", "");
-          if (tab === "sprints") navigate(`/dashboard/${realId}/sprints`);
-          else if (tab === "backlog") navigate(`/dashboard/${realId}/backlog`);
-          else if (tab === "reports") navigate(`/dashboard/${realId}/reports`);
+          navigate(id ? `/dashboard/${realId}/reports` : "/dashboard");
         }}
       />
 
       <div className="main-content">
         <MainHeader />
-        <SprintsHeader
-          project={currentProject}
-          activeTab="reports"
-          onTabSelect={(id, tab) => {
-            const realId = id?.replace("project", "");
-            if (tab === "sprints") navigate(`/dashboard/${realId}/sprints`);
-            else if (tab === "backlog")
-              navigate(`/dashboard/${realId}/backlog`);
-            else if (tab === "reports")
-              navigate(`/dashboard/${realId}/reports`);
-          }}
-        />
+        <SprintsHeader project={currentProject} activeTab="project" />
 
         <div className="content-area report-container">
           <div className="reports-header">
             <h2 className="reports-title">Báo cáo tiến độ</h2>
-
             <select
               value={selectedSprintId}
               onChange={(e) => setSelectedSprintId(e.target.value)}
@@ -187,18 +164,10 @@ const ProjectReportsPage = ({ projectId, user }) => {
                   },
                   datalabels: {
                     color: "#fff",
-                    font: {
-                      weight: "bold",
-                      size: 14,
-                    },
+                    font: { weight: "bold", size: 14 },
                     formatter: (value, context) => {
-                      const total = context.chart.data.datasets[0].data.reduce(
-                        (a, b) => a + b,
-                        0
-                      );
-                      const percent = total
-                        ? ((value / total) * 100).toFixed(0)
-                        : 0;
+                      const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                      const percent = total ? ((value / total) * 100).toFixed(0) : 0;
                       return percent + "%";
                     },
                   },

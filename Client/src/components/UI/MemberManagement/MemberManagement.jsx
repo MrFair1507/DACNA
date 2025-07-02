@@ -172,7 +172,7 @@ const MemberManagement = ({ projectId }) => {
       </div>
 
       {/* Cài đặt quyền truy cập */}
-      <div className="board-access-section">
+      {/* <div className="board-access-section">
         <h3>Cài đặt quyền truy cập</h3>
         <div className="access-options">
           <div className="access-option">
@@ -215,7 +215,7 @@ const MemberManagement = ({ projectId }) => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Modal form thêm thành viên */}
       {showAddMembersForm && (

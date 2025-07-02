@@ -36,18 +36,6 @@ const Sidebar = ({
             </span>
             <span>Dashboard</span>
           </li>
-          <li>
-            <span className="menu-icon">
-              <i className="icon-profile"></i>
-            </span>
-            <span>Hồ sơ</span>
-          </li>
-          <li>
-            <span className="menu-icon">
-              <i className="icon-settings"></i>
-            </span>
-            <span>Cài đặt</span>
-          </li>
         </ul>
       </div>
 
@@ -68,7 +56,8 @@ const Sidebar = ({
           ))}
         </ul>
       </div>
-      {showMemberMenu && ( 
+
+      {showMemberMenu && (
         <div className="sidebar-section">
           <h4>THÀNH VIÊN</h4>
           <ul className="sidebar-menu">
