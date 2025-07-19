@@ -27,14 +27,22 @@ module.exports = function (req, res, next) {
   const token = tokenFromHeader || tokenFromCookie; // ✅ lấy từ cookie nếu không có header
 
   if (!token) {
-    return res.status(401).json({ message: "Access denied. No token provided." });
+    return res
+      .status(401)
+      .json({ message: "Access denied. No token provided." });
   }
 
   try {
+    console.log(
+      "🔐 JWT_SECRET used in authMiddleware:",
+      process.env.JWT_SECRET
+    );
+    console.log("📦 Token received for verification:", token);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
   } catch (err) {
+    console.error("❌ JWT verify error:", err.message);
     res.status(403).json({ message: "Invalid token" });
   }
 };

@@ -82,36 +82,116 @@ exports.sendInvitationByEmail = async (req, res) => {
 };
 
 // Chấp nhận lời mời
+// exports.acceptInvitation = async (req, res) => {
+//   const { token } = req.body;
+
+//   try {
+//     const [[invitation]] = await db.query(
+//       'SELECT * FROM ProjectInvitations WHERE token = ? AND status = "pending"',
+//       [token]
+//     );
+//     if (!invitation) return res.status(404).json({ message: 'Lời mời không hợp lệ hoặc đã dùng' });
+
+//     if (new Date(invitation.expires_at) < new Date()) {
+//       await db.query(
+//         'UPDATE ProjectInvitations SET status = "expired" WHERE invitation_id = ?',
+//         [invitation.invitation_id]
+//       );
+//       return res.status(400).json({ message: 'Lời mời đã hết hạn' });
+//     }
+
+//     const [[user]] = await db.query('SELECT * FROM Users WHERE email = ?', [invitation.email]);
+//     if (!user) {
+//       return res.status(404).json({
+//         message: 'Chưa có tài khoản. Cần đăng ký trước.',
+//         requireRegistration: true
+//       });
+//     }
+
+//     const [[exists]] = await db.query(
+//       'SELECT * FROM User_Project WHERE user_id = ? AND project_id = ?',
+//       [user.user_id, invitation.project_id]
+//     );
+//     if (!exists) {
+//       await db.query(
+//         'INSERT INTO User_Project (user_id, project_id, role_id, status) VALUES (?, ?, ?, "accepted")',
+//         [user.user_id, invitation.project_id, invitation.role_id]
+//       );
+//     }
+
+//     await db.query(
+//       'UPDATE ProjectInvitations SET status = "accepted" WHERE invitation_id = ?',
+//       [invitation.invitation_id]
+//     );
+
+//     res.json({ message: 'Tham gia dự án thành công' });
+
+//   } catch (err) {
+//     console.error("❌ Accept lỗi:", err);
+//     res.status(500).json({ error: 'Lỗi khi xác nhận lời mời' });
+//   }
+// };
 exports.acceptInvitation = async (req, res) => {
   const { token } = req.body;
 
   try {
     const [[invitation]] = await db.query(
-      'SELECT * FROM ProjectInvitations WHERE token = ? AND status = "pending"',
+      'SELECT * FROM ProjectInvitations WHERE token = ?',
       [token]
     );
-    if (!invitation) return res.status(404).json({ message: 'Lời mời không hợp lệ hoặc đã dùng' });
 
+    if (!invitation) {
+      return res.status(404).json({ message: 'Lời mời không tồn tại hoặc không hợp lệ.' });
+    }
+
+    // Kiểm tra hết hạn
     if (new Date(invitation.expires_at) < new Date()) {
       await db.query(
         'UPDATE ProjectInvitations SET status = "expired" WHERE invitation_id = ?',
         [invitation.invitation_id]
       );
-      return res.status(400).json({ message: 'Lời mời đã hết hạn' });
+      return res.status(400).json({ message: 'Lời mời đã hết hạn.', code: 'expired' });
     }
 
+    // Kiểm tra đã hủy
+    if (invitation.status === 'cancelled') {
+      return res.status(400).json({ message: 'Lời mời đã bị hủy.', code: 'cancelled' });
+    }
+
+    // Kiểm tra người dùng có tồn tại không
     const [[user]] = await db.query('SELECT * FROM Users WHERE email = ?', [invitation.email]);
     if (!user) {
       return res.status(404).json({
-        message: 'Chưa có tài khoản. Cần đăng ký trước.',
-        requireRegistration: true
+        message: 'Người nhận chưa có tài khoản. Vui lòng đăng ký.',
+        requireRegistration: true,
+        email: invitation.email
       });
     }
 
+    // Nếu đã chấp nhận từ trước
+    if (invitation.status === 'accepted') {
+      const jwt = require("jsonwebtoken");
+      const accessToken = jwt.sign(
+        { user_id: user.user_id, email: user.email, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      return res.status(200).json({
+        message: 'Bạn đã tham gia dự án.',
+        alreadyAccepted: true,
+        email: user.email,
+        user: user,
+        token: accessToken
+      });
+    }
+
+    // Nếu chưa tồn tại trong User_Project thì thêm
     const [[exists]] = await db.query(
       'SELECT * FROM User_Project WHERE user_id = ? AND project_id = ?',
       [user.user_id, invitation.project_id]
     );
+
     if (!exists) {
       await db.query(
         'INSERT INTO User_Project (user_id, project_id, role_id, status) VALUES (?, ?, ?, "accepted")',
@@ -124,13 +204,26 @@ exports.acceptInvitation = async (req, res) => {
       [invitation.invitation_id]
     );
 
-    res.json({ message: 'Tham gia dự án thành công' });
+    const jwt = require("jsonwebtoken");
+    const accessToken = jwt.sign(
+      { user_id: user.user_id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      message: 'Tham gia dự án thành công',
+      email: user.email,
+      user: user,
+      token: accessToken
+    });
 
   } catch (err) {
     console.error("❌ Accept lỗi:", err);
     res.status(500).json({ error: 'Lỗi khi xác nhận lời mời' });
   }
 };
+
 
 // Lấy danh sách lời mời
 exports.getProjectInvitations = async (req, res) => {

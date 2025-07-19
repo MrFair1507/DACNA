@@ -58,6 +58,7 @@ exports.login = async (req, res) => {
     }
 
     // Tạo access token
+    console.log("🔐 JWT_SECRET used in authController:", process.env.JWT_SECRET);
     const token = generateToken(user);
     // Lưu vào cookie
     res.cookie('token', token, {
